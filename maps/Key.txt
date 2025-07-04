@@ -1,0 +1,20 @@
+--First Line--
+
+The first line of a map file has the following format.
+
+[MAP]::[ID]::[Name]
+
+MAP     a three letter code to let you know it's a MAP file. We might not need this.
+ID      a unique number that we give to a map.
+Name    believe it or not, the name of the map.
+
+I want to use an ID as the index because I want to be able to change the map's friendly name 
+without having to worry about changing any code.
+
+
+--Key--
+
+# = A plain wall
+S = The start position when you first load into a level
+@ = Some kind of save/healing shrine/well/thing
+C = A chest!
