@@ -4,12 +4,14 @@
 #include <iostream>
 #include <vector>
 
+#include "shaderReader.h"
+
 using namespace std;
 
 //file scoped variables
 static string GameVersion = "0.0.0";
-static int SCREEN_WIDTH = 800;
-static int SCREEN_HEIGHT = 600;
+static int SCREEN_WIDTH = 960;
+static int SCREEN_HEIGHT = 540;
 static bool WireFrameMode = false;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
@@ -61,7 +63,7 @@ GLFWwindow* SetUpGlfw()
     glfwSetKeyCallback(window, key_callback);
 
     //inputmode
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     return window;
 }
@@ -86,7 +88,6 @@ void ConsoleSplashMessage()
 
 void ShowCompileErrors(unsigned int shader)
 {
-    //check for errors
     int success;
     char infoLog[512];
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -95,6 +96,17 @@ void ShowCompileErrors(unsigned int shader)
     {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+}
+
+void ShowLinkingErrors(unsigned int shaderProgram)
+{
+    char infoLog[512];
+    int success;
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 }
 
@@ -110,50 +122,28 @@ int main()
 
     ConsoleSplashMessage();
 
-	const char* vertSh =
-		"#version 330 core\n"
-        ""
-		"layout(location = 0) in vec3 aPos;"
-		"void main()"
-		"{"
-		    "gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);"
-		"}";
-
+    //compile and link shaders    
+    string shaderString = ReadShaderFile("shaders\\vert.shader");
+    const char* shaderPointer = shaderString.c_str();
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertSh, NULL);
+    glShaderSource(vertexShader, 1, &shaderPointer, NULL);
     glCompileShader(vertexShader);
-
     ShowCompileErrors(vertexShader);
 
-    const char* fragSh =
-        "#version 330 core\n"
-        ""
-        "out vec4 FragColor;"
-        "void main()"
-        "{"
-            "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);"
-        "}";
-
+    shaderString = ReadShaderFile("shaders\\frag.shader");
+    shaderPointer = shaderString.c_str();
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragSh, NULL);
+    glShaderSource(fragmentShader, 1, &shaderPointer, NULL);
     glCompileShader(fragmentShader);
-
     ShowCompileErrors(fragmentShader);
 
     unsigned int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
+    ShowLinkingErrors(shaderProgram);
 
-    //TODO: put this linking error check into it's own function
-    char infoLog[512];
-    int success;
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-
+    //clean up shaders
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 

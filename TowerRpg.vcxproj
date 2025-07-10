@@ -21,6 +21,14 @@
   <ItemGroup>
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\shaderReader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\frag.shader" />
+    <None Include="shaders\vert.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\shaderReader.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
