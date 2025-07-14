@@ -2,15 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\glad.c">
-      <Filter>GLAD</Filter>
-    </ClCompile>
     <ClCompile Include="src\shaderReader.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="GLAD">
-      <UniqueIdentifier>{60db7dcf-1c85-4ccf-9230-9c2a3bac07e7}</UniqueIdentifier>
-    </Filter>
+    <ClCompile Include="thirdparty_src\glad.c" />
+    <ClCompile Include="src\textures.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\vert.shader" />
@@ -18,5 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\shaderReader.h" />
+    <ClInclude Include="src\textures.h" />
+    <ClInclude Include="thirdparty_src\stb_image.h" />
   </ItemGroup>
 </Project>
