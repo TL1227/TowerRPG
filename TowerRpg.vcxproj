@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\shaderReader.cpp" />
     <ClCompile Include="src\textures.cpp" />
-    <ClCompile Include="thirdparty_src\glad.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag.shader" />

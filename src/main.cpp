@@ -7,13 +7,21 @@
 #include "shaderReader.h"
 #include "textures.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace std;
 
 //file scoped variables
 static string GameVersion = "0.0.0";
 static int SCREEN_WIDTH = 960;
 static int SCREEN_HEIGHT = 540;
+static float RATIO = 9.0f / 16.0f;
 static bool WireFrameMode = false;
+static float MOVE = 1.0f;
+static float RIGHT = 0.0f;
+static float UP = 0.0f;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -26,7 +34,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         glfwSetWindowShouldClose(window, true);
     }
-    if (key == GLFW_KEY_F2 && action == GLFW_PRESS)
+    else if (key == GLFW_KEY_F2 && action == GLFW_PRESS)
     {
         if (WireFrameMode)
         {
@@ -38,6 +46,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             WireFrameMode = true;
         }
+    }
+    else if (key == GLFW_KEY_W && action == GLFW_PRESS)
+    {
+        UP += MOVE;
+    }
+    else if (key == GLFW_KEY_S && action == GLFW_PRESS)
+    {
+        UP -= MOVE;
+    }
+    else if (key == GLFW_KEY_D && action == GLFW_PRESS)
+    {
+        RIGHT += MOVE * RATIO;
+    }
+    else if (key == GLFW_KEY_A && action == GLFW_PRESS)
+    {
+        RIGHT -= MOVE * RATIO;
     }
 }
 
@@ -195,13 +219,17 @@ int main()
 
     glUseProgram(shaderProgram);
 
+
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(RIGHT, UP, 0.0f));
+
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
 
         glfwSwapBuffers(window);
         glfwPollEvents();

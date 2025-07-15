@@ -3,8 +3,8 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\shaderReader.cpp" />
-    <ClCompile Include="thirdparty_src\glad.c" />
     <ClCompile Include="src\textures.cpp" />
+    <ClCompile Include="src\glad.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\vert.shader" />
