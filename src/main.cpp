@@ -21,12 +21,12 @@ static int SCREEN_HEIGHT = 540;
 static float RATIO = 9.0f / 16.0f;
 static bool WireFrameMode = false;
 static float MOVE = 1.0f;
-static float RIGHTMOVE = 1.0f;
+static float RIGHTMOVE = 90.0f;
 static float RIGHT = 0.0f;
 static float UP = 0.0f;
-static vec3 CameraPos = vec3(0.0f, 0.0f, UP + 3.0f);
-static vec3 CameraFront = vec3(0.0f, 0.0f, UP + -1.0f);
-static vec3 CameraUp = vec3(0.0f, 1.0f, 0.0f);
+vec3 CameraPos = vec3(0.0f, 0.0f, 3.0f);
+vec3 CameraFront = vec3(0.0f, 0.0f, -1.0f);
+vec3 CameraUp = vec3(0.0f, 1.0f, 0.0f);
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -54,24 +54,20 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     else if (key == GLFW_KEY_W && action == GLFW_PRESS)
     {
-        UP -= MOVE;
+        CameraPos.z -= MOVE;
     }
     else if (key == GLFW_KEY_S && action == GLFW_PRESS)
     {
-        UP += MOVE;
+        CameraPos.z += MOVE;
     }
     else if (key == GLFW_KEY_D && action == GLFW_PRESS)
     {
-        //RIGHT += RIGHTMOVE;
-        /*
-        vec3 axis = vec3(0.0f, 1.0f, 0.0f);
-        CameraPos = rotate(radians(90.0f), axis);
-        CameraFront *= model;
-        */
+        RIGHT += RIGHTMOVE;
+        CameraFront.x = cos(radians(RIGHT));
     }
     else if (key == GLFW_KEY_A && action == GLFW_PRESS)
     {
-        RIGHT -= RIGHTMOVE;
+        //RIGHT -= RIGHTMOVE;
     }
 
     cout << RIGHT << endl;
@@ -159,6 +155,9 @@ void MakeCube(int shaderID, float x, float y,  float z)
 
     //CameraCode start
     mat4 view = lookAt(CameraPos, CameraPos + CameraFront, CameraUp);
+    //This just rotates the scene
+    //view = rotate(view, radians(RIGHT), vec3(0.0f, 1.0f, 0.0f));
+
 	unsigned int viewLoc = glGetUniformLocation(shaderID, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
     //CameraCode end
