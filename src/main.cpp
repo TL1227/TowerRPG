@@ -21,8 +21,12 @@ static int SCREEN_HEIGHT = 540;
 static float RATIO = 9.0f / 16.0f;
 static bool WireFrameMode = false;
 static float MOVE = 1.0f;
+static float RIGHTMOVE = 1.0f;
 static float RIGHT = 0.0f;
 static float UP = 0.0f;
+static vec3 CameraPos = vec3(0.0f, 0.0f, UP + 3.0f);
+static vec3 CameraFront = vec3(0.0f, 0.0f, UP + -1.0f);
+static vec3 CameraUp = vec3(0.0f, 1.0f, 0.0f);
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -50,20 +54,27 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     else if (key == GLFW_KEY_W && action == GLFW_PRESS)
     {
-        UP += MOVE;
+        UP -= MOVE;
     }
     else if (key == GLFW_KEY_S && action == GLFW_PRESS)
     {
-        UP -= MOVE;
+        UP += MOVE;
     }
     else if (key == GLFW_KEY_D && action == GLFW_PRESS)
     {
-        RIGHT += MOVE * RATIO;
+        //RIGHT += RIGHTMOVE;
+        /*
+        vec3 axis = vec3(0.0f, 1.0f, 0.0f);
+        CameraPos = rotate(radians(90.0f), axis);
+        CameraFront *= model;
+        */
     }
     else if (key == GLFW_KEY_A && action == GLFW_PRESS)
     {
-        RIGHT -= MOVE * RATIO;
+        RIGHT -= RIGHTMOVE;
     }
+
+    cout << RIGHT << endl;
 }
 
 GLFWwindow* SetUpGlfw()
@@ -137,6 +148,27 @@ void ShowLinkingErrors(unsigned int shaderProgram)
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
+}
+
+void MakeCube(int shaderID, float x, float y,  float z)
+{
+	mat4 model = mat4(1.0f);
+	model = translate(model, vec3(x, y, z));
+	unsigned int modelLoc = glGetUniformLocation(shaderID, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+
+    //CameraCode start
+    mat4 view = lookAt(CameraPos, CameraPos + CameraFront, CameraUp);
+	unsigned int viewLoc = glGetUniformLocation(shaderID, "view");
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
+    //CameraCode end
+
+	mat4 projection;
+	projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
+	unsigned int projectionLoc = glGetUniformLocation(shaderID, "projection");
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 int main()
@@ -252,6 +284,7 @@ int main()
     glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), wallTex);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
     glEnable(GL_DEPTH_TEST);
 
     glUseProgram(shaderProgram);
@@ -262,22 +295,40 @@ int main()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        mat4 model = mat4(1.0f);
-        model = rotate(model, radians(UP), vec3(1.0f, 0.0f, 0.0f));
-        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        //wall
+        MakeCube(shaderProgram,  0.0f,  0.0f,  0.0f);
+        MakeCube(shaderProgram,  1.0f,  0.0f,  0.0f);
+        MakeCube(shaderProgram, -1.0f,  0.0f,  0.0f);
 
-        mat4 view = mat4(1.0f); 
-        view = translate(view, vec3(0.0f, 0.0f, -3.0f));
-        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
+        MakeCube(shaderProgram,  0.0f,  1.0f,  0.0f);
+        MakeCube(shaderProgram,  1.0f,  1.0f,  0.0f);
+        MakeCube(shaderProgram, -1.0f,  1.0f,  0.0f);
 
-        mat4 projection;
-        projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
-        unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
+        //floor
+        MakeCube(shaderProgram,  0.0f, -1.0f,  0.0f);
+        MakeCube(shaderProgram,  1.0f, -1.0f,  0.0f);
+        MakeCube(shaderProgram, -1.0f, -1.0f,  0.0f);
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        MakeCube(shaderProgram,  0.0f, -1.0f,  1.0f);
+        MakeCube(shaderProgram,  1.0f, -1.0f,  1.0f);
+        MakeCube(shaderProgram, -1.0f, -1.0f,  1.0f);
+
+        MakeCube(shaderProgram,  0.0f, -1.0f,  2.0f);
+        MakeCube(shaderProgram,  1.0f, -1.0f,  2.0f);
+        MakeCube(shaderProgram, -1.0f, -1.0f,  2.0f);
+
+        //roof
+        MakeCube(shaderProgram,  0.0f,  2.0f,  0.0f);
+        MakeCube(shaderProgram,  1.0f,  2.0f,  0.0f);
+        MakeCube(shaderProgram, -1.0f,  2.0f,  0.0f);
+
+        MakeCube(shaderProgram,  0.0f,  2.0f,  1.0f);
+        MakeCube(shaderProgram,  1.0f,  2.0f,  1.0f);
+        MakeCube(shaderProgram, -1.0f,  2.0f,  1.0f);
+
+        MakeCube(shaderProgram,  0.0f,  2.0f,  2.0f);
+        MakeCube(shaderProgram,  1.0f,  2.0f,  2.0f);
+        MakeCube(shaderProgram, -1.0f,  2.0f,  2.0f);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
