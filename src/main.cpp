@@ -24,11 +24,19 @@ static float MOVE = 1.0f;
 static float RIGHTMOVE = 90.0f;
 static float RIGHT = 0.0f;
 static float UP = 0.0f;
-vec3 CameraPos = vec3(0.0f, 0.0f, 3.0f);
-vec3 CameraFront = vec3(0.0f, 0.0f, -1.0f);
-vec3 CameraUp = vec3(0.0f, 1.0f, 0.0f);
-vec3 YRotAxis = vec3(0.0f, 1.0f, 0.0f);
-float HorRot = -90.0f;
+static vec3 CameraPos = vec3(0.0f, 0.0f, 3.0f);
+static vec3 CameraFront = vec3(0.0f, 0.0f, -1.0f);
+static vec3 CameraUp = vec3(0.0f, 1.0f, 0.0f);
+static vec3 YRotAxis = vec3(0.0f, 1.0f, 0.0f);
+static float HorRot = -90.0f;
+static float DeltaTime = 0.0f;
+static float LastFrame = 0.0f;
+static float FPS = 1.0 / 100.0;
+
+static bool MOVING = false;
+static float MOVESTART = 0.0f;
+static float MOVEDIST = 1.0f;
+static float MOVESPEED = 2.0f;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -56,7 +64,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     else if (key == GLFW_KEY_W && action == GLFW_PRESS)
     {
-        CameraPos += MOVE * CameraFront;
+        if (!MOVING)
+        {
+			MOVING = true;
+        }
     }
     else if (key == GLFW_KEY_S && action == GLFW_PRESS)
     {
@@ -152,7 +163,7 @@ void ShowLinkingErrors(unsigned int shaderProgram)
     }
 }
 
-void MakeCube(int shaderID, float x, float y,  float z)
+void RenderCube(int shaderID, float x, float y,  float z)
 {
 	mat4 model = mat4(1.0f);
 	model = translate(model, vec3(x, y, z));
@@ -172,6 +183,23 @@ void MakeCube(int shaderID, float x, float y,  float z)
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+}
+
+void MoveChar()
+{
+    if (MOVING)
+    {
+		CameraPos += (MOVESPEED * DeltaTime) * CameraFront;
+        MOVESTART += (MOVESPEED * DeltaTime);
+
+        if (MOVESTART > MOVEDIST)
+        {
+            MOVING = false;
+            MOVESTART = 0.0f;
+            CameraPos.x = floor(CameraPos.x + 0.5);
+            CameraPos.z = floor(CameraPos.z + 0.5);
+        }
+    }
 }
 
 int main()
@@ -294,61 +322,55 @@ int main()
 
     //TODO: try and abstract this into some kind of block.cpp
 
+	char groundLevel[7][7] =
+	{
+		 {'w', ' ', ' ', 's', ' ', ' ', 'w'},
+		 {'w', ' ', ' ', ' ', ' ', ' ', 'w'},
+		 {'w', 'w', 'w', ' ', 'w', 'w', 'w'},
+		 {'w', ' ', ' ', ' ', ' ', ' ', 'w'},
+		 {'w', ' ', ' ', ' ', ' ', ' ', 'w'},
+		 {'w', ' ', ' ', ' ', ' ', ' ', 'w'},
+		 {'w', 'w', 'w', 'w', 'w', 'w', 'w'}
+	};
+
     while (!glfwWindowShouldClose(window))
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        float currentFrame = static_cast<float>(glfwGetTime());
+        DeltaTime = currentFrame - LastFrame;
 
-        char groundLevel[7][7] = 
-        { 
-             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
-             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
-             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
-             {'w', 'x', 'x', 'x', 'w', 'w', 'w'},
-             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
-             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
-             {'w', 'w', 'w', 'w', 'w', 'w', 'w'}
-        };
-
-        for (int i = 0; i < 7; i++)
+        if (DeltaTime >= FPS)
         {
-            for (int j = 0; j < 7; j++)
-            {
-				if (groundLevel[i][j] == 'w')
-					MakeCube(shaderProgram, j, 0.0f, i);
-            }
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			MoveChar();
+
+			for (int i = 0; i < 7; i++)
+			{
+				for (int j = 0; j < 7; j++)
+				{
+					if (groundLevel[i][j] == 'w')
+						RenderCube(shaderProgram, j, 0.0f, i);
+				}
+			}
+
+			//floor
+			for (int i = 0; i < 7; i++)
+				for (int j = 0; j < 7; j++)
+					RenderCube(shaderProgram, j, -1.0f, i);
+
+			//roof
+			for (int i = 0; i < 7; i++)
+				for (int j = 0; j < 7; j++)
+					RenderCube(shaderProgram, j, 1.0f, i);
+
+			glfwSwapBuffers(window);
+            LastFrame = currentFrame;
+        }
+        else
+        {
+            glfwWaitEventsTimeout(FPS - DeltaTime);
         }
 
-        char floor[7][7] = 
-        { 
-             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
-             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
-             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
-             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
-             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
-             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
-             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
-        };
-
-        for (int i = 0; i < 7; i++)
-        {
-            for (int j = 0; j < 7; j++)
-            {
-				if (floor[i][j] == 'w')
-					MakeCube(shaderProgram, j, -1.0f, i);
-            }
-        }
-
-        //roof
-        for (int i = 0; i < 7; i++)
-        {
-            for (int j = 0; j < 7; j++)
-            {
-				if (floor[i][j] == 'w')
-					MakeCube(shaderProgram, j, 1.0f, i);
-            }
-        }
-
-        glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
