@@ -298,40 +298,55 @@ int main()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //wall
-        MakeCube(shaderProgram,  0.0f,  0.0f,  0.0f);
-        MakeCube(shaderProgram,  1.0f,  0.0f,  0.0f);
-        MakeCube(shaderProgram, -1.0f,  0.0f,  0.0f);
+        char groundLevel[7][7] = 
+        { 
+             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
+             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
+             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
+             {'w', 'x', 'x', 'x', 'w', 'w', 'w'},
+             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
+             {'w', 'x', 'x', 'x', 'x', 'x', 'w'},
+             {'w', 'w', 'w', 'w', 'w', 'w', 'w'}
+        };
 
-        MakeCube(shaderProgram,  0.0f,  1.0f,  0.0f);
-        MakeCube(shaderProgram,  1.0f,  1.0f,  0.0f);
-        MakeCube(shaderProgram, -1.0f,  1.0f,  0.0f);
+        for (int i = 0; i < 7; i++)
+        {
+            for (int j = 0; j < 7; j++)
+            {
+				if (groundLevel[i][j] == 'w')
+					MakeCube(shaderProgram, j, 0.0f, i);
+            }
+        }
 
-        //floor
-        MakeCube(shaderProgram,  0.0f, -1.0f,  0.0f);
-        MakeCube(shaderProgram,  1.0f, -1.0f,  0.0f);
-        MakeCube(shaderProgram, -1.0f, -1.0f,  0.0f);
+        char floor[7][7] = 
+        { 
+             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
+             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
+             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
+             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
+             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
+             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
+             {'w', 'w', 'w', 'w', 'w', 'w', 'w'},
+        };
 
-        MakeCube(shaderProgram,  0.0f, -1.0f,  1.0f);
-        MakeCube(shaderProgram,  1.0f, -1.0f,  1.0f);
-        MakeCube(shaderProgram, -1.0f, -1.0f,  1.0f);
-
-        MakeCube(shaderProgram,  0.0f, -1.0f,  2.0f);
-        MakeCube(shaderProgram,  1.0f, -1.0f,  2.0f);
-        MakeCube(shaderProgram, -1.0f, -1.0f,  2.0f);
+        for (int i = 0; i < 7; i++)
+        {
+            for (int j = 0; j < 7; j++)
+            {
+				if (floor[i][j] == 'w')
+					MakeCube(shaderProgram, j, -1.0f, i);
+            }
+        }
 
         //roof
-        MakeCube(shaderProgram,  0.0f,  2.0f,  0.0f);
-        MakeCube(shaderProgram,  1.0f,  2.0f,  0.0f);
-        MakeCube(shaderProgram, -1.0f,  2.0f,  0.0f);
-
-        MakeCube(shaderProgram,  0.0f,  2.0f,  1.0f);
-        MakeCube(shaderProgram,  1.0f,  2.0f,  1.0f);
-        MakeCube(shaderProgram, -1.0f,  2.0f,  1.0f);
-
-        MakeCube(shaderProgram,  0.0f,  2.0f,  2.0f);
-        MakeCube(shaderProgram,  1.0f,  2.0f,  2.0f);
-        MakeCube(shaderProgram, -1.0f,  2.0f,  2.0f);
+        for (int i = 0; i < 7; i++)
+        {
+            for (int j = 0; j < 7; j++)
+            {
+				if (floor[i][j] == 'w')
+					MakeCube(shaderProgram, j, 1.0f, i);
+            }
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
