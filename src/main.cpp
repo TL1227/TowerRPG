@@ -27,6 +27,8 @@ static float UP = 0.0f;
 vec3 CameraPos = vec3(0.0f, 0.0f, 3.0f);
 vec3 CameraFront = vec3(0.0f, 0.0f, -1.0f);
 vec3 CameraUp = vec3(0.0f, 1.0f, 0.0f);
+vec3 YRotAxis = vec3(0.0f, 1.0f, 0.0f);
+float HorRot = -90.0f;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -54,23 +56,27 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     else if (key == GLFW_KEY_W && action == GLFW_PRESS)
     {
-        CameraPos.z -= MOVE;
+        CameraPos += MOVE * CameraFront;
     }
     else if (key == GLFW_KEY_S && action == GLFW_PRESS)
     {
-        CameraPos.z += MOVE;
+        CameraPos -= MOVE * CameraFront;
     }
     else if (key == GLFW_KEY_D && action == GLFW_PRESS)
     {
-        RIGHT += RIGHTMOVE;
-        CameraFront.x = cos(radians(RIGHT));
+        HorRot += 90.0f;
+
+        if (HorRot > 360.0f)
+            HorRot = 90.0f;
     }
     else if (key == GLFW_KEY_A && action == GLFW_PRESS)
     {
-        //RIGHT -= RIGHTMOVE;
+        HorRot -= 90.0f;
+
+        if (HorRot < -360.0f)
+            HorRot = -90.0f;
     }
 
-    cout << RIGHT << endl;
 }
 
 GLFWwindow* SetUpGlfw()
@@ -153,14 +159,12 @@ void MakeCube(int shaderID, float x, float y,  float z)
 	unsigned int modelLoc = glGetUniformLocation(shaderID, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
 
-    //CameraCode start
+    //CameraCode 
+	CameraFront.x = cos(glm::radians(HorRot));
+	CameraFront.z = sin(glm::radians(HorRot));
     mat4 view = lookAt(CameraPos, CameraPos + CameraFront, CameraUp);
-    //This just rotates the scene
-    //view = rotate(view, radians(RIGHT), vec3(0.0f, 1.0f, 0.0f));
-
 	unsigned int viewLoc = glGetUniformLocation(shaderID, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
-    //CameraCode end
 
 	mat4 projection;
 	projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
