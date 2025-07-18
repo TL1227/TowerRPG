@@ -15,10 +15,14 @@ using namespace std;
 using namespace glm;
 
 //file scoped variables
+
 static string GameVersion = "0.0.0";
+
+//screen
 static int SCREEN_WIDTH = 960;
 static int SCREEN_HEIGHT = 540;
 static float RATIO = 9.0f / 16.0f;
+
 static bool WireFrameMode = false;
 static float MOVE = 1.0f;
 static float RIGHTMOVE = 90.0f;
@@ -29,11 +33,20 @@ static vec3 CameraFront = vec3(0.0f, 0.0f, -1.0f);
 static vec3 CameraUp = vec3(0.0f, 1.0f, 0.0f);
 static vec3 YRotAxis = vec3(0.0f, 1.0f, 0.0f);
 static float HorRot = -90.0f;
+
+//framerate
 static float DeltaTime = 0.0f;
 static float LastFrame = 0.0f;
 static float FPS = 1.0 / 100.0;
 
-static bool MOVING = false;
+//movement
+enum Direction
+{
+    None,
+    Forwards,
+    Backwards
+};
+static Direction MOVING = Direction::None;
 static float MOVESTART = 0.0f;
 static float MOVEDIST = 1.0f;
 static float MOVESPEED = 2.0f;
@@ -64,14 +77,17 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     else if (key == GLFW_KEY_W && action == GLFW_PRESS)
     {
-        if (!MOVING)
+        if (MOVING == Direction::None)
         {
-			MOVING = true;
+            MOVING = Direction::Forwards;
         }
     }
     else if (key == GLFW_KEY_S && action == GLFW_PRESS)
     {
-        CameraPos -= MOVE * CameraFront;
+        if (MOVING == Direction::None)
+        {
+            MOVING = Direction::Backwards;
+        }
     }
     else if (key == GLFW_KEY_D && action == GLFW_PRESS)
     {
@@ -187,14 +203,27 @@ void RenderCube(int shaderID, float x, float y,  float z)
 
 void MoveChar()
 {
-    if (MOVING)
+    if (MOVING == Direction::Forwards)
     {
 		CameraPos += (MOVESPEED * DeltaTime) * CameraFront;
         MOVESTART += (MOVESPEED * DeltaTime);
 
         if (MOVESTART > MOVEDIST)
         {
-            MOVING = false;
+            MOVING = Direction::None;
+            MOVESTART = 0.0f;
+            CameraPos.x = floor(CameraPos.x + 0.5);
+            CameraPos.z = floor(CameraPos.z + 0.5);
+        }
+    }
+    else if (MOVING == Direction::Backwards)
+    {
+		CameraPos -= (MOVESPEED * DeltaTime) * CameraFront;
+        MOVESTART += (MOVESPEED * DeltaTime);
+
+        if (MOVESTART > MOVEDIST)
+        {
+            MOVING = Direction::None;
             MOVESTART = 0.0f;
             CameraPos.x = floor(CameraPos.x + 0.5);
             CameraPos.z = floor(CameraPos.z + 0.5);
