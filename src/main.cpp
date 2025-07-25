@@ -232,6 +232,8 @@ void MoveChar()
             MOVESTART = 0.0f;
             CameraPos.x = floor(CameraPos.x + 0.5);
             CameraPos.z = floor(CameraPos.z + 0.5);
+
+            cout << "x: " << CameraPos.x << " z: " << CameraPos.z << endl;
         }
     }
     else if (MOVING == Direction::Backwards)
@@ -388,14 +390,28 @@ int main()
 
 	char groundLevel[7][7] =
 	{
-		 {'w', ' ', ' ', 's', ' ', ' ', 'w'},
-		 {'w', ' ', ' ', ' ', ' ', ' ', 'w'},
-		 {'w', 'w', 'w', ' ', 'w', 'w', 'w'},
-		 {'w', ' ', ' ', ' ', ' ', ' ', 'w'},
-		 {'w', ' ', ' ', ' ', ' ', ' ', 'w'},
-		 {'w', ' ', ' ', ' ', ' ', ' ', 'w'},
-		 {'w', 'w', 'w', 'w', 'w', 'w', 'w'}
+		 {'#', '#', '#', '#', '#', '#', '#'},
+		 {'#', ' ', ' ', ' ', ' ', ' ', '#'},
+		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+		 {'#', ' ', '#', 's', '#', ' ', '#'}
 	};
+
+    //set camera at 's' character
+	for (int i = 0; i < 7; i++)
+	{
+		for (int j = 0; j < 7; j++)
+		{
+			if (groundLevel[i][j] == 's')
+			{
+				CameraPos.x = j;
+				CameraPos.z = i;
+                break;
+			}
+		}
+	}
 
     while (!glfwWindowShouldClose(window))
     {
@@ -412,8 +428,10 @@ int main()
 			{
 				for (int j = 0; j < 7; j++)
 				{
-					if (groundLevel[i][j] == 'w')
+                    if (groundLevel[i][j] == '#')
+                    {
 						RenderCube(shaderProgram, j, 0.0f, i);
+                    }
 				}
 			}
 
