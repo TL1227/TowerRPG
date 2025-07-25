@@ -40,7 +40,7 @@ static float LastFrame = 0.0f;
 static float FPS = 1.0 / 100.0;
 
 //movement
-enum Direction
+enum class Direction
 {
     None,
     Forwards,
@@ -50,6 +50,17 @@ static Direction MOVING = Direction::None;
 static float MOVESTART = 0.0f;
 static float MOVEDIST = 1.0f;
 static float MOVESPEED = 2.0f;
+
+enum class Rotation
+{
+    None,
+    Right,
+    Left
+};
+static Rotation ROTATING = Rotation::None;
+static float ROTSTART = 0.0f;
+static float ROTDIST = 90.0f;
+static float ROTSPEED = 70.0f;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -91,10 +102,17 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     else if (key == GLFW_KEY_D && action == GLFW_PRESS)
     {
+        if (ROTATING == Rotation::None)
+        {
+            ROTATING = Rotation::Right;
+        }
+
+        /*
         HorRot += 90.0f;
 
         if (HorRot > 360.0f)
             HorRot = 90.0f;
+            */
     }
     else if (key == GLFW_KEY_A && action == GLFW_PRESS)
     {
@@ -227,6 +245,23 @@ void MoveChar()
             MOVESTART = 0.0f;
             CameraPos.x = floor(CameraPos.x + 0.5);
             CameraPos.z = floor(CameraPos.z + 0.5);
+        }
+    }
+
+    if (ROTATING == Rotation::Right)
+    {
+        HorRot += ROTSPEED * DeltaTime;
+        ROTSTART += ROTSPEED * DeltaTime;
+
+        /*
+        if (HorRot > 360.0f)
+            HorRot = 90.0f;
+            */
+
+        if (ROTSTART > ROTDIST)
+        {
+            ROTATING = Rotation::None;
+            ROTSTART = 0.0f;
         }
     }
 }
