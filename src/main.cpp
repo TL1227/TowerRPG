@@ -120,6 +120,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
         if (HorRot < -360.0f)
             HorRot = -90.0f;
+
+        cout << HorRot << endl;
     }
 
 }
@@ -264,6 +266,8 @@ void MoveChar()
         {
             ROTATING = Rotation::None;
             ROTSTART = 0.0f;
+
+            cout << HorRot << endl;
         }
     }
 }
@@ -386,23 +390,28 @@ int main()
 
     glUseProgram(shaderProgram);
 
-    //TODO: try and abstract this into some kind of block.cpp
-
-	char groundLevel[7][7] =
-	{
+    vector<vector<char>> groundLevel =
+    {
 		 {'#', '#', '#', '#', '#', '#', '#'},
-		 {'#', ' ', ' ', ' ', ' ', ' ', '#'},
+		 {'#', ' ', ' ', 's', ' ', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
-		 {'#', ' ', '#', 's', '#', ' ', '#'}
-	};
+		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+    };
+
+    int rowSize = groundLevel.size();
+    int columnSize = groundLevel[0].size();
 
     //set camera at 's' character
-	for (int i = 0; i < 7; i++)
+    for (int i = 0; i < rowSize; i++)
 	{
-		for (int j = 0; j < 7; j++)
+		for (int j = 0; j < columnSize; j++)
 		{
 			if (groundLevel[i][j] == 's')
 			{
@@ -424,9 +433,9 @@ int main()
 
 			MoveChar();
 
-			for (int i = 0; i < 7; i++)
+			for (int i = 0; i < rowSize; i++)
 			{
-				for (int j = 0; j < 7; j++)
+				for (int j = 0; j < columnSize; j++)
 				{
                     if (groundLevel[i][j] == '#')
                     {
@@ -436,13 +445,13 @@ int main()
 			}
 
 			//floor
-			for (int i = 0; i < 7; i++)
-				for (int j = 0; j < 7; j++)
+			for (int i = 0; i < rowSize; i++)
+				for (int j = 0; j < columnSize; j++)
 					RenderCube(shaderProgram, j, -1.0f, i);
 
 			//roof
-			for (int i = 0; i < 7; i++)
-				for (int j = 0; j < 7; j++)
+			for (int i = 0; i < rowSize; i++)
+				for (int j = 0; j < columnSize; j++)
 					RenderCube(shaderProgram, j, 1.0f, i);
 
 			glfwSwapBuffers(window);
