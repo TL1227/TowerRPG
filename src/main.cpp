@@ -6,6 +6,7 @@
 
 #include "shaderReader.h"
 #include "textures.h"
+#include "movement.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -21,18 +22,14 @@ static string GameVersion = "0.0.0";
 //screen
 static int SCREEN_WIDTH = 960;
 static int SCREEN_HEIGHT = 540;
-static float RATIO = 9.0f / 16.0f;
 
 static bool WireFrameMode = false;
-static float MOVE = 1.0f;
-static float RIGHTMOVE = 90.0f;
-static float RIGHT = 0.0f;
-static float UP = 0.0f;
+
 static vec3 CameraPos = vec3(0.0f, 0.0f, 3.0f);
 static vec3 CameraFront = vec3(0.0f, 0.0f, -1.0f);
 static vec3 CameraUp = vec3(0.0f, 1.0f, 0.0f);
 static vec3 YRotAxis = vec3(0.0f, 1.0f, 0.0f);
-static float HorRot = -90.0f;
+static float HorRot = 0.0f;
 
 //framerate
 static float DeltaTime = 0.0f;
@@ -40,27 +37,8 @@ static float LastFrame = 0.0f;
 static float FPS = 1.0 / 100.0;
 
 //movement
-enum class Direction
-{
-    None,
-    Forwards,
-    Backwards
-};
-static Direction MOVING = Direction::None;
-static float MOVESTART = 0.0f;
-static float MOVEDIST = 1.0f;
-static float MOVESPEED = 2.0f;
 
-enum class Rotation
-{
-    None,
-    Right,
-    Left
-};
-static Rotation ROTATING = Rotation::None;
-static float ROTSTART = 0.0f;
-static float ROTDIST = 90.0f;
-static float ROTSPEED = 70.0f;
+Movement CharMove;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -88,42 +66,20 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     else if (key == GLFW_KEY_W && action == GLFW_PRESS)
     {
-        if (MOVING == Direction::None)
-        {
-            MOVING = Direction::Forwards;
-        }
+        CharMove.SetMoveAction(MoveAction::Forwards);
     }
     else if (key == GLFW_KEY_S && action == GLFW_PRESS)
     {
-        if (MOVING == Direction::None)
-        {
-            MOVING = Direction::Backwards;
-        }
+        CharMove.SetMoveAction(MoveAction::Backwards);
     }
     else if (key == GLFW_KEY_D && action == GLFW_PRESS)
     {
-        if (ROTATING == Rotation::None)
-        {
-            ROTATING = Rotation::Right;
-        }
-
-        /*
-        HorRot += 90.0f;
-
-        if (HorRot > 360.0f)
-            HorRot = 90.0f;
-            */
+        CharMove.SetMoveAction(MoveAction::TurnRight);
     }
     else if (key == GLFW_KEY_A && action == GLFW_PRESS)
     {
-        HorRot -= 90.0f;
-
-        if (HorRot < -360.0f)
-            HorRot = -90.0f;
-
-        cout << HorRot << endl;
+        CharMove.SetMoveAction(MoveAction::TurnLeft);
     }
-
 }
 
 GLFWwindow* SetUpGlfw()
@@ -223,14 +179,14 @@ void RenderCube(int shaderID, float x, float y,  float z)
 
 void MoveChar()
 {
-    if (MOVING == Direction::Forwards)
+    if (CharMove.CurrMovement == MoveAction::Forwards)
     {
 		CameraPos += (MOVESPEED * DeltaTime) * CameraFront;
         MOVESTART += (MOVESPEED * DeltaTime);
 
         if (MOVESTART > MOVEDIST)
         {
-            MOVING = Direction::None;
+            CurrMovement = MoveAction::None;
             MOVESTART = 0.0f;
             CameraPos.x = floor(CameraPos.x + 0.5);
             CameraPos.z = floor(CameraPos.z + 0.5);
@@ -238,37 +194,44 @@ void MoveChar()
             cout << "x: " << CameraPos.x << " z: " << CameraPos.z << endl;
         }
     }
-    else if (MOVING == Direction::Backwards)
+    else if (CurrMovement == MoveAction::Backwards)
     {
 		CameraPos -= (MOVESPEED * DeltaTime) * CameraFront;
         MOVESTART += (MOVESPEED * DeltaTime);
 
         if (MOVESTART > MOVEDIST)
         {
-            MOVING = Direction::None;
+            CurrMovement = MoveAction::None;
             MOVESTART = 0.0f;
             CameraPos.x = floor(CameraPos.x + 0.5);
             CameraPos.z = floor(CameraPos.z + 0.5);
         }
     }
-
-    if (ROTATING == Rotation::Right)
+    else if (CurrMovement == MoveAction::TurnRight)
     {
         HorRot += ROTSPEED * DeltaTime;
-        ROTSTART += ROTSPEED * DeltaTime;
 
-        /*
-        if (HorRot > 360.0f)
-            HorRot = 90.0f;
-            */
+		if (HorRot > CharMove.GetCurrent() + 90)
+		{
+			CurrMovement = MoveAction::None;
+            HorRot = CharMove.GetNextRightDir();
+            CharMove.SetCurrent(CharMove.GetNextRightDir());
 
-        if (ROTSTART > ROTDIST)
-        {
-            ROTATING = Rotation::None;
-            ROTSTART = 0.0f;
+			cout << HorRot << endl;
+		}
+    }
+    else if (CurrMovement == MoveAction::TurnLeft)
+    {
+        HorRot -= ROTSPEED * DeltaTime;
 
-            cout << HorRot << endl;
-        }
+		if (HorRot < CharMove.GetCurrent() - 90)
+		{
+			CurrMovement = MoveAction::None;
+            HorRot = CharMove.GetNextLeftDir();
+            CharMove.SetCurrent(CharMove.GetNextLeftDir());
+
+			cout << HorRot << endl;
+		}
     }
 }
 

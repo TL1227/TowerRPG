@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\movement.cpp" />
     <ClCompile Include="src\shaderReader.cpp" />
     <ClCompile Include="src\textures.cpp" />
   </ItemGroup>
@@ -29,6 +30,7 @@
     <None Include="shaders\vert.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\movement.h" />
     <ClInclude Include="src\shaderReader.h" />
     <ClInclude Include="src\textures.h" />
     <ClInclude Include="thirdparty_src\stb_image.h" />
