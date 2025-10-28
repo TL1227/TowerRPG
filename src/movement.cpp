@@ -2,10 +2,6 @@
 
 #include "movement.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 int Movement::GetNextRightDir()
 {
 	if (CurrentDirection == North)
@@ -38,60 +34,61 @@ void Movement::SetMoveAction(MoveAction action)
 	}
 }
 
-void Movement::MoveChar(glm::vec3 *CameraPos, glm::vec3 CameraFront, float DeltaTime, float *HorRot)
+void Movement::MoveChar(Camera &camera, float DeltaTime)
 {
     if (CurrMovement == MoveAction::Forwards)
     {
-		*CameraPos += (MOVESPEED * DeltaTime) * CameraFront;
-        MOVESTART += (MOVESPEED * DeltaTime);
+        camera.CameraPos += (MovementSpeed * DeltaTime) * camera.CameraFront;
+        MOVESTART += (MovementSpeed * DeltaTime);
 
         if (MOVESTART > MOVEDIST)
         {
             CurrMovement = MoveAction::None;
             MOVESTART = 0.0f;
-            CameraPos->x = floor(CameraPos->x + 0.5);
-            CameraPos->z = floor(CameraPos->z + 0.5);
+            camera.CameraPos.x = floor(camera.CameraPos.x + 0.5);
+            camera.CameraPos.z = floor(camera.CameraPos.z + 0.5);
 
-            std::cout << "x: " << CameraPos->x << " z: " << CameraPos->z << std::endl;
+            std::cout << "x: " << camera.CameraPos.x << " z: " << camera.CameraPos.z << std::endl;
         }
     }
     else if (CurrMovement == MoveAction::Backwards)
     {
-		CameraPos -= (MOVESPEED * DeltaTime) * CameraFront;
-        MOVESTART += (MOVESPEED * DeltaTime);
+		camera.CameraPos -= (MovementSpeed * DeltaTime) * camera.CameraFront;
+        MOVESTART += (MovementSpeed * DeltaTime);
 
         if (MOVESTART > MOVEDIST)
         {
             CurrMovement = MoveAction::None;
             MOVESTART = 0.0f;
-            CameraPos->x = floor(CameraPos->x + 0.5);
-            CameraPos->z = floor(CameraPos->z + 0.5);
+            camera.CameraPos.x = floor(camera.CameraPos.x + 0.5);
+            camera.CameraPos.z = floor(camera.CameraPos.z + 0.5);
         }
     }
     else if (CurrMovement == MoveAction::TurnRight)
     {
-        HorRot += ROTSPEED * DeltaTime;
+        camera.HorRot += RotationSpeed * DeltaTime;
 
-		if (HorRot > CharMove.GetCurrent() + 90)
+		if (camera.HorRot > GetCurrent() + 90)
 		{
 			CurrMovement = MoveAction::None;
-            HorRot = CharMove.GetNextRightDir();
-            CharMove.SetCurrent(CharMove.GetNextRightDir());
+            camera.HorRot = GetNextRightDir();
+            SetCurrent(GetNextRightDir());
 
-			cout << HorRot << endl;
+			std::cout <<camera.HorRot << std::endl;
 		}
     }
     else if (CurrMovement == MoveAction::TurnLeft)
     {
-        HorRot -= ROTSPEED * DeltaTime;
+        camera.HorRot -= RotationSpeed * DeltaTime;
 
-		if (HorRot < CharMove.GetCurrent() - 90)
+		if (camera.HorRot < GetCurrent() - 90)
 		{
 			CurrMovement = MoveAction::None;
-            HorRot = CharMove.GetNextLeftDir();
-            CharMove.SetCurrent(CharMove.GetNextLeftDir());
+            camera.HorRot = GetNextLeftDir();
 
-			cout << HorRot << endl;
+            SetCurrent(GetNextLeftDir());
+
+			std::cout <<camera.HorRot << std::endl;
 		}
     }
 }

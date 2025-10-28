@@ -1,6 +1,10 @@
 #ifndef MOVEMENT_H
 #define MOVEMENT_H
 
+#include <glm/glm.hpp>
+
+#include "camera.h"
+
 enum class MoveAction
 {
 	None,
@@ -16,7 +20,7 @@ public:
     int GetNextRightDir();
     int GetNextLeftDir();
 	void SetMoveAction(MoveAction);
-	void MoveChar();
+	void MoveChar(Camera &camera, float DeltaTime);
     int GetCurrent() { return CurrentDirection; }
     void SetCurrent(float direction) { CurrentDirection = direction; }
 
@@ -30,10 +34,9 @@ private:
 
 	float MOVESTART = 0.0f;
 	float MOVEDIST = 1.0f;
-	float MOVESPEED = 2.0f;
-	float ROTSTART = 0.0f;
-	float ROTDIST = 90.0f;
-	float ROTSPEED = 130.0f;
+
+	const float MovementSpeed = 2.0f;
+	const float RotationSpeed = 130.0f;
 
 	MoveAction CurrMovement = MoveAction::None;
 };

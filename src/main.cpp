@@ -7,6 +7,7 @@
 #include "shaderReader.h"
 #include "textures.h"
 #include "movement.h"
+#include "camera.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -25,11 +26,7 @@ static int SCREEN_HEIGHT = 540;
 
 static bool WireFrameMode = false;
 
-static vec3 CameraPos = vec3(0.0f, 0.0f, 3.0f);
-static vec3 CameraFront = vec3(0.0f, 0.0f, -1.0f);
-static vec3 CameraUp = vec3(0.0f, 1.0f, 0.0f);
-static vec3 YRotAxis = vec3(0.0f, 1.0f, 0.0f);
-static float HorRot = 0.0f;
+Camera camera;
 
 //framerate
 static float DeltaTime = 0.0f;
@@ -37,7 +34,6 @@ static float LastFrame = 0.0f;
 static float FPS = 1.0 / 100.0;
 
 //movement
-
 Movement CharMove;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
@@ -163,9 +159,9 @@ void RenderCube(int shaderID, float x, float y,  float z)
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
 
     //CameraCode 
-	CameraFront.x = cos(glm::radians(HorRot));
-	CameraFront.z = sin(glm::radians(HorRot));
-    mat4 view = lookAt(CameraPos, CameraPos + CameraFront, CameraUp);
+	camera.CameraFront.x = cos(glm::radians(camera.HorRot));
+	camera.CameraFront.z = sin(glm::radians(camera.HorRot));
+    mat4 view = lookAt(camera.CameraPos, camera.CameraPos + camera.CameraFront, camera.CameraUp);
 	unsigned int viewLoc = glGetUniformLocation(shaderID, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
 
@@ -175,64 +171,6 @@ void RenderCube(int shaderID, float x, float y,  float z)
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-}
-
-void MoveChar()
-{
-    if (CharMove.CurrMovement == MoveAction::Forwards)
-    {
-		CameraPos += (MOVESPEED * DeltaTime) * CameraFront;
-        MOVESTART += (MOVESPEED * DeltaTime);
-
-        if (MOVESTART > MOVEDIST)
-        {
-            CurrMovement = MoveAction::None;
-            MOVESTART = 0.0f;
-            CameraPos.x = floor(CameraPos.x + 0.5);
-            CameraPos.z = floor(CameraPos.z + 0.5);
-
-            cout << "x: " << CameraPos.x << " z: " << CameraPos.z << endl;
-        }
-    }
-    else if (CurrMovement == MoveAction::Backwards)
-    {
-		CameraPos -= (MOVESPEED * DeltaTime) * CameraFront;
-        MOVESTART += (MOVESPEED * DeltaTime);
-
-        if (MOVESTART > MOVEDIST)
-        {
-            CurrMovement = MoveAction::None;
-            MOVESTART = 0.0f;
-            CameraPos.x = floor(CameraPos.x + 0.5);
-            CameraPos.z = floor(CameraPos.z + 0.5);
-        }
-    }
-    else if (CurrMovement == MoveAction::TurnRight)
-    {
-        HorRot += ROTSPEED * DeltaTime;
-
-		if (HorRot > CharMove.GetCurrent() + 90)
-		{
-			CurrMovement = MoveAction::None;
-            HorRot = CharMove.GetNextRightDir();
-            CharMove.SetCurrent(CharMove.GetNextRightDir());
-
-			cout << HorRot << endl;
-		}
-    }
-    else if (CurrMovement == MoveAction::TurnLeft)
-    {
-        HorRot -= ROTSPEED * DeltaTime;
-
-		if (HorRot < CharMove.GetCurrent() - 90)
-		{
-			CurrMovement = MoveAction::None;
-            HorRot = CharMove.GetNextLeftDir();
-            CharMove.SetCurrent(CharMove.GetNextLeftDir());
-
-			cout << HorRot << endl;
-		}
-    }
 }
 
 int main()
@@ -378,8 +316,8 @@ int main()
 		{
 			if (groundLevel[i][j] == 's')
 			{
-				CameraPos.x = j;
-				CameraPos.z = i;
+				camera.CameraPos.x = j;
+				camera.CameraPos.z = i;
                 break;
 			}
 		}
@@ -394,7 +332,7 @@ int main()
         {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			MoveChar();
+			CharMove.MoveChar(camera, DeltaTime);
 
 			for (int i = 0; i < rowSize; i++)
 			{
