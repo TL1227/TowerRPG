@@ -85,7 +85,7 @@ GLFWwindow* SetUpGlfw()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tower RPG", NULL, NULL);
 
     if (window == NULL)
     {
@@ -294,9 +294,9 @@ int main()
     vector<vector<char>> groundLevel =
     {
 		 {'#', '#', '#', '#', '#', '#', '#'},
-		 {'#', ' ', ' ', 's', ' ', ' ', '#'},
-		 {'#', ' ', '#', ' ', '#', ' ', '#'},
-		 {'#', ' ', '#', ' ', '#', ' ', '#'},
+		 {'#', ' ', ' ', ' ', ' ', ' ', '#'},
+		 {'#', ' ', ' ', ' ', ' ', ' ', '#'},
+		 {'#', 's', ' ', ' ', ' ', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
