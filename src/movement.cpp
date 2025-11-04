@@ -39,27 +39,25 @@ void Movement::MoveChar(Camera &camera, float DeltaTime)
     if (CurrMovement == MoveAction::Forwards)
     {
         camera.CameraPos += (MovementSpeed * DeltaTime) * camera.CameraFront;
-        MOVESTART += (MovementSpeed * DeltaTime);
+        DistanceMoved += (MovementSpeed * DeltaTime);
 
-        if (MOVESTART > MOVEDIST)
+        if (DistanceMoved > MovementUnit)
         {
             CurrMovement = MoveAction::None;
-            MOVESTART = 0.0f;
+            DistanceMoved = 0.0f;
             camera.CameraPos.x = floor(camera.CameraPos.x + 0.5);
             camera.CameraPos.z = floor(camera.CameraPos.z + 0.5);
-
-            std::cout << "x: " << camera.CameraPos.x << " z: " << camera.CameraPos.z << std::endl;
         }
     }
     else if (CurrMovement == MoveAction::Backwards)
     {
 		camera.CameraPos -= (MovementSpeed * DeltaTime) * camera.CameraFront;
-        MOVESTART += (MovementSpeed * DeltaTime);
+        DistanceMoved += (MovementSpeed * DeltaTime);
 
-        if (MOVESTART > MOVEDIST)
+        if (DistanceMoved > MovementUnit)
         {
             CurrMovement = MoveAction::None;
-            MOVESTART = 0.0f;
+            DistanceMoved = 0.0f;
             camera.CameraPos.x = floor(camera.CameraPos.x + 0.5);
             camera.CameraPos.z = floor(camera.CameraPos.z + 0.5);
         }
@@ -72,6 +70,7 @@ void Movement::MoveChar(Camera &camera, float DeltaTime)
 		{
 			CurrMovement = MoveAction::None;
             camera.HorRot = GetNextRightDir();
+
             SetCurrentDirection(GetNextRightDir());
 
 			std::cout <<camera.HorRot << std::endl;

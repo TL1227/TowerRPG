@@ -32,8 +32,8 @@ private:
 	int West = 0;
     int CurrentDirection;
 
-	float MOVESTART = 0.0f;
-	float MOVEDIST = 1.0f;
+	float DistanceMoved = 0.0f;
+	float MovementUnit = 1.0f;
 
 	const float MovementSpeed = 2.0f;
 	const float RotationSpeed = 130.0f;
