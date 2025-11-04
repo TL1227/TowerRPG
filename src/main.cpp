@@ -357,6 +357,9 @@ int main()
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;
+
+			std::cout << "CameraFront [" << camera.CameraFront.x << ',' << camera.CameraFront.y << ',' << camera.CameraFront.z << ']'
+				<< "CameraPos [" << camera.CameraPos.x << ',' << camera.CameraPos.y << ',' << camera.CameraPos.z << ']' << std::endl;
         }
         else
         {
