@@ -68,11 +68,11 @@ void Movement::MoveChar(Camera &camera, float DeltaTime)
     {
         camera.HorRot += RotationSpeed * DeltaTime;
 
-		if (camera.HorRot > GetCurrent() + 90)
+		if (camera.HorRot > GetCurrentDirection() + 90)
 		{
 			CurrMovement = MoveAction::None;
             camera.HorRot = GetNextRightDir();
-            SetCurrent(GetNextRightDir());
+            SetCurrentDirection(GetNextRightDir());
 
 			std::cout <<camera.HorRot << std::endl;
 		}
@@ -81,12 +81,12 @@ void Movement::MoveChar(Camera &camera, float DeltaTime)
     {
         camera.HorRot -= RotationSpeed * DeltaTime;
 
-		if (camera.HorRot < GetCurrent() - 90)
+		if (camera.HorRot < GetCurrentDirection() - 90)
 		{
 			CurrMovement = MoveAction::None;
             camera.HorRot = GetNextLeftDir();
 
-            SetCurrent(GetNextLeftDir());
+            SetCurrentDirection(GetNextLeftDir());
 
 			std::cout <<camera.HorRot << std::endl;
 		}

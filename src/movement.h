@@ -21,8 +21,8 @@ public:
     int GetNextLeftDir();
 	void SetMoveAction(MoveAction);
 	void MoveChar(Camera &camera, float DeltaTime);
-    int GetCurrent() { return CurrentDirection; }
-    void SetCurrent(float direction) { CurrentDirection = direction; }
+    int GetCurrentDirection() { return CurrentDirection; }
+    void SetCurrentDirection(float direction) { CurrentDirection = direction; }
 
 
 private:
