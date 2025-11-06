@@ -60,19 +60,19 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             WireFrameMode = true;
         }
     }
-    else if (key == GLFW_KEY_W && action == GLFW_PRESS)
+    else if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
     {
         CharMove.SetMoveAction(MoveAction::Forwards);
     }
-    else if (key == GLFW_KEY_S && action == GLFW_PRESS)
+    else if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
     {
         CharMove.SetMoveAction(MoveAction::Backwards);
     }
-    else if (key == GLFW_KEY_D && action == GLFW_PRESS)
+    else if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
     {
         CharMove.SetMoveAction(MoveAction::TurnRight);
     }
-    else if (key == GLFW_KEY_A && action == GLFW_PRESS)
+    else if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
     {
         CharMove.SetMoveAction(MoveAction::TurnLeft);
     }
@@ -295,8 +295,8 @@ int main()
     {
 		 {'#', '#', '#', '#', '#', '#', '#'},
 		 {'#', ' ', ' ', ' ', ' ', ' ', '#'},
-		 {'#', ' ', ' ', ' ', ' ', ' ', '#'},
 		 {'#', 's', ' ', ' ', ' ', ' ', '#'},
+		 {'#', ' ', ' ', ' ', ' ', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
 		 {'#', ' ', '#', ' ', '#', ' ', '#'},
@@ -358,8 +358,8 @@ int main()
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;
 
-			std::cout << "CameraFront [" << camera.CameraFront.x << ',' << camera.CameraFront.y << ',' << camera.CameraFront.z << ']'
-				<< "CameraPos [" << camera.CameraPos.x << ',' << camera.CameraPos.y << ',' << camera.CameraPos.z << ']' << std::endl;
+			//std::cout << "CameraFront [" << camera.CameraFront.x << ',' << camera.CameraFront.y << ',' << camera.CameraFront.z << ']'
+				//<< "CameraPos [" << camera.CameraPos.x << ',' << camera.CameraPos.y << ',' << camera.CameraPos.z << ']' << std::endl;
         }
         else
         {
