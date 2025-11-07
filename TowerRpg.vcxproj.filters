@@ -1,11 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\shaderReader.cpp" />
     <ClCompile Include="src\textures.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\movement.cpp" />
+    <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\map.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\vert.shader" />
@@ -16,5 +18,7 @@
     <ClInclude Include="src\textures.h" />
     <ClInclude Include="thirdparty_src\stb_image.h" />
     <ClInclude Include="src\movement.h" />
+    <ClInclude Include="src\camera.h" />
+    <ClInclude Include="src\map.h" />
   </ItemGroup>
 </Project>

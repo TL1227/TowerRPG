@@ -8,6 +8,7 @@
 #include "textures.h"
 #include "movement.h"
 #include "camera.h"
+#include "map.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -35,6 +36,9 @@ static float FPS = 1.0 / 100.0;
 
 //movement
 Movement CharMove;
+
+//maps
+Map LevelMap("C:\\Users\\lavelle.t\\Desktop\\map.txt");
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -291,30 +295,15 @@ int main()
 
     glUseProgram(shaderProgram);
 
-    vector<vector<char>> groundLevel =
-    {
-		 {'#', '#', '#', '#', '#', '#', '#'},
-		 {'#', ' ', ' ', ' ', ' ', ' ', '#'},
-		 {'#', 's', ' ', ' ', ' ', ' ', '#'},
-		 {'#', ' ', ' ', ' ', ' ', ' ', '#'},
-		 {'#', ' ', '#', ' ', '#', ' ', '#'},
-		 {'#', ' ', '#', ' ', '#', ' ', '#'},
-		 {'#', ' ', '#', ' ', '#', ' ', '#'},
-		 {'#', ' ', '#', ' ', '#', ' ', '#'},
-		 {'#', ' ', '#', ' ', '#', ' ', '#'},
-		 {'#', ' ', '#', ' ', '#', ' ', '#'},
-		 {'#', ' ', '#', ' ', '#', ' ', '#'},
-    };
-
-    int rowSize = groundLevel.size();
-    int columnSize = groundLevel[0].size();
+    int rowSize = LevelMap.Data.size();
+    int columnSize = LevelMap.Data[0].size();
 
     //set camera at 's' character
     for (int i = 0; i < rowSize; i++)
 	{
 		for (int j = 0; j < columnSize; j++)
 		{
-			if (groundLevel[i][j] == 's')
+			if (LevelMap.Data[i][j] == 's')
 			{
 				camera.CameraPos.x = j;
 				camera.CameraPos.z = i;
@@ -338,7 +327,7 @@ int main()
 			{
 				for (int j = 0; j < columnSize; j++)
 				{
-                    if (groundLevel[i][j] == '#')
+                    if (LevelMap.Data[i][j] == '#')
                     {
 						RenderCube(shaderProgram, j, 0.0f, i);
                     }
@@ -358,8 +347,9 @@ int main()
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;
 
-			//std::cout << "CameraFront [" << camera.CameraFront.x << ',' << camera.CameraFront.y << ',' << camera.CameraFront.z << ']'
-				//<< "CameraPos [" << camera.CameraPos.x << ',' << camera.CameraPos.y << ',' << camera.CameraPos.z << ']' << std::endl;
+            //TODO: set this to only happen with a certain flag like -mapedit "filePath"
+            if (LevelMap.HasChanged())
+                LevelMap.Load();
         }
         else
         {
