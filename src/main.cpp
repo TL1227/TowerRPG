@@ -38,7 +38,7 @@ static float FPS = 1.0 / 100.0;
 Movement CharMove;
 
 //maps
-Map LevelMap("C:\\Users\\lavelle.t\\Desktop\\map.txt");
+Map LevelMap("C:\\Users\\Tosh\\Desktop\\CurrentMap\\map.txt");
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -63,22 +63,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             WireFrameMode = true;
         }
-    }
-    else if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        CharMove.SetMoveAction(MoveAction::Forwards);
-    }
-    else if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        CharMove.SetMoveAction(MoveAction::Backwards);
-    }
-    else if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        CharMove.SetMoveAction(MoveAction::TurnRight);
-    }
-    else if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        CharMove.SetMoveAction(MoveAction::TurnLeft);
     }
 }
 
@@ -320,6 +304,15 @@ int main()
         if (DeltaTime >= FPS)
         {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
+                CharMove.SetMoveAction(MoveAction::Forwards);
+            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
+                CharMove.SetMoveAction(MoveAction::Backwards);
+            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
+                CharMove.SetMoveAction(MoveAction::TurnRight);
+            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
+                CharMove.SetMoveAction(MoveAction::TurnLeft);
 
 			CharMove.MoveChar(camera, DeltaTime);
 
