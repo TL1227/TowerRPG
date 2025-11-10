@@ -10,6 +10,8 @@ enum class MoveAction
 	None,
 	Forwards,
 	Backwards,
+	Left,
+	Right,
 	TurnRight,
 	TurnLeft
 };
@@ -39,6 +41,8 @@ private:
 	const float RotationSpeed = 150.0f;
 
 	MoveAction CurrMovement = MoveAction::None;
+
+	void EndMovement(Camera&);
 };
 
 #endif
