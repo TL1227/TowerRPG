@@ -5,7 +5,7 @@ class Args
 {
 public:
 	bool IsLiveEdit = false;
-	Args(int argc, char* argv[]);
+	void Parse(int argc, char* argv[]);
 };
 
 #endif

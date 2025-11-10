@@ -9,6 +9,7 @@
 #include "movement.h"
 #include "camera.h"
 #include "map.h"
+#include "args.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -34,11 +35,13 @@ static float DeltaTime = 0.0f;
 static float LastFrame = 0.0f;
 static float FPS = 1.0 / 100.0;
 
+Args G_Args;
+
 //movement
 Movement CharMove;
 
 //maps
-Map LevelMap("C:\\Users\\Tosh\\Desktop\\CurrentMap\\map.txt");
+Map LevelMap("C:\\Users\\lavelle.t\\Desktop\\map.txt");
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -161,8 +164,10 @@ void RenderCube(int shaderID, float x, float y,  float z)
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    G_Args.Parse(argc, argv);
+
     GLFWwindow* window = SetUpGlfw();
 
     if (window == NULL)
@@ -313,6 +318,10 @@ int main()
                 CharMove.SetMoveAction(MoveAction::TurnRight);
             else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
                 CharMove.SetMoveAction(MoveAction::TurnLeft);
+            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT))
+                CharMove.SetMoveAction(MoveAction::Right);
+            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT))
+                CharMove.SetMoveAction(MoveAction::Left);
 
 			CharMove.MoveChar(camera, DeltaTime);
 
@@ -340,9 +349,12 @@ int main()
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;
 
-            //TODO: set this to only happen with a certain flag like -mapedit "filePath"
-            if (LevelMap.HasChanged())
-                LevelMap.Load();
+            //TODO: put this in some kind of ISystem vector so it only gets checked if we're in live edit mode
+            if (G_Args.IsLiveEdit)
+            {
+				if (LevelMap.HasChanged())
+					LevelMap.Load();
+            }
         }
         else
         {

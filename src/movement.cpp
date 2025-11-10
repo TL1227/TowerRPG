@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include "movement.h"
 
@@ -34,17 +35,6 @@ void Movement::SetMoveAction(MoveAction action)
 	}
 }
 
-void Movement::EndMovement(Camera& camera)
-{
-	CurrMovement = MoveAction::None;
-	DistanceMoved = 0.0f;
-	camera.CameraPos.x = floor(camera.CameraPos.x + 0.5);
-	camera.CameraPos.z = floor(camera.CameraPos.z + 0.5);
-
-	std::cout << "x: " << camera.CameraPos.x << ' '
-		<< "z: " << camera.CameraPos.z << std::endl;
-}
-
 void Movement::MoveChar(Camera &camera, float DeltaTime)
 {
     if (CurrMovement == MoveAction::None) 
@@ -76,7 +66,20 @@ void Movement::MoveChar(Camera &camera, float DeltaTime)
 		DistanceMoved += moveAmount;
 
 		if (DistanceMoved > MovementUnit)
-			EndMovement(camera);
+		{
+			CurrMovement = MoveAction::None;
+			DistanceMoved = 0.0f;
+			camera.CameraPos.x = floor(camera.CameraPos.x + 0.5);
+			camera.CameraPos.z = floor(camera.CameraPos.z + 0.5);
+
+			std::cout << "x: " << camera.CameraPos.x << ' '
+				<< "z: " << camera.CameraPos.z << std::endl;
+
+			//TODO: Move this to it's own file\class
+			std::ofstream outfile("C:\\Users\\lavelle.t\\Desktop\\pos.txt");
+			outfile << camera.CameraPos.x << ' ' << camera.CameraPos.z;
+			outfile.close();
+		}
 	}
     else if (CurrMovement == MoveAction::TurnRight)
     {

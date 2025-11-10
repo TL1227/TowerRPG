@@ -2,7 +2,7 @@
 
 #include <string>
 
-Args::Args(int argc, char* argv[])
+void Args::Parse(int argc, char* argv[])
 {
 	for (size_t i = 0; i < argc; i++)
 	{
