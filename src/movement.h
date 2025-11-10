@@ -36,7 +36,7 @@ private:
 	float MovementUnit = 1.0f;
 
 	const float MovementSpeed = 2.0f;
-	const float RotationSpeed = 130.0f;
+	const float RotationSpeed = 150.0f;
 
 	MoveAction CurrMovement = MoveAction::None;
 };
