@@ -10,3 +10,5 @@ void Args::Parse(int argc, char* argv[])
 			IsLiveEdit = true;
 	}
 }
+
+Args G_Args;

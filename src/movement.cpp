@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "movement.h"
+#include "args.h"
 
 int Movement::GetNextRightDir()
 {
@@ -72,13 +73,16 @@ void Movement::MoveChar(Camera &camera, float DeltaTime)
 			camera.CameraPos.x = floor(camera.CameraPos.x + 0.5);
 			camera.CameraPos.z = floor(camera.CameraPos.z + 0.5);
 
-			std::cout << "x: " << camera.CameraPos.x << ' '
-				<< "z: " << camera.CameraPos.z << std::endl;
+			//std::cout << "x: " << camera.CameraPos.x << ' '
+				//<< "z: " << camera.CameraPos.z << std::endl;
 
-			//TODO: Move this to it's own file\class
-			std::ofstream outfile("C:\\Users\\lavelle.t\\Desktop\\pos.txt");
-			outfile << camera.CameraPos.x << ' ' << camera.CameraPos.z;
-			outfile.close();
+			//TODO: Only call this if we're in LiveEdit
+			if (G_Args.IsLiveEdit)
+			{
+				std::ofstream outfile("C:\\Users\\Tosh\\Projects\\Crimson Tower\\TowerRPG\\data\\pos.txt");
+				outfile << camera.CameraPos.x << ' ' << camera.CameraPos.z;
+				outfile.close();
+			}
 		}
 	}
     else if (CurrMovement == MoveAction::TurnRight)

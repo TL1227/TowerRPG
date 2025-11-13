@@ -35,13 +35,14 @@ static float DeltaTime = 0.0f;
 static float LastFrame = 0.0f;
 static float FPS = 1.0 / 100.0;
 
-Args G_Args;
+//directories
+std::string DataDir = "C:\\Users\\Tosh\\Projects\\Crimson Tower\\TowerRPG\\data";
 
 //movement
 Movement CharMove;
 
 //maps
-Map LevelMap("C:\\Users\\lavelle.t\\Desktop\\map.txt");
+Map LevelMap(DataDir + "\\map.txt");
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -275,7 +276,8 @@ int main(int argc, char* argv[])
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    unsigned int wallTex = LoadTexture("textures\\wall_01.jpg");
+    //junsigned int wallTex = LoadTexture("textures\\wall_01.jpg");
+    unsigned int wallTex = LoadTexture("textures\\stone.jpg");
     glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), wallTex);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -283,6 +285,17 @@ int main(int argc, char* argv[])
     glEnable(GL_DEPTH_TEST);
 
     glUseProgram(shaderProgram);
+
+    LevelMap.Data =
+    {
+        { '#','#','#','#','#' },
+        { '#',' ','#',' ','#' },
+        { '#',' ','#',' ','#' },
+        { 's',' ',' ',' ','#' },
+        { '#',' ',' ',' ','#' },
+        { '#',' ',' ',' ','#' },
+        { '#','#','#','#','#' },
+    };
 
     int rowSize = LevelMap.Data.size();
     int columnSize = LevelMap.Data[0].size();
@@ -310,11 +323,7 @@ int main(int argc, char* argv[])
         {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
-                CharMove.SetMoveAction(MoveAction::Forwards);
-            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
-                CharMove.SetMoveAction(MoveAction::Backwards);
-            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
+            if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
                 CharMove.SetMoveAction(MoveAction::TurnRight);
             else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
                 CharMove.SetMoveAction(MoveAction::TurnLeft);
@@ -322,6 +331,10 @@ int main(int argc, char* argv[])
                 CharMove.SetMoveAction(MoveAction::Right);
             else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT))
                 CharMove.SetMoveAction(MoveAction::Left);
+            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
+                CharMove.SetMoveAction(MoveAction::Forwards);
+            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
+                CharMove.SetMoveAction(MoveAction::Backwards);
 
 			CharMove.MoveChar(camera, DeltaTime);
 

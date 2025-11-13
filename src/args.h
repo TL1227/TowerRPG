@@ -8,5 +8,7 @@ public:
 	void Parse(int argc, char* argv[]);
 };
 
+extern Args G_Args;
+
 #endif
 
