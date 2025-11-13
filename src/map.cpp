@@ -3,6 +3,12 @@
 #include <fstream>
 #include <filesystem>
 
+Map::Map(const std::string& filePath) : _filePath{ filePath }
+{
+    _lastChecked = std::filesystem::last_write_time(_filePath);
+    Load();
+}
+
 void Map::Load()
 {
 	Data.clear();
@@ -15,6 +21,12 @@ void Map::Load()
 	{
 		Data.emplace_back(line.begin(), line.end());
 	}
+}
+
+void Map::Load(const std::string& filePath)
+{
+    _filePath = filePath;
+    Load();
 }
 
 bool Map::HasChanged()

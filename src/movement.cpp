@@ -73,13 +73,10 @@ void Movement::MoveChar(Camera &camera, float DeltaTime)
 			camera.CameraPos.x = floor(camera.CameraPos.x + 0.5);
 			camera.CameraPos.z = floor(camera.CameraPos.z + 0.5);
 
-			//std::cout << "x: " << camera.CameraPos.x << ' '
-				//<< "z: " << camera.CameraPos.z << std::endl;
-
-			//TODO: Only call this if we're in LiveEdit
+			//TODO: Move this into it's own folder one day
 			if (G_Args.IsLiveEdit)
 			{
-				std::ofstream outfile("C:\\Users\\Tosh\\Projects\\Crimson Tower\\TowerRPG\\data\\pos.txt");
+				std::ofstream outfile("data\\pos.txt");
 				outfile << camera.CameraPos.x << ' ' << camera.CameraPos.z;
 				outfile.close();
 			}

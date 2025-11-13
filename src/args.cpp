@@ -8,6 +8,8 @@ void Args::Parse(int argc, char* argv[])
 	{
 		if (std::string(argv[i]) == "--live-edit") 
 			IsLiveEdit = true;
+		if (std::string(argv[i]) == "--map-path") 
+			MapPath = argv[i + 1];
 	}
 }
 

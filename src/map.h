@@ -11,14 +11,10 @@ class Map
 public:
 	using MapData = std::vector<std::vector<char>>;
 
-	Map(const std::string& filePath)
-		: _filePath{ filePath }
-	{
-		_lastChecked = std::filesystem::last_write_time(_filePath);
-		Load();
-	}
-
+	Map() = default;
+	Map(const std::string& filePath);
 	void Load();
+	void Load(const std::string& filePath);
 	bool HasChanged();
 	MapData Data;
 

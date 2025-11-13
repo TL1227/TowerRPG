@@ -1,1 +1,1 @@
-start x64/Debug/TowerRpg.exe
+@start x64/Debug/TowerRpg.exe

@@ -22,12 +22,6 @@ using namespace glm;
 
 static string GameVersion = "0.0.0";
 
-//screen
-static int SCREEN_WIDTH = 960;
-static int SCREEN_HEIGHT = 540;
-
-static bool WireFrameMode = false;
-
 Camera camera;
 
 //framerate
@@ -36,13 +30,15 @@ static float LastFrame = 0.0f;
 static float FPS = 1.0 / 100.0;
 
 //directories
-std::string DataDir = "C:\\Users\\Tosh\\Projects\\Crimson Tower\\TowerRPG\\data";
+string DataDir = "data";
 
 //movement
 Movement CharMove;
 
-//maps
-Map LevelMap(DataDir + "\\map.txt");
+//map
+
+Map LevelMap;
+
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -57,6 +53,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     else if (key == GLFW_KEY_F2 && action == GLFW_PRESS)
     {
+        static bool WireFrameMode = false;
+
         if (WireFrameMode)
         {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -70,6 +68,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
+//screen
+static int SCREEN_WIDTH = 960;
+static int SCREEN_HEIGHT = 540;
 GLFWwindow* SetUpGlfw()
 {
     glfwInit();
@@ -286,6 +287,12 @@ int main(int argc, char* argv[])
 
     glUseProgram(shaderProgram);
 
+    //Load map
+    if (G_Args.MapPath.empty()) 
+        LevelMap.Load(DataDir + "\\map.txt");
+    else 
+        LevelMap.Load(G_Args.MapPath);
+    /*
     LevelMap.Data =
     {
         { '#','#','#','#','#' },
@@ -296,6 +303,7 @@ int main(int argc, char* argv[])
         { '#',' ',' ',' ','#' },
         { '#','#','#','#','#' },
     };
+    */
 
     int rowSize = LevelMap.Data.size();
     int columnSize = LevelMap.Data[0].size();
