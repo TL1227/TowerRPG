@@ -31,14 +31,13 @@ static float FPS = 1.0 / 100.0;
 
 //directories
 string DataDir = "data";
+string MapPath = "maps";
 
 //movement
 Movement CharMove;
 
 //map
-
 Map LevelMap;
-
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
