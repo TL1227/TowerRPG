@@ -24,6 +24,7 @@
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\map.cpp" />
+    <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\movement.cpp" />
     <ClCompile Include="src\shaderReader.cpp" />
     <ClCompile Include="src\textures.cpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="src\args.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\map.h" />
+    <ClInclude Include="src\model.h" />
     <ClInclude Include="src\movement.h" />
     <ClInclude Include="src\shaderReader.h" />
     <ClInclude Include="src\textures.h" />

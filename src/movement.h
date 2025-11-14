@@ -26,13 +26,12 @@ public:
     int GetCurrentDirection() { return CurrentDirection; }
     void SetCurrentDirection(float direction) { CurrentDirection = direction; }
 
-
 private:
 	int North = 90;
 	int East = 180;
 	int South = 270;
 	int West = 0;
-    int CurrentDirection;
+	int CurrentDirection;
 
 	float DistanceMoved = 0.0f;
 	float MovementUnit = 1.0f;

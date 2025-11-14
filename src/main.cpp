@@ -10,6 +10,7 @@
 #include "camera.h"
 #include "map.h"
 #include "args.h"
+#include "model.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -143,39 +144,13 @@ void ShowLinkingErrors(unsigned int shaderProgram)
     }
 }
 
-void RenderCube(int shaderID, float x, float y,  float z)
-{
-	mat4 model = mat4(1.0f);
-	model = translate(model, vec3(x, y, z));
-	unsigned int modelLoc = glGetUniformLocation(shaderID, "model");
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
-
-    //CameraCode 
-	camera.CameraFront.x = cos(glm::radians(camera.HorRot));
-	camera.CameraFront.z = sin(glm::radians(camera.HorRot));
-    mat4 view = lookAt(camera.CameraPos, camera.CameraPos + camera.CameraFront, camera.CameraUp);
-	unsigned int viewLoc = glGetUniformLocation(shaderID, "view");
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
-
-	mat4 projection;
-	projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
-	unsigned int projectionLoc = glGetUniformLocation(shaderID, "projection");
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
-
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-}
-
 int main(int argc, char* argv[])
 {
+    //init stuff
     G_Args.Parse(argc, argv);
-
     GLFWwindow* window = SetUpGlfw();
-
-    if (window == NULL)
-        return -1;
-
-    if (!SetUpGlad()) 
-        return -1;
+    if (window == NULL) return -1;
+    if (!SetUpGlad()) return -1;
 
     ConsoleSplashMessage();
 
@@ -249,60 +224,17 @@ int main(int argc, char* argv[])
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
-
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    unsigned int arrayBuffer;
-    glGenBuffers(1, &arrayBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, arrayBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    unsigned int vertBuffer;
-    glGenBuffers(1, &vertBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertBuffer);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // texture coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    //junsigned int wallTex = LoadTexture("textures\\wall_01.jpg");
-    unsigned int wallTex = LoadTexture("textures\\stone.jpg");
-    glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), wallTex);
+    Model wall{ vertices, shaderProgram };
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
-
-    glUseProgram(shaderProgram);
 
     //Load map
     if (G_Args.MapPath.empty()) 
         LevelMap.Load(DataDir + "\\map.txt");
     else 
         LevelMap.Load(G_Args.MapPath);
-    /*
-    LevelMap.Data =
-    {
-        { '#','#','#','#','#' },
-        { '#',' ','#',' ','#' },
-        { '#',' ','#',' ','#' },
-        { 's',' ',' ',' ','#' },
-        { '#',' ',' ',' ','#' },
-        { '#',' ',' ',' ','#' },
-        { '#','#','#','#','#' },
-    };
-    */
 
     int rowSize = LevelMap.Data.size();
     int columnSize = LevelMap.Data[0].size();
@@ -321,10 +253,24 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
+
+    int frames = 0;
+    float LastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
+        frames++;
+
         float currentFrame = static_cast<float>(glfwGetTime());
         DeltaTime = currentFrame - LastFrame;
+
+		if (currentFrame - LastTime >= 1.0)
+		{
+		    std::cout << "FPS: " << frames << std::endl;
+		    std::cout << "LastTime: " << LastTime << std::endl;
+            frames = 0;
+            LastTime += 1.0;
+		}
 
         if (DeltaTime >= FPS)
         {
@@ -345,26 +291,34 @@ int main(int argc, char* argv[])
 
 			CharMove.MoveChar(camera, DeltaTime);
 
+            camera.UpdateCameraRotation();
+
+            mat4 view = camera.GetView();
+
 			for (int i = 0; i < rowSize; i++)
 			{
 				for (int j = 0; j < columnSize; j++)
 				{
                     if (LevelMap.Data[i][j] == '#')
                     {
-						RenderCube(shaderProgram, j, 0.0f, i);
+						//glm::mat4 model = glm::mat4(1.0f);
+						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, 0.0f, i));
+                        wall.Draw(model, view, projection);
                     }
 				}
 			}
 
+            /*
 			//floor
 			for (int i = 0; i < rowSize; i++)
 				for (int j = 0; j < columnSize; j++)
-					RenderCube(shaderProgram, j, -1.0f, i);
+                        wall.Draw(camera, glm::vec3(j, 0.0f, i));
 
 			//roof
 			for (int i = 0; i < rowSize; i++)
 				for (int j = 0; j < columnSize; j++)
-					RenderCube(shaderProgram, j, 1.0f, i);
+                        wall.Draw(camera, glm::vec3(j, 0.0f, i));
+                        */
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;

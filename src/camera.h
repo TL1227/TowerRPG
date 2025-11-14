@@ -10,6 +10,9 @@ public:
 	glm::vec3 CameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 	glm::vec3 CameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	float HorRot = 0.0f;
+
+	glm::mat4 GetView();
+	void UpdateCameraRotation();
 };
 
 #endif
