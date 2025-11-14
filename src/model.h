@@ -11,13 +11,14 @@
 class Model
 {
 public:
-	std::vector<float> Verticies;
+	std::vector<float> Vertices;
+	std::vector<unsigned int> Indices;
     unsigned int VAO;
     unsigned int ArrayBuffer;
     unsigned int VertBuffer;
     unsigned int Shader;
 
-    Model(std::vector<float> verts, unsigned int shader);
+    Model(std::vector<float> verts, std::vector<unsigned int> indices, unsigned int shader);
 
 	void Draw(Camera &camera, glm::vec3 translate);
     void Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection);

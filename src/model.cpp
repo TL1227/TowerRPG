@@ -5,25 +5,19 @@
 
 #include "textures.h"
 
-Model::Model(std::vector<float> verts, unsigned int shader)
-    : Verticies{ verts }, Shader{ shader}
+Model::Model(std::vector<float> verts, std::vector<unsigned int> indices, unsigned int shader)
+	: Vertices{ verts }, Indices{ indices }, Shader { shader }
 {
-    //TODO: figure this out later
-    unsigned int Indicies[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
-
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
     glGenBuffers(1, &ArrayBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ArrayBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indicies), Indicies, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,  Indices.size() * sizeof(unsigned int), &Indices[0], GL_STATIC_DRAW);
 
     glGenBuffers(1, &VertBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, VertBuffer);
-    glBufferData(GL_ARRAY_BUFFER, Verticies.size() * sizeof(float), &Verticies[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(float), &Vertices[0], GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -31,7 +25,6 @@ Model::Model(std::vector<float> verts, unsigned int shader)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    //unsigned int wallTex = LoadTexture("textures\\wall_01.jpg");
     unsigned int wallTex = LoadTexture("textures\\stone.jpg");
     glUniform1i(glGetUniformLocation(shader, "texture1"), wallTex);
 }
@@ -71,5 +64,5 @@ void Model::Draw(glm::mat4 model, glm::mat4 view, glm::mat4 projection)
 
     glUseProgram(Shader);
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDrawElements(GL_TRIANGLES, Indices.size(), GL_UNSIGNED_INT, 0);
 }

@@ -11,6 +11,7 @@
 #include "map.h"
 #include "args.h"
 #include "model.h"
+#include "ass.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -224,7 +225,12 @@ int main(int argc, char* argv[])
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-    Model wall{ vertices, shaderProgram };
+    Ass ass;
+    vector<VertInd> vi = ass.Import();
+    vector<Model> models;
+    for (auto v : vi)
+        models.push_back({ v.Vertices, v.Indices, shaderProgram });
+
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -295,15 +301,20 @@ int main(int argc, char* argv[])
 
             mat4 view = camera.GetView();
 
+			mat4 model = glm::translate(mat4(1.0f), glm::vec3(1.0f, 0.0f, 1.0f));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+
+
 			for (int i = 0; i < rowSize; i++)
 			{
 				for (int j = 0; j < columnSize; j++)
 				{
                     if (LevelMap.Data[i][j] == '#')
                     {
-						//glm::mat4 model = glm::mat4(1.0f);
 						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, 0.0f, i));
-                        wall.Draw(model, view, projection);
+                        //wall.Draw(model, view, projection);
+						for (auto c : models)
+							c.Draw(model, view, projection);
                     }
 				}
 			}
