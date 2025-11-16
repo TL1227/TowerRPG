@@ -4,14 +4,13 @@
 #include <iostream>
 #include <vector>
 
-#include "shaderReader.h"
+#include "shader.h"
 #include "textures.h"
 #include "movement.h"
 #include "camera.h"
 #include "map.h"
 #include "args.h"
 #include "model.h"
-#include "ass.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -155,86 +154,16 @@ int main(int argc, char* argv[])
 
     ConsoleSplashMessage();
 
-    //compile and link shaders    
-    string shaderString = ReadShaderFile("shaders\\vert.shader");
-    const char* shaderPointer = shaderString.c_str();
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &shaderPointer, NULL);
-    glCompileShader(vertexShader);
-    ShowCompileErrors(vertexShader);
-
-    shaderString = ReadShaderFile("shaders\\frag.shader");
-    shaderPointer = shaderString.c_str();
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &shaderPointer, NULL);
-    glCompileShader(fragmentShader);
-    ShowCompileErrors(fragmentShader);
-
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    ShowLinkingErrors(shaderProgram);
-
-    //clean up shaders
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    //x, y, z
-    vector<float> vertices = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
-
-    Ass ass;
-    vector<VertInd> vi = ass.Import();
-    vector<Model> models;
-    for (auto v : vi)
-        models.push_back({ v.Vertices, v.Indices, shaderProgram });
-
+    //stbi_set_flip_vertically_on_load(true);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
+
+    Shader shader{ "shaders\\vert.shader", "shaders\\frag.shader" };
+
+    Model chest{ "C:\\Users\\Tosh\\Projects\\Crimson Tower\\TowerRPG\\models\\chest\\wooden_crate_01_4k.gltf" };
+    Model ourModel{ "C:\\Users\\Tosh\\Projects\\Crimson Tower\\TowerRPG\\models\\cube\\cube.gltf" };
 
     //Load map
     if (G_Args.MapPath.empty()) 
@@ -259,7 +188,9 @@ int main(int argc, char* argv[])
 		}
 	}
 
+    shader.use();
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
+	shader.setMat4("projection", projection);
 
     int frames = 0;
     float LastTime = glfwGetTime();
@@ -300,10 +231,10 @@ int main(int argc, char* argv[])
             camera.UpdateCameraRotation();
 
             mat4 view = camera.GetView();
+			shader.setMat4("view", view);
 
-			mat4 model = glm::translate(mat4(1.0f), glm::vec3(1.0f, 0.0f, 1.0f));
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-
+			//mat4 model = glm::translate(mat4(1.0f), glm::vec3(1.0f, 0.0f, 1.0f));
+			//model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
 
 			for (int i = 0; i < rowSize; i++)
 			{
@@ -312,24 +243,37 @@ int main(int argc, char* argv[])
                     if (LevelMap.Data[i][j] == '#')
                     {
 						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, 0.0f, i));
-                        //wall.Draw(model, view, projection);
-						for (auto c : models)
-							c.Draw(model, view, projection);
+                        shader.setMat4("model", model);
+                        ourModel.Draw(shader);
                     }
+                    /*
+                    else if (LevelMap.Data[i][j] == 'c')
+                    {
+						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, 0.0f, i));
+                        shader.setMat4("model", model);
+                        chest.Draw(shader);
+                    }
+                    */
 				}
 			}
 
-            /*
 			//floor
 			for (int i = 0; i < rowSize; i++)
-				for (int j = 0; j < columnSize; j++)
-                        wall.Draw(camera, glm::vec3(j, 0.0f, i));
+                for (int j = 0; j < columnSize; j++)
+                {
+						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, -1.0f, i));
+                        shader.setMat4("model", model);
+                        ourModel.Draw(shader);
+                }
 
 			//roof
 			for (int i = 0; i < rowSize; i++)
 				for (int j = 0; j < columnSize; j++)
-                        wall.Draw(camera, glm::vec3(j, 0.0f, i));
-                        */
+				{
+					mat4 model = glm::translate(mat4(1.0f), glm::vec3(j,  1.0f, i));
+					shader.setMat4("model", model);
+					ourModel.Draw(shader);
+				}
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;

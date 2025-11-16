@@ -20,14 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\args.cpp" />
-    <ClCompile Include="src\ass.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\map.cpp" />
-    <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\movement.cpp" />
-    <ClCompile Include="src\shaderReader.cpp" />
     <ClCompile Include="src\textures.cpp" />
     <ClCompile Include="src\win32.cpp" />
   </ItemGroup>
@@ -37,12 +34,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\args.h" />
-    <ClInclude Include="src\ass.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\map.h" />
+    <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\model.h" />
     <ClInclude Include="src\movement.h" />
-    <ClInclude Include="src\shaderReader.h" />
+    <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\textures.h" />
     <ClInclude Include="thirdparty_src\stb_image.h" />
   </ItemGroup>
