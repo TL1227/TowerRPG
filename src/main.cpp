@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
     //glUniformMatrix4fv(glGetUniformLocation(uiShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     //ui init
-    UI ui;
+    UI ui {SCREEN_WIDTH, SCREEN_HEIGHT};
     ui.InitUi();
 
     int frames = 0;
@@ -224,6 +224,8 @@ int main(int argc, char* argv[])
 
             camera.UpdateCameraRotation();
 
+            assetShader.use();
+
             mat4 view = camera.GetView();
 			assetShader.setMat4("view", view);
 
@@ -264,8 +266,8 @@ int main(int argc, char* argv[])
 					ourModel.Draw(assetShader);
 				}
 
-            ui.DrawUi(uiShader, "The Crimson Tower", 20, 20, 1.0f, vec3{ 1.0f, 0.5f, 0.5f });
-            assetShader.use();
+            //UI DRAWING
+            ui.DrawText(uiShader, "[E] Open", 0, 60, 1.0f, vec3{ 1.0f, 0.5f, 0.5f }, TextAlign::Center);
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;

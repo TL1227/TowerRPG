@@ -26,8 +26,8 @@
     <ClCompile Include="src\map.cpp" />
     <ClCompile Include="src\movement.cpp" />
     <ClCompile Include="src\textures.cpp" />
-    <ClCompile Include="src\win32.cpp" />
     <ClCompile Include="src\ui.cpp" />
+    <ClCompile Include="src\win32.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag.shader" />
@@ -42,8 +42,8 @@
     <ClInclude Include="src\movement.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\textures.h" />
+    <ClInclude Include="src\ui.h" />
     <ClInclude Include="thirdparty_src\stb_image.h" />
-    <ClCompile Include="src\ui.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -16,16 +16,26 @@ struct Character {
     unsigned int Advance;    // Offset to advance to next glyph
 };
 
+enum class TextAlign
+{
+    None,
+    Center
+};
+
 class UI
 {
 public:
+    UI(int screenWidth, int screenHeight);
 	void InitUi();
-	void DrawUi(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color);
+	void DrawText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color, TextAlign ta = TextAlign::None);
 
 	std::map<char, Character> Characters;
 private:
+    int GetStringPixelLength(std::string &text);
     unsigned int VAO;
     unsigned int VBO;
+    int ScreenWidth;
+    int ScreenHeight;
 };
 
 #endif

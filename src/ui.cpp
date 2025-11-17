@@ -1,8 +1,13 @@
 #include "ui.h"
 
-
 #include <glad/glad.h>
 #include <iostream>
+
+UI::UI(int screenWidth, int screenHeight)
+    : ScreenWidth {screenWidth}, ScreenHeight {screenHeight} 
+{ 
+
+}
 
 void UI::InitUi()
 {
@@ -77,7 +82,20 @@ void UI::InitUi()
     glBindVertexArray(0);
 }
 
-void UI::DrawUi(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color)
+int UI::GetStringPixelLength(std::string &text)
+{
+    int advTotal = 0;
+    std::string::const_iterator c;
+    for (c = text.begin(); c != text.end(); c++)
+    {
+        Character ch = Characters[*c];
+        advTotal += (ch.Advance >> 6);
+    }
+
+    return advTotal;
+}
+
+void UI::DrawText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color, TextAlign ta)
 {
     // activate corresponding render state	
     shader.use();
@@ -85,7 +103,16 @@ void UI::DrawUi(Shader& shader, std::string text, float x, float y, float scale,
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
 
-    // iterate through all characters
+    if (ta == TextAlign::Center)
+    {
+		int stringLength = GetStringPixelLength(text);
+		int halfStringLength = stringLength / 2;
+		int SCREEN_WIDTH = 960;
+		int halfScreenwidth = 960 / 2;
+
+		x = halfScreenwidth - halfStringLength;
+    }
+
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++)
     {
