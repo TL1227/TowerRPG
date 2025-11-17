@@ -11,6 +11,7 @@
 #include "map.h"
 #include "args.h"
 #include "model.h"
+#include "ui.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -117,33 +118,6 @@ void ConsoleSplashMessage()
     cout << "Version" << GameVersion << endl;
 }
 
-void ShowCompileErrors(unsigned int shader)
-{
-    int success;
-    char infoLog[512];
-
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-    if (!success)
-    {
-        glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-}
-
-void ShowLinkingErrors(unsigned int shaderProgram)
-{
-    char infoLog[512];
-    int success;
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-}
-
 int main(int argc, char* argv[])
 {
     //init stuff
@@ -159,11 +133,16 @@ int main(int argc, char* argv[])
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Shader shader{ "shaders\\vert.shader", "shaders\\frag.shader" };
 
-    Model chest{ "C:\\Users\\Tosh\\Projects\\Crimson Tower\\TowerRPG\\models\\chest\\wooden_crate_01_4k.gltf" };
-    Model ourModel{ "C:\\Users\\Tosh\\Projects\\Crimson Tower\\TowerRPG\\models\\cube\\cube.gltf" };
+    //std::string headDir =  "C:\\Users\\Tosh\\Projects\\Crimson Tower\\"; //Home
+    std::string headDir =  "C:\\Users\\lavelle.t\\Projects\\Personal\\"; //Work
+    Model chest{ headDir + "TowerRPG\\models\\chest\\wooden_crate_01_4k.gltf" };
+    Model ourModel{ headDir + "TowerRPG\\models\\cube\\cube.gltf" };
+
 
     //Load map
     if (G_Args.MapPath.empty()) 
@@ -172,12 +151,12 @@ int main(int argc, char* argv[])
         LevelMap.Load(G_Args.MapPath);
 
     int rowSize = LevelMap.Data.size();
-    int columnSize = LevelMap.Data[0].size();
+    int colSize = LevelMap.Data[0].size();
 
     //set camera at 's' character
     for (int i = 0; i < rowSize; i++)
 	{
-		for (int j = 0; j < columnSize; j++)
+		for (int j = 0; j < colSize; j++)
 		{
 			if (LevelMap.Data[i][j] == 's')
 			{
@@ -188,9 +167,23 @@ int main(int argc, char* argv[])
 		}
 	}
 
-    shader.use();
+    //build shaders
+    Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
+    Shader uiShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
+
+    //projection set up
+    assetShader.use();
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
-	shader.setMat4("projection", projection);
+	assetShader.setMat4("projection", projection);
+
+    uiShader.use();
+    projection = glm::ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
+	uiShader.setMat4("projection", projection);
+    //glUniformMatrix4fv(glGetUniformLocation(uiShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    //ui init
+    UI ui;
+    ui.InitUi();
 
     int frames = 0;
     float LastTime = glfwGetTime();
@@ -213,6 +206,7 @@ int main(int argc, char* argv[])
         {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
             if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
                 CharMove.SetMoveAction(MoveAction::TurnRight);
             else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
@@ -231,49 +225,47 @@ int main(int argc, char* argv[])
             camera.UpdateCameraRotation();
 
             mat4 view = camera.GetView();
-			shader.setMat4("view", view);
-
-			//mat4 model = glm::translate(mat4(1.0f), glm::vec3(1.0f, 0.0f, 1.0f));
-			//model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+			assetShader.setMat4("view", view);
 
 			for (int i = 0; i < rowSize; i++)
 			{
-				for (int j = 0; j < columnSize; j++)
+				for (int j = 0; j < colSize; j++)
 				{
                     if (LevelMap.Data[i][j] == '#')
                     {
 						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, 0.0f, i));
-                        shader.setMat4("model", model);
-                        ourModel.Draw(shader);
+                        assetShader.setMat4("model", model);
+                        ourModel.Draw(assetShader);
                     }
-                    /*
                     else if (LevelMap.Data[i][j] == 'c')
                     {
 						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, 0.0f, i));
-                        shader.setMat4("model", model);
-                        chest.Draw(shader);
+                        assetShader.setMat4("model", model);
+                        chest.Draw(assetShader);
                     }
-                    */
 				}
 			}
 
 			//floor
 			for (int i = 0; i < rowSize; i++)
-                for (int j = 0; j < columnSize; j++)
+                for (int j = 0; j < colSize; j++)
                 {
 						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, -1.0f, i));
-                        shader.setMat4("model", model);
-                        ourModel.Draw(shader);
+                        assetShader.setMat4("model", model);
+                        ourModel.Draw(assetShader);
                 }
 
 			//roof
 			for (int i = 0; i < rowSize; i++)
-				for (int j = 0; j < columnSize; j++)
+				for (int j = 0; j < colSize; j++)
 				{
 					mat4 model = glm::translate(mat4(1.0f), glm::vec3(j,  1.0f, i));
-					shader.setMat4("model", model);
-					ourModel.Draw(shader);
+					assetShader.setMat4("model", model);
+					ourModel.Draw(assetShader);
 				}
+
+            ui.DrawUi(uiShader, "The Crimson Tower", 20, 20, 1.0f, vec3{ 1.0f, 0.5f, 0.5f });
+            assetShader.use();
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;
