@@ -16,6 +16,7 @@ public:
 	void Load();
 	void Load(const std::string& filePath);
 	bool HasChanged();
+	char GetChar(int x, int z);
 	MapData Data;
 
 private:

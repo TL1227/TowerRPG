@@ -33,11 +33,44 @@ Direction Movement::GetNextLeftDir() const
 		return Direction::North;
 }
 
+bool BlockIsSolid(char ch)
+{
+	return (ch == '#' || ch == 'c');
+}
+
 void Movement::SetMoveAction(MoveAction action)
 {
 	if (CurrMovement == MoveAction::None)
 	{
-		CurrMovement = action;
+		char ch;
+		if (action == MoveAction::Forwards)
+		{
+			ch = Map.GetChar(Tiles.Front.x, Tiles.Front.z);
+			if (!BlockIsSolid(ch))
+				CurrMovement = action;
+		}
+		else if (action == MoveAction::Backwards)
+		{
+			ch = Map.GetChar(Tiles.Back.x, Tiles.Back.z);
+			if (!BlockIsSolid(ch))
+				CurrMovement = action;
+		}
+		else if (action == MoveAction::Left)
+		{
+			ch = Map.GetChar(Tiles.Left.x, Tiles.Left.z);
+			if (!BlockIsSolid(ch))
+				CurrMovement = action;
+		}
+		else if (action == MoveAction::Right)
+		{
+			ch = Map.GetChar(Tiles.Right.x, Tiles.Right.z);
+			if (!BlockIsSolid(ch))
+				CurrMovement = action;
+		}
+		else if (action == MoveAction::TurnRight || action == MoveAction::TurnLeft)
+		{
+			CurrMovement = action;
+		}
 	}
 }
 

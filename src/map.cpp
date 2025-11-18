@@ -43,3 +43,8 @@ bool Map::HasChanged()
 		return false;
 	}
 }
+
+char Map::GetChar(int x, int z)
+{
+	return Data[z][x];
+}
