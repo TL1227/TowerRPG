@@ -4,28 +4,33 @@
 #include "movement.h"
 #include "args.h"
 
-int Movement::GetNextRightDir()
+Movement::Movement(::Map& map, ::Camera& camera)
+	: Map{ map }, Camera{camera}
 {
-	if (CurrentDirection == North)
-		return East;
-	if (CurrentDirection == East)
-		return South;
-	if (CurrentDirection == South)
-		return West;
-	if (CurrentDirection == West)
-		return North;
 }
 
-int Movement::GetNextLeftDir()
+Direction Movement::GetNextRightDir() const
 {
-	if (CurrentDirection == North)
-		return West;
-	if (CurrentDirection == West)
-		return South;
-	if (CurrentDirection == South)
-		return East;
-	if (CurrentDirection == East)
-		return North;
+	if (CurrentDirection == Direction::North)
+		return Direction::East;
+	if (CurrentDirection == Direction::East)
+		return Direction::South;
+	if (CurrentDirection == Direction::South)
+		return Direction::West;
+	if (CurrentDirection == Direction::West)
+		return Direction::North;
+}
+
+Direction Movement::GetNextLeftDir() const
+{
+	if (CurrentDirection == Direction::North)
+		return Direction::West;
+	if (CurrentDirection == Direction::West)
+		return Direction::South;
+	if (CurrentDirection == Direction::South)
+		return Direction::East;
+	if (CurrentDirection == Direction::East)
+		return Direction::North;
 }
 
 void Movement::SetMoveAction(MoveAction action)
@@ -36,7 +41,37 @@ void Movement::SetMoveAction(MoveAction action)
 	}
 }
 
-void Movement::MoveChar(Camera &camera, float DeltaTime)
+bool Movement::IsStill() const
+{
+	return CurrMovement == MoveAction::None;
+}
+
+glm::vec3 Movement::DirOffset(Direction dir)
+{
+	switch (dir)
+	{
+		case Direction::North: return {  0,  0, -1 };
+		case Direction::South: return {  0,  0,  1 };
+		case Direction::East:  return {  1,  0,  0 };
+		case Direction::West:  return { -1,  0,  0 };
+	}
+
+	return { 0,0,0 };
+}
+
+void Movement::SetSurroundingTiles()
+{
+	glm::vec3 forward = DirOffset(CurrentDirection);
+	glm::vec3 left = { -forward.z, 0, forward.x };
+	glm::vec3 right = { forward.z, 0, -forward.x };
+
+	Tiles.Front = Camera.CameraPos + forward;
+	Tiles.Back = Camera.CameraPos - forward;
+	Tiles.Left = Camera.CameraPos + left;
+	Tiles.Right = Camera.CameraPos + right;
+}
+
+void Movement::MoveChar(float DeltaTime)
 {
     if (CurrMovement == MoveAction::None) 
 		return;
@@ -45,16 +80,16 @@ void Movement::MoveChar(Camera &camera, float DeltaTime)
 
 	switch (CurrMovement) {
 	case MoveAction::Forwards:
-		moveDir = camera.CameraFront;
+		moveDir = Camera.CameraFront;
 		break;
 	case MoveAction::Backwards:
-		moveDir = -camera.CameraFront;
+		moveDir = -Camera.CameraFront;
 		break;
 	case MoveAction::Left:
-		moveDir = -glm::normalize(glm::cross(camera.CameraFront, camera.CameraUp));
+		moveDir = -glm::normalize(glm::cross(Camera.CameraFront, Camera.CameraUp));
 		break;
 	case MoveAction::Right:
-		moveDir = glm::normalize(glm::cross(camera.CameraFront, camera.CameraUp));
+		moveDir = glm::normalize(glm::cross(Camera.CameraFront, Camera.CameraUp));
 		break;
 	default:
 		moveDir = glm::vec3(0.0f);
@@ -63,45 +98,51 @@ void Movement::MoveChar(Camera &camera, float DeltaTime)
 	if (glm::length(moveDir) > 0.0f) 
 	{
 		float moveAmount = MovementSpeed * DeltaTime;
-		camera.CameraPos += moveDir * moveAmount;
+		Camera.CameraPos += moveDir * moveAmount;
 		DistanceMoved += moveAmount;
 
 		if (DistanceMoved > MovementUnit)
 		{
 			CurrMovement = MoveAction::None;
 			DistanceMoved = 0.0f;
-			camera.CameraPos.x = floor(camera.CameraPos.x + 0.5);
-			camera.CameraPos.z = floor(camera.CameraPos.z + 0.5);
+			Camera.CameraPos.x = floor(Camera.CameraPos.x + 0.5);
+			Camera.CameraPos.z = floor(Camera.CameraPos.z + 0.5);
+
+			SetSurroundingTiles();
 
 			//TODO: Move this into it's own folder one day
 			if (G_Args.IsLiveEdit)
 			{
 				std::ofstream outfile("data\\pos.txt");
-				outfile << camera.CameraPos.x << ' ' << camera.CameraPos.z;
+				outfile << Camera.CameraPos.x << ' ' << Camera.CameraPos.z;
 				outfile.close();
 			}
 		}
 	}
     else if (CurrMovement == MoveAction::TurnRight)
     {
-        camera.HorRot += RotationSpeed * DeltaTime;
+        Camera.HorRot += RotationSpeed * DeltaTime;
 
-		if (camera.HorRot > GetCurrentDirection() + 90)
+		if (Camera.HorRot > (int)CurrentDirection + 90)
 		{
 			CurrMovement = MoveAction::None;
-            camera.HorRot = GetNextRightDir();
-            SetCurrentDirection(GetNextRightDir());
+            Camera.HorRot = (int)GetNextRightDir();
+			CurrentDirection = GetNextRightDir();
+			SetSurroundingTiles();
 		}
     }
     else if (CurrMovement == MoveAction::TurnLeft)
     {
-        camera.HorRot -= RotationSpeed * DeltaTime;
+        Camera.HorRot -= RotationSpeed * DeltaTime;
 
-		if (camera.HorRot < GetCurrentDirection() - 90)
+		if (Camera.HorRot < (int)CurrentDirection - 90)
 		{
 			CurrMovement = MoveAction::None;
-            camera.HorRot = GetNextLeftDir();
-            SetCurrentDirection(GetNextLeftDir());
+            Camera.HorRot = (int)GetNextLeftDir();
+			CurrentDirection = GetNextLeftDir();
+			SetSurroundingTiles();
 		}
     }
+
+	std::cout << (int)CurrentDirection << std::endl;
 }

@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "camera.h"
+#include "map.h"
 
 enum class MoveAction
 {
@@ -16,32 +17,51 @@ enum class MoveAction
 	TurnLeft
 };
 
+struct TilePos
+{
+	int X;
+	int Z;
+};
+
+struct SurroundingTiles
+{
+	glm::vec3 Front;
+	glm::vec3 Back;
+	glm::vec3 Left;
+	glm::vec3 Right;
+};
+
+enum class Direction
+{
+	South = 90,
+	West = 180,
+	North = 270,
+	East = 0,
+};
+
 class Movement
 {
 public:
-    int GetNextRightDir();
-    int GetNextLeftDir();
+	Movement(Map& map, Camera& c);
+    Direction GetNextRightDir() const;
+    Direction GetNextLeftDir() const;
+	void SetSurroundingTiles();
 	void SetMoveAction(MoveAction);
-	void MoveChar(Camera &camera, float DeltaTime);
-    int GetCurrentDirection() { return CurrentDirection; }
-    void SetCurrentDirection(float direction) { CurrentDirection = direction; }
+	void MoveChar(float DeltaTime);
+	bool IsStill() const;
+	SurroundingTiles Tiles{};
 
 private:
-	int North = 90;
-	int East = 180;
-	int South = 270;
-	int West = 0;
-	int CurrentDirection;
 
+	glm::vec3 DirOffset(Direction dir);
+	Map& Map;
+	Camera& Camera;
+	Direction CurrentDirection = Direction::East;
 	float DistanceMoved = 0.0f;
 	float MovementUnit = 1.0f;
-
 	const float MovementSpeed = 2.0f;
 	const float RotationSpeed = 150.0f;
-
 	MoveAction CurrMovement = MoveAction::None;
-
-	void EndMovement(Camera&);
 };
 
 #endif

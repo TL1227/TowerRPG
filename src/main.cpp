@@ -24,7 +24,6 @@ using namespace glm;
 
 static string GameVersion = "0.0.0";
 
-Camera camera;
 
 //framerate
 static float DeltaTime = 0.0f;
@@ -35,11 +34,6 @@ static float FPS = 1.0 / 100.0;
 string DataDir = "data";
 string MapPath = "maps";
 
-//movement
-Movement CharMove;
-
-//map
-Map LevelMap;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -120,15 +114,12 @@ void ConsoleSplashMessage()
 
 int main(int argc, char* argv[])
 {
-    //init stuff
     G_Args.Parse(argc, argv);
     GLFWwindow* window = SetUpGlfw();
     if (window == NULL) return -1;
     if (!SetUpGlad()) return -1;
 
     ConsoleSplashMessage();
-
-    //stbi_set_flip_vertically_on_load(true);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -137,12 +128,15 @@ int main(int argc, char* argv[])
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
     //std::string headDir =  "C:\\Users\\Tosh\\Projects\\Crimson Tower\\"; //Home
     std::string headDir =  "C:\\Users\\lavelle.t\\Projects\\Personal\\"; //Work
+    
     Model chest{ headDir + "TowerRPG\\models\\chest\\wooden_crate_01_4k.gltf" };
     Model ourModel{ headDir + "TowerRPG\\models\\cube\\cube.gltf" };
 
+	Map LevelMap;
+	Camera Camera;
+    Movement CharMove{ LevelMap, Camera };
 
     //Load map
     if (G_Args.MapPath.empty()) 
@@ -153,15 +147,15 @@ int main(int argc, char* argv[])
     int rowSize = LevelMap.Data.size();
     int colSize = LevelMap.Data[0].size();
 
-    //set camera at 's' character
+    //set Camera at 's' character
     for (int i = 0; i < rowSize; i++)
 	{
 		for (int j = 0; j < colSize; j++)
 		{
 			if (LevelMap.Data[i][j] == 's')
 			{
-				camera.CameraPos.x = j;
-				camera.CameraPos.z = i;
+				Camera.CameraPos.x = j;
+				Camera.CameraPos.z = i;
                 break;
 			}
 		}
@@ -179,7 +173,6 @@ int main(int argc, char* argv[])
     uiShader.use();
     projection = glm::ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
 	uiShader.setMat4("projection", projection);
-    //glUniformMatrix4fv(glGetUniformLocation(uiShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     //ui init
     UI ui {SCREEN_WIDTH, SCREEN_HEIGHT};
@@ -196,8 +189,8 @@ int main(int argc, char* argv[])
 
 		if (currentFrame - LastTime >= 1.0)
 		{
-		    std::cout << "FPS: " << frames << std::endl;
-		    std::cout << "LastTime: " << LastTime << std::endl;
+		    //std::cout << "FPS: " << frames << std::endl;
+		    //std::cout << "LastTime: " << LastTime << std::endl;
             frames = 0;
             LastTime += 1.0;
 		}
@@ -205,7 +198,6 @@ int main(int argc, char* argv[])
         if (DeltaTime >= FPS)
         {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
             if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
                 CharMove.SetMoveAction(MoveAction::TurnRight);
@@ -220,13 +212,14 @@ int main(int argc, char* argv[])
             else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
                 CharMove.SetMoveAction(MoveAction::Backwards);
 
-			CharMove.MoveChar(camera, DeltaTime);
+			CharMove.MoveChar(DeltaTime);
 
-            camera.UpdateCameraRotation();
+            //TODO: This could probably get called in MoveChar itself 
+            Camera.UpdateCameraRotation();
 
             assetShader.use();
 
-            mat4 view = camera.GetView();
+            mat4 view = Camera.GetView();
 			assetShader.setMat4("view", view);
 
 			for (int i = 0; i < rowSize; i++)
@@ -250,12 +243,12 @@ int main(int argc, char* argv[])
 
 			//floor
 			for (int i = 0; i < rowSize; i++)
-                for (int j = 0; j < colSize; j++)
-                {
-						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, -1.0f, i));
-                        assetShader.setMat4("model", model);
-                        ourModel.Draw(assetShader);
-                }
+				for (int j = 0; j < colSize; j++)
+				{
+					mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, -1.0f, i));
+					assetShader.setMat4("model", model);
+					ourModel.Draw(assetShader);
+				}
 
 			//roof
 			for (int i = 0; i < rowSize; i++)
@@ -267,7 +260,9 @@ int main(int argc, char* argv[])
 				}
 
             //UI DRAWING
-            ui.DrawText(uiShader, "[E] Open", 0, 60, 1.0f, vec3{ 1.0f, 0.5f, 0.5f }, TextAlign::Center);
+            if(CharMove.IsStill() && 
+                LevelMap.Data[CharMove.Tiles.Front.z][CharMove.Tiles.Front.x] == 'c')
+				ui.DrawText(uiShader, "[E] Open", 0, 60, 1.0f, vec3{ 1.0f, 0.5f, 0.5f }, TextAlign::Center);
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;
