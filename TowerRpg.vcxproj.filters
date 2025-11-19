@@ -10,6 +10,8 @@
     <ClCompile Include="src\args.cpp" />
     <ClCompile Include="src\win32.cpp" />
     <ClCompile Include="src\ui.cpp" />
+    <ClCompile Include="src\tile.cpp" />
+    <ClCompile Include="src\model.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\vert.shader" />
@@ -26,5 +28,6 @@
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\ui.h" />
+    <ClInclude Include="src\tile.h" />
   </ItemGroup>
 </Project>

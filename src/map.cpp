@@ -1,4 +1,5 @@
 #include "map.h"
+#include "model.h"
 
 #include <fstream>
 #include <filesystem>
@@ -21,6 +22,44 @@ void Map::Load()
 	{
 		Data.emplace_back(line.begin(), line.end());
 	}
+
+    //TODO: load this info from the map file itself
+    string headDir =  "C:\\Users\\Tosh\\Projects\\Crimson Tower\\"; //Home
+    //string headDir =  "C:\\Users\\lavelle.t\\Projects\\Personal\\"; //Work
+    ChestModel = { headDir + "TowerRPG\\models\\chest\\wooden_crate_01_4k.gltf" };
+    WallModel = { headDir + "TowerRPG\\models\\cube\\cube.gltf" };
+
+    int rowSize = Data.size();
+    int colSize = Data[0].size();
+
+    for (int i = 0; i < rowSize; i++)
+		for (int j = 0; j < colSize; j++)
+        {
+            if (Data[i][j] == ' ')
+                continue;
+
+			Tile tile{ glm::vec3{ j, 0.0f, i } };
+
+            if (Data[i][j] == '#')
+            {
+                tile.TileType = TileType::Wall;
+                tile.Model = &WallModel;
+            }
+            if (Data[i][j] == 'c')
+            {
+                tile.TileType = TileType::Chest;
+                tile.Model = &ChestModel;
+                tile.InteractiveText = "[E] Open"; //TODO: get this dynamically
+            }
+            else if (Data[i][j] == 's')
+			{
+                tile.TileType = TileType::Start;
+
+                PlayerStartPos = glm::vec3{ j, 0.0f, i };
+			}
+
+			Tiles.push_back(tile);
+        }
 }
 
 void Map::Load(const std::string& filePath)
@@ -47,4 +86,30 @@ bool Map::HasChanged()
 char Map::GetChar(int x, int z)
 {
 	return Data[z][x];
+}
+
+Tile* Map::GetTile(int x, int z)
+{
+    for (auto& tile : Tiles)
+    {
+        if (tile.X == x && tile.Z == z)
+        {
+            return &tile;
+        }
+    }
+
+    return nullptr;
+}
+
+Tile* Map::GetTile(glm::vec3 pos)
+{
+    for (auto& tile : Tiles)
+    {
+        if (tile.X == pos.x && tile.Z == pos.z)
+        {
+            return &tile;
+        }
+    }
+
+    return nullptr;
 }

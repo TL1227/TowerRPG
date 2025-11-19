@@ -7,6 +7,7 @@
 Movement::Movement(::Map& map, ::Camera& camera)
 	: Map{ map }, Camera{camera}
 {
+	SetSurroundingTiles();
 }
 
 Direction Movement::GetNextRightDir() const
@@ -42,29 +43,32 @@ void Movement::SetMoveAction(MoveAction action)
 {
 	if (CurrMovement == MoveAction::None)
 	{
-		char ch;
 		if (action == MoveAction::Forwards)
 		{
-			ch = Map.GetChar(Tiles.Front.x, Tiles.Front.z);
-			if (!BlockIsSolid(ch))
+			Tile* tp = Map.GetTile(FrontTilePos);
+
+			if(!tp || tp->IsWalkable)
 				CurrMovement = action;
 		}
 		else if (action == MoveAction::Backwards)
 		{
-			ch = Map.GetChar(Tiles.Back.x, Tiles.Back.z);
-			if (!BlockIsSolid(ch))
+			Tile* tp = Map.GetTile(BackTilePos);
+
+			if(!tp || tp->IsWalkable)
 				CurrMovement = action;
 		}
 		else if (action == MoveAction::Left)
 		{
-			ch = Map.GetChar(Tiles.Left.x, Tiles.Left.z);
-			if (!BlockIsSolid(ch))
+			Tile* tp = Map.GetTile(LeftTilePos);
+
+			if(!tp || tp->IsWalkable)
 				CurrMovement = action;
 		}
 		else if (action == MoveAction::Right)
 		{
-			ch = Map.GetChar(Tiles.Right.x, Tiles.Right.z);
-			if (!BlockIsSolid(ch))
+			Tile* tp = Map.GetTile(RightTilePos);
+
+			if(!tp || tp->IsWalkable)
 				CurrMovement = action;
 		}
 		else if (action == MoveAction::TurnRight || action == MoveAction::TurnLeft)
@@ -108,11 +112,13 @@ void Movement::SetSurroundingTiles()
 	glm::vec3 forward = DirOffset(CurrentDirection);
 	glm::vec3 right = { -forward.z, 0, forward.x };
 	glm::vec3 left = { forward.z, 0, -forward.x };
+	
+	FrontTilePos = Camera.CameraPos + forward;
+	BackTilePos = Camera.CameraPos - forward;
+	LeftTilePos = Camera.CameraPos + left;
+	RightTilePos = Camera.CameraPos + right;
 
-	Tiles.Front = Camera.CameraPos + forward;
-	Tiles.Back = Camera.CameraPos - forward;
-	Tiles.Left = Camera.CameraPos + left;
-	Tiles.Right = Camera.CameraPos + right;
+	FrontTile = Map.GetTile(FrontTilePos);
 }
 
 void Movement::MoveChar(float DeltaTime)

@@ -12,6 +12,7 @@
 #include "args.h"
 #include "model.h"
 #include "ui.h"
+#include "tile.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -121,22 +122,15 @@ int main(int argc, char* argv[])
 
     ConsoleSplashMessage();
 
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.7f, 1.0f, 1.0f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    string headDir =  "C:\\Users\\Tosh\\Projects\\Crimson Tower\\"; //Home
-    //string headDir =  "C:\\Users\\lavelle.t\\Projects\\Personal\\"; //Work
-    
-    Model chest{ headDir + "TowerRPG\\models\\chest\\wooden_crate_01_4k.gltf" };
-    Model ourModel{ headDir + "TowerRPG\\models\\cube\\cube.gltf" };
-
 	Map LevelMap;
 	Camera Camera;
-    Movement CharMove{ LevelMap, Camera };
 
     //Load map
     if (G_Args.MapPath.empty()) 
@@ -144,22 +138,9 @@ int main(int argc, char* argv[])
     else 
         LevelMap.Load(G_Args.MapPath);
 
-    int rowSize = LevelMap.Data.size();
-    int colSize = LevelMap.Data[0].size();
+    Camera.CameraPos = LevelMap.PlayerStartPos;
 
-    //set Camera at 's' character
-    for (int i = 0; i < rowSize; i++)
-	{
-		for (int j = 0; j < colSize; j++)
-		{
-			if (LevelMap.Data[i][j] == 's')
-			{
-				Camera.CameraPos.x = j;
-				Camera.CameraPos.z = i;
-                break;
-			}
-		}
-	}
+    Movement CharMove{ LevelMap, Camera };
 
     //build shaders
     Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
@@ -189,8 +170,8 @@ int main(int argc, char* argv[])
 
 		if (currentFrame - LastTime >= 1.0)
 		{
-		    //cout << "FPS: " << frames << endl;
-		    //cout << "LastTime: " << LastTime << endl;
+		    cout << "FPS: " << frames << endl;
+		    cout << "LastTime: " << LastTime << endl;
             frames = 0;
             LastTime += 1.0;
 		}
@@ -222,47 +203,48 @@ int main(int argc, char* argv[])
             mat4 view = Camera.GetView();
 			assetShader.setMat4("view", view);
 
-			for (int i = 0; i < rowSize; i++)
-			{
-				for (int j = 0; j < colSize; j++)
-				{
-                    if (LevelMap.Data[i][j] == '#')
-                    {
-						mat4 model = translate(mat4(1.0f), vec3(j, 0.0f, i));
-                        assetShader.setMat4("model", model);
-                        ourModel.Draw(assetShader);
-                    }
-                    else if (LevelMap.Data[i][j] == 'c')
-                    {
-						mat4 model = translate(mat4(1.0f), vec3(j, 0.0f, i));
-                        assetShader.setMat4("model", model);
-                        chest.Draw(assetShader);
-                    }
-				}
-			}
+            for (auto& tile : LevelMap.Tiles)
+            {
+				mat4 model = translate(mat4(1.0f), tile.Position);
+				assetShader.setMat4("model", model);
+
+                if (tile.Model)
+                {
+					tile.Model->Draw(assetShader);
+                }
+            }
 
 			//floor
-			for (int i = 0; i < rowSize; i++)
-				for (int j = 0; j < colSize; j++)
+			for (int i = 0; i < LevelMap.Data.size(); i++)
+				for (int j = 0; j < LevelMap.Data[0].size(); j++)
 				{
 					mat4 model = translate(mat4(1.0f), vec3(j, -1.0f, i));
 					assetShader.setMat4("model", model);
-					ourModel.Draw(assetShader);
+					LevelMap.WallModel.Draw(assetShader);
 				}
 
 			//roof
+            /*
 			for (int i = 0; i < rowSize; i++)
 				for (int j = 0; j < colSize; j++)
 				{
 					mat4 model = translate(mat4(1.0f), vec3(j,  1.0f, i));
 					assetShader.setMat4("model", model);
-					ourModel.Draw(assetShader);
+					LevelMap.WallModel.Draw(assetShader);
 				}
+                */
 
             //UI DRAWING
-            if(CharMove.IsStill() && 
-                LevelMap.Data[CharMove.Tiles.Front.z][CharMove.Tiles.Front.x] == 'c')
-				ui.DrawText(uiShader, "[E] Open", 0, 60, 1.0f, vec3{ 1.0f, 0.5f, 0.5f }, TextAlign::Center);
+            if (CharMove.IsStill())
+            {
+                if (CharMove.FrontTile)
+                {
+                    if (!CharMove.FrontTile->InteractiveText.empty())
+                    {
+                        ui.DrawText(uiShader, CharMove.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+                    }
+                }
+            }
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;

@@ -25,7 +25,9 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\map.cpp" />
     <ClCompile Include="src\movement.cpp" />
+    <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\textures.cpp" />
+    <ClCompile Include="src\tile.cpp" />
     <ClCompile Include="src\ui.cpp" />
     <ClCompile Include="src\win32.cpp" />
   </ItemGroup>
@@ -42,6 +44,7 @@
     <ClInclude Include="src\movement.h" />
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\textures.h" />
+    <ClInclude Include="src\tile.h" />
     <ClInclude Include="src\ui.h" />
     <ClInclude Include="thirdparty_src\stb_image.h" />
   </ItemGroup>

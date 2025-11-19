@@ -5,6 +5,8 @@
 #include <string>
 #include <filesystem>
 
+#include "tile.h"
+
 class Map
 {
 
@@ -17,7 +19,15 @@ public:
 	void Load(const std::string& filePath);
 	bool HasChanged();
 	char GetChar(int x, int z);
+	Tile* GetTile(int x, int z);
+	Tile* GetTile(glm::vec3 pos);
 	MapData Data;
+	vector<Tile> Tiles;
+	glm::vec3 PlayerStartPos;
+
+	//TODO: Store these a bit more elegantly 
+	Model ChestModel;
+	Model WallModel;
 
 private:
 	std::filesystem::file_time_type _lastChecked;

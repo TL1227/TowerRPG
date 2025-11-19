@@ -49,7 +49,11 @@ public:
 	void SetMoveAction(MoveAction);
 	void MoveChar(float DeltaTime);
 	bool IsStill() const;
-	SurroundingTiles Tiles{};
+	glm::vec3 FrontTilePos;
+	glm::vec3 BackTilePos;
+	glm::vec3 LeftTilePos;
+	glm::vec3 RightTilePos;
+	Tile* FrontTile;
 
 private:
 
