@@ -54,6 +54,7 @@ void Map::Load()
             else if (Data[i][j] == 's')
 			{
                 tile.TileType = TileType::Start;
+                tile.IsWalkable = true;
 
                 PlayerStartPos = glm::vec3{ j, 0.0f, i };
 			}
