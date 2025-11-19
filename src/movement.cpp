@@ -74,6 +74,17 @@ void Movement::SetMoveAction(MoveAction action)
 	}
 }
 
+std::string Movement::PrintDir()
+{
+	switch (CurrentDirection)
+	{
+		case Direction::North: return "North";
+		case Direction::South: return "South";
+		case Direction::East: return "East";
+		case Direction::West: return "West";
+	}
+}
+
 bool Movement::IsStill() const
 {
 	return CurrMovement == MoveAction::None;
@@ -95,8 +106,8 @@ glm::vec3 Movement::DirOffset(Direction dir)
 void Movement::SetSurroundingTiles()
 {
 	glm::vec3 forward = DirOffset(CurrentDirection);
-	glm::vec3 left = { -forward.z, 0, forward.x };
-	glm::vec3 right = { forward.z, 0, -forward.x };
+	glm::vec3 right = { -forward.z, 0, forward.x };
+	glm::vec3 left = { forward.z, 0, -forward.x };
 
 	Tiles.Front = Camera.CameraPos + forward;
 	Tiles.Back = Camera.CameraPos - forward;

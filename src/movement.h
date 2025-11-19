@@ -62,6 +62,7 @@ private:
 	const float MovementSpeed = 2.0f;
 	const float RotationSpeed = 150.0f;
 	MoveAction CurrMovement = MoveAction::None;
+	std::string PrintDir();
 };
 
 #endif
