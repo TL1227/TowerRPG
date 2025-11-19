@@ -77,7 +77,7 @@ GLFWwindow* SetUpGlfw()
 
     if (window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        cout << "Failed to create GLFW window" << endl;
         glfwTerminate();
     }
 
@@ -98,7 +98,7 @@ bool SetUpGlad()
 {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        cout << "Failed to initialize GLAD" << endl;
         return false;
     }
 
@@ -128,8 +128,8 @@ int main(int argc, char* argv[])
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    //std::string headDir =  "C:\\Users\\Tosh\\Projects\\Crimson Tower\\"; //Home
-    std::string headDir =  "C:\\Users\\lavelle.t\\Projects\\Personal\\"; //Work
+    string headDir =  "C:\\Users\\Tosh\\Projects\\Crimson Tower\\"; //Home
+    //string headDir =  "C:\\Users\\lavelle.t\\Projects\\Personal\\"; //Work
     
     Model chest{ headDir + "TowerRPG\\models\\chest\\wooden_crate_01_4k.gltf" };
     Model ourModel{ headDir + "TowerRPG\\models\\cube\\cube.gltf" };
@@ -167,11 +167,11 @@ int main(int argc, char* argv[])
 
     //projection set up
     assetShader.use();
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
+	mat4 projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
 	assetShader.setMat4("projection", projection);
 
     uiShader.use();
-    projection = glm::ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
+    projection = ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
 	uiShader.setMat4("projection", projection);
 
     //ui init
@@ -189,8 +189,8 @@ int main(int argc, char* argv[])
 
 		if (currentFrame - LastTime >= 1.0)
 		{
-		    //std::cout << "FPS: " << frames << std::endl;
-		    //std::cout << "LastTime: " << LastTime << std::endl;
+		    //cout << "FPS: " << frames << endl;
+		    //cout << "LastTime: " << LastTime << endl;
             frames = 0;
             LastTime += 1.0;
 		}
@@ -228,13 +228,13 @@ int main(int argc, char* argv[])
 				{
                     if (LevelMap.Data[i][j] == '#')
                     {
-						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, 0.0f, i));
+						mat4 model = translate(mat4(1.0f), vec3(j, 0.0f, i));
                         assetShader.setMat4("model", model);
                         ourModel.Draw(assetShader);
                     }
                     else if (LevelMap.Data[i][j] == 'c')
                     {
-						mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, 0.0f, i));
+						mat4 model = translate(mat4(1.0f), vec3(j, 0.0f, i));
                         assetShader.setMat4("model", model);
                         chest.Draw(assetShader);
                     }
@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
 			for (int i = 0; i < rowSize; i++)
 				for (int j = 0; j < colSize; j++)
 				{
-					mat4 model = glm::translate(mat4(1.0f), glm::vec3(j, -1.0f, i));
+					mat4 model = translate(mat4(1.0f), vec3(j, -1.0f, i));
 					assetShader.setMat4("model", model);
 					ourModel.Draw(assetShader);
 				}
@@ -254,7 +254,7 @@ int main(int argc, char* argv[])
 			for (int i = 0; i < rowSize; i++)
 				for (int j = 0; j < colSize; j++)
 				{
-					mat4 model = glm::translate(mat4(1.0f), glm::vec3(j,  1.0f, i));
+					mat4 model = translate(mat4(1.0f), vec3(j,  1.0f, i));
 					assetShader.setMat4("model", model);
 					ourModel.Draw(assetShader);
 				}
