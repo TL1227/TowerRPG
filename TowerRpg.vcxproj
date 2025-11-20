@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\args.cpp" />
     <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\enemy.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\map.cpp" />
@@ -38,6 +39,7 @@
   <ItemGroup>
     <ClInclude Include="src\args.h" />
     <ClInclude Include="src\camera.h" />
+    <ClInclude Include="src\enemy.h" />
     <ClInclude Include="src\map.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\model.h" />

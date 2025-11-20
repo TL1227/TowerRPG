@@ -13,6 +13,7 @@
 #include "model.h"
 #include "ui.h"
 #include "tile.h"
+#include "enemy.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -145,6 +146,7 @@ int main(int argc, char* argv[])
     //build shaders
     Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
     Shader uiShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
+    Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
 
     //projection set up
     assetShader.use();
@@ -158,6 +160,8 @@ int main(int argc, char* argv[])
     //ui init
     UI ui {SCREEN_WIDTH, SCREEN_HEIGHT};
     ui.InitUi();
+
+    Enemy enemy;
 
     int frames = 0;
     float LastTime = glfwGetTime();
@@ -180,6 +184,7 @@ int main(int argc, char* argv[])
         {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            /*
             if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
                 CharMove.SetMoveAction(MoveAction::TurnRight);
             else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
@@ -234,6 +239,7 @@ int main(int argc, char* argv[])
 				}
                 */
 
+            /*
             //UI DRAWING
             if (CharMove.IsStill())
             {
@@ -245,6 +251,11 @@ int main(int argc, char* argv[])
                     }
                 }
             }
+            */
+
+            //Enemy
+            enemyShader.use();
+            enemy.Draw();
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;
