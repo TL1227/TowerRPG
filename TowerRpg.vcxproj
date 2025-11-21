@@ -33,7 +33,11 @@
     <ClCompile Include="src\win32.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\enemyfrag.shader" />
+    <None Include="shaders\enemyvert.shader" />
     <None Include="shaders\frag.shader" />
+    <None Include="shaders\uifrag.shader" />
+    <None Include="shaders\uivert.shader" />
     <None Include="shaders\vert.shader" />
   </ItemGroup>
   <ItemGroup>

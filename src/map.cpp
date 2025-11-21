@@ -24,8 +24,8 @@ void Map::Load()
 	}
 
     //TODO: load this info from the map file itself
-    string headDir =  "C:\\Users\\Tosh\\Projects\\Crimson Tower\\"; //Home
-    //string headDir =  "C:\\Users\\lavelle.t\\Projects\\Personal\\"; //Work
+    //string headDir =  "C:\\Users\\Tosh\\Projects\\Crimson Tower\\"; //Home
+    string headDir =  "C:\\Users\\lavelle.t\\Projects\\Personal\\"; //Work
     ChestModel = { headDir + "TowerRPG\\models\\chest\\wooden_crate_01_4k.gltf" };
     WallModel = { headDir + "TowerRPG\\models\\cube\\cube.gltf" };
 

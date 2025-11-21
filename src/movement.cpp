@@ -1,8 +1,12 @@
 #include <iostream>
 #include <fstream>
+#include <random>
 
 #include "movement.h"
 #include "args.h"
+
+//maybe do this?
+//#define FORWARD (int)MoveAction::Forwards
 
 Movement::Movement(::Map& map, ::Camera& camera)
 	: Map{ map }, Camera{camera}
@@ -10,28 +14,38 @@ Movement::Movement(::Map& map, ::Camera& camera)
 	SetSurroundingTiles();
 }
 
-Direction Movement::GetNextRightDir() const
+//TODO:: This does NOT belong in this file. Move it later
+static int RandomNumber()
 {
-	if (CurrentDirection == Direction::North)
-		return Direction::East;
-	if (CurrentDirection == Direction::East)
-		return Direction::South;
-	if (CurrentDirection == Direction::South)
-		return Direction::West;
-	if (CurrentDirection == Direction::West)
-		return Direction::North;
+	std::random_device rd;  // a seed source for the random number engine
+	std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+	std::uniform_int_distribution<> distrib(3, 10);
+
+	return distrib(gen);
 }
 
-Direction Movement::GetNextLeftDir() const
+Cardinal Movement::GetNextRightDir() const
 {
-	if (CurrentDirection == Direction::North)
-		return Direction::West;
-	if (CurrentDirection == Direction::West)
-		return Direction::South;
-	if (CurrentDirection == Direction::South)
-		return Direction::East;
-	if (CurrentDirection == Direction::East)
-		return Direction::North;
+	if (CurrentDirection == Cardinal::North)
+		return Cardinal::East;
+	if (CurrentDirection == Cardinal::East)
+		return Cardinal::South;
+	if (CurrentDirection == Cardinal::South)
+		return Cardinal::West;
+	if (CurrentDirection == Cardinal::West)
+		return Cardinal::North;
+}
+
+Cardinal Movement::GetNextLeftDir() const
+{
+	if (CurrentDirection == Cardinal::North)
+		return Cardinal::West;
+	if (CurrentDirection == Cardinal::West)
+		return Cardinal::South;
+	if (CurrentDirection == Cardinal::South)
+		return Cardinal::East;
+	if (CurrentDirection == Cardinal::East)
+		return Cardinal::North;
 }
 
 bool BlockIsSolid(char ch)
@@ -43,49 +57,50 @@ void Movement::SetMoveAction(MoveAction action)
 {
 	if (CurrMovement == MoveAction::None)
 	{
-		if (action == MoveAction::Forwards)
+		if (action == MoveAction::TurnRight || action == MoveAction::TurnLeft)
 		{
-			Tile* tp = Map.GetTile(FrontTilePos);
-
-			if(!tp || tp->IsWalkable)
-				CurrMovement = action;
+			CurrMovement = action;
+			return;
 		}
-		else if (action == MoveAction::Backwards)
-		{
-			Tile* tp = Map.GetTile(BackTilePos);
 
-			if(!tp || tp->IsWalkable)
-				CurrMovement = action;
-		}
-		else if (action == MoveAction::Left)
-		{
-			Tile* tp = Map.GetTile(LeftTilePos);
+		Tile* nextTile = nullptr;
 
-			if(!tp || tp->IsWalkable)
-				CurrMovement = action;
-		}
-		else if (action == MoveAction::Right)
+		//note: a nullptr here means theres no tile, so an empty space
+		//once I've created explicit ground tiles we can get rid of this check
+		nextTile = Map.GetTile(SurroundingTiles[(int)action]);
+		if (!nextTile || nextTile->IsWalkable)
 		{
-			Tile* tp = Map.GetTile(RightTilePos);
+			Tile* enemyTile = Map.GetTile(EnemyTiles[(int)action]);
+			if (!enemyTile || enemyTile->IsWalkable)
+			{
+				if (EnemyCounter <= 0)
+				{
+					MovementSpeed = PreBattleMovementSpeed;
+					WeBattleNow = true;
+					Enemy->Position = EnemyTiles[(int)action];
+					EnemyCounter = RandomNumber();
+				}
+			}
 
-			if(!tp || tp->IsWalkable)
-				CurrMovement = action;
-		}
-		else if (action == MoveAction::TurnRight || action == MoveAction::TurnLeft)
-		{
 			CurrMovement = action;
 		}
 	}
+}
+
+void Movement::EndBattle()
+{
+	WeBattleNow = false;
+	MovementSpeed = NormalMovementSpeed;
 }
 
 std::string Movement::PrintDir()
 {
 	switch (CurrentDirection)
 	{
-		case Direction::North: return "North";
-		case Direction::South: return "South";
-		case Direction::East: return "East";
-		case Direction::West: return "West";
+		case Cardinal::North: return "North";
+		case Cardinal::South: return "South";
+		case Cardinal::East: return "East";
+		case Cardinal::West: return "West";
 	}
 }
 
@@ -94,14 +109,14 @@ bool Movement::IsStill() const
 	return CurrMovement == MoveAction::None;
 }
 
-glm::vec3 Movement::DirOffset(Direction dir)
+glm::vec3 Movement::DirOffset(Cardinal dir)
 {
 	switch (dir)
 	{
-		case Direction::North: return {  0,  0, -1 };
-		case Direction::South: return {  0,  0,  1 };
-		case Direction::East:  return {  1,  0,  0 };
-		case Direction::West:  return { -1,  0,  0 };
+		case Cardinal::North: return {  0,  0, -1 };
+		case Cardinal::South: return {  0,  0,  1 };
+		case Cardinal::East:  return {  1,  0,  0 };
+		case Cardinal::West:  return { -1,  0,  0 };
 	}
 
 	return { 0,0,0 };
@@ -113,12 +128,18 @@ void Movement::SetSurroundingTiles()
 	glm::vec3 right = { -forward.z, 0, forward.x };
 	glm::vec3 left = { forward.z, 0, -forward.x };
 	
-	FrontTilePos = Camera.CameraPos + forward;
-	BackTilePos = Camera.CameraPos - forward;
-	LeftTilePos = Camera.CameraPos + left;
-	RightTilePos = Camera.CameraPos + right;
+	//note: these match the MoveAction enums
+	SurroundingTiles[0] = Camera.CameraPos + forward;
+	SurroundingTiles[1] = Camera.CameraPos - forward;
+	SurroundingTiles[2] = Camera.CameraPos + left;
+	SurroundingTiles[3] = Camera.CameraPos + right;
 
-	FrontTile = Map.GetTile(FrontTilePos);
+	EnemyTiles[0] = SurroundingTiles[0] + forward;
+	EnemyTiles[1] = SurroundingTiles[1] - forward;
+	EnemyTiles[2] = SurroundingTiles[2] + left;
+	EnemyTiles[3] = SurroundingTiles[3] + right;
+
+	FrontTile = Map.GetTile(SurroundingTiles[0]);
 }
 
 void Movement::MoveChar(float DeltaTime)
@@ -158,7 +179,10 @@ void Movement::MoveChar(float DeltaTime)
 			Camera.CameraPos.x = floor(Camera.CameraPos.x + 0.5);
 			Camera.CameraPos.z = floor(Camera.CameraPos.z + 0.5);
 
-			SetSurroundingTiles();
+			EndMovement();
+
+			EnemyCounter--;
+			cout << EnemyCounter << endl;
 
 			//TODO: Move this into it's own folder one day
 			if (G_Args.IsLiveEdit)
@@ -178,7 +202,7 @@ void Movement::MoveChar(float DeltaTime)
 			CurrMovement = MoveAction::None;
             Camera.HorRot = (int)GetNextRightDir();
 			CurrentDirection = GetNextRightDir();
-			SetSurroundingTiles();
+			EndMovement();
 		}
     }
     else if (CurrMovement == MoveAction::TurnLeft)
@@ -190,9 +214,18 @@ void Movement::MoveChar(float DeltaTime)
 			CurrMovement = MoveAction::None;
             Camera.HorRot = (int)GetNextLeftDir();
 			CurrentDirection = GetNextLeftDir();
-			SetSurroundingTiles();
+			EndMovement();
 		}
     }
-
-	std::cout << (int)CurrentDirection << std::endl;
 }
+
+float Movement::GetDirection()
+{
+	return (float)CurrentDirection;
+}
+
+void Movement::EndMovement()
+{
+	SetSurroundingTiles();
+}
+

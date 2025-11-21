@@ -17,6 +17,8 @@ public:
     unsigned int VBO, EBO, VAO;
     std::vector<EnemyVertex>       vertices;
     std::vector<unsigned int> indices;
+    glm::vec3 Position;
+    int Texture;
 
     Enemy();
     void Draw();

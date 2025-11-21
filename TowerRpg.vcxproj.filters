@@ -15,8 +15,24 @@
     <ClCompile Include="src\enemy.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\vert.shader" />
-    <None Include="shaders\frag.shader" />
+    <None Include="shaders\uifrag.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\uivert.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\vert.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\enemyfrag.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\enemyvert.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\frag.shader">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\textures.h" />
@@ -31,5 +47,10 @@
     <ClInclude Include="src\ui.h" />
     <ClInclude Include="src\tile.h" />
     <ClInclude Include="src\enemy.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{f03710a8-d0a8-4670-960d-902334a5c699}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

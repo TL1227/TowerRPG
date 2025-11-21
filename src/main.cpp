@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 	glClearColor(0.7f, 1.0f, 1.0f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -148,13 +148,16 @@ int main(int argc, char* argv[])
     Shader uiShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
     Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
 
-    //projection set up
-    assetShader.use();
+    //perspective projection
 	mat4 projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
+    assetShader.use();
 	assetShader.setMat4("projection", projection);
+	enemyShader.use();
+	enemyShader.setMat4("projection", projection);
 
-    uiShader.use();
+    //orthogonal projection
     projection = ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
+    uiShader.use();
 	uiShader.setMat4("projection", projection);
 
     //ui init
@@ -162,6 +165,7 @@ int main(int argc, char* argv[])
     ui.InitUi();
 
     Enemy enemy;
+    CharMove.Enemy = &enemy;
 
     int frames = 0;
     float LastTime = glfwGetTime();
@@ -174,8 +178,8 @@ int main(int argc, char* argv[])
 
 		if (currentFrame - LastTime >= 1.0)
 		{
-		    cout << "FPS: " << frames << endl;
-		    cout << "LastTime: " << LastTime << endl;
+		    //cout << "FPS: " << frames << endl;
+		    //cout << "LastTime: " << LastTime << endl;
             frames = 0;
             LastTime += 1.0;
 		}
@@ -184,7 +188,6 @@ int main(int argc, char* argv[])
         {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            /*
             if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
                 CharMove.SetMoveAction(MoveAction::TurnRight);
             else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
@@ -197,6 +200,10 @@ int main(int argc, char* argv[])
                 CharMove.SetMoveAction(MoveAction::Forwards);
             else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
                 CharMove.SetMoveAction(MoveAction::Backwards);
+            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE))
+            {
+                CharMove.EndBattle();
+            }
 
 			CharMove.MoveChar(DeltaTime);
 
@@ -239,7 +246,6 @@ int main(int argc, char* argv[])
 				}
                 */
 
-            /*
             //UI DRAWING
             if (CharMove.IsStill())
             {
@@ -251,11 +257,18 @@ int main(int argc, char* argv[])
                     }
                 }
             }
-            */
 
             //Enemy
-            enemyShader.use();
-            enemy.Draw();
+            if (CharMove.WeBattleNow)
+            {
+				enemyShader.use();
+				mat4 enemymodel = translate(mat4(1.0f), enemy.Position);
+				enemymodel = rotate(enemymodel, radians(CharMove.GetDirection() + 90), vec3(0.0f, 1.0f, 0.0f));
+				enemyShader.setMat4("model", enemymodel);
+				enemyShader.setMat4("view", view);
+				enemyShader.setFloat("alpha", (CharMove.DistanceMoved == 0) ? 1.0f : CharMove.DistanceMoved);
+				enemy.Draw();
+            }
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;
