@@ -13,6 +13,7 @@
     <ClCompile Include="src\tile.cpp" />
     <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\enemy.cpp" />
+    <ClCompile Include="src\audio.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\uifrag.shader">
@@ -47,6 +48,7 @@
     <ClInclude Include="src\ui.h" />
     <ClInclude Include="src\tile.h" />
     <ClInclude Include="src\enemy.h" />
+    <ClInclude Include="src\audio.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

@@ -44,6 +44,7 @@ Enemy::Enemy()
     glEnableVertexAttribArray(2);
 
     Texture = LoadTexture("textures\\sillymonster.jpg");
+    //Texture = LoadTexture("textures\\wall_01.jpg");
 }
 
 void Enemy::Draw()

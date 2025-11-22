@@ -8,6 +8,8 @@
 //maybe do this?
 //#define FORWARD (int)MoveAction::Forwards
 
+static MoveAction NextMove = MoveAction::None;
+
 Movement::Movement(::Map& map, ::Camera& camera)
 	: Map{ map }, Camera{camera}
 {
@@ -79,6 +81,12 @@ void Movement::SetMoveAction(MoveAction action)
 					WeBattleNow = true;
 					Enemy->Position = EnemyTiles[(int)action];
 					EnemyCounter = RandomNumber();
+
+					//TODO: turn to face the enemy
+					if (action == MoveAction::Left)
+						NextMove = MoveAction::TurnLeft;
+					if (action == MoveAction::Right)
+						NextMove = MoveAction::TurnRight;
 				}
 			}
 
@@ -227,5 +235,12 @@ float Movement::GetDirection()
 void Movement::EndMovement()
 {
 	SetSurroundingTiles();
+
+	if (NextMove != MoveAction::None)
+	{
+		auto move = NextMove;
+		NextMove = MoveAction::None;
+		SetMoveAction(move);
+	}
 }
 
