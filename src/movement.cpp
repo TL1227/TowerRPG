@@ -50,6 +50,18 @@ Cardinal Movement::GetNextLeftDir() const
 		return Cardinal::North;
 }
 
+Cardinal Movement::GetOppositeDir() const
+{
+	if (CurrentDirection == Cardinal::North)
+		return Cardinal::South;
+	if (CurrentDirection == Cardinal::West)
+		return Cardinal::East;
+	if (CurrentDirection == Cardinal::South)
+		return Cardinal::North;
+	if (CurrentDirection == Cardinal::East)
+		return Cardinal::West;
+}
+
 bool BlockIsSolid(char ch)
 {
 	return (ch == '#' || ch == 'c');
@@ -59,7 +71,9 @@ void Movement::SetMoveAction(MoveAction action)
 {
 	if (CurrMovement == MoveAction::None)
 	{
-		if (action == MoveAction::TurnRight || action == MoveAction::TurnLeft)
+		if (action == MoveAction::TurnRight || 
+			action == MoveAction::TurnLeft ||
+			action == MoveAction::TurnAround) 
 		{
 			CurrMovement = action;
 			return;
@@ -80,13 +94,25 @@ void Movement::SetMoveAction(MoveAction action)
 					MovementSpeed = PreBattleMovementSpeed;
 					WeBattleNow = true;
 					Enemy->Position = EnemyTiles[(int)action];
+					Enemy->PlayerDirection = (float)CurrentDirection;
 					EnemyCounter = RandomNumber();
 
-					//TODO: turn to face the enemy
+					// turn to face the enemy
 					if (action == MoveAction::Left)
+					{
 						NextMove = MoveAction::TurnLeft;
+						Enemy->PlayerDirection = (float)GetNextLeftDir();
+					}
 					if (action == MoveAction::Right)
+					{
 						NextMove = MoveAction::TurnRight;
+						Enemy->PlayerDirection = (float)GetNextRightDir();
+					}
+					if (action == MoveAction::Backwards)
+					{
+						NextMove = MoveAction::TurnAround;
+						Enemy->PlayerDirection = (float)GetOppositeDir();
+					}
 				}
 			}
 
@@ -222,6 +248,18 @@ void Movement::MoveChar(float DeltaTime)
 			CurrMovement = MoveAction::None;
             Camera.HorRot = (int)GetNextLeftDir();
 			CurrentDirection = GetNextLeftDir();
+			EndMovement();
+		}
+    }
+    else if (CurrMovement == MoveAction::TurnAround)
+    {
+        Camera.HorRot -= RotationSpeed * DeltaTime;
+
+		if (Camera.HorRot < (int)CurrentDirection - 180)
+		{
+			CurrMovement = MoveAction::None;
+            Camera.HorRot = (int)GetOppositeDir();
+			CurrentDirection = GetOppositeDir();
 			EndMovement();
 		}
     }

@@ -15,6 +15,7 @@ enum class MoveAction
 	Right,
 	TurnRight,
 	TurnLeft,
+	TurnAround,
 	None,
 };
 
@@ -38,6 +39,7 @@ public:
 	Movement(Map& map, Camera& c);
     Cardinal GetNextRightDir() const;
     Cardinal GetNextLeftDir() const;
+    Cardinal GetOppositeDir() const;
 	void SetSurroundingTiles();
 	void SetMoveAction(MoveAction);
 	void MoveChar(float DeltaTime);

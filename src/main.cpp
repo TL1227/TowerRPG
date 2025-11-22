@@ -189,21 +189,28 @@ int main(int argc, char* argv[])
         {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
-                CharMove.SetMoveAction(MoveAction::TurnRight);
-            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
-                CharMove.SetMoveAction(MoveAction::TurnLeft);
-            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT))
-                CharMove.SetMoveAction(MoveAction::Right);
-            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT))
-                CharMove.SetMoveAction(MoveAction::Left);
-            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
-                CharMove.SetMoveAction(MoveAction::Forwards);
-            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
-                CharMove.SetMoveAction(MoveAction::Backwards);
-            else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE))
+            if (CharMove.WeBattleNow)
             {
-                CharMove.EndBattle();
+                //battle controls
+				if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE))
+					CharMove.EndBattle();
+            }
+            else
+            {
+				if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
+					CharMove.SetMoveAction(MoveAction::TurnRight);
+				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
+					CharMove.SetMoveAction(MoveAction::TurnLeft);
+				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT))
+					CharMove.SetMoveAction(MoveAction::Right);
+				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT))
+					CharMove.SetMoveAction(MoveAction::Left);
+				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN))
+					CharMove.SetMoveAction(MoveAction::TurnAround);
+				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
+					CharMove.SetMoveAction(MoveAction::Forwards);
+				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
+					CharMove.SetMoveAction(MoveAction::Backwards);
             }
 
 			CharMove.MoveChar(DeltaTime);
@@ -264,7 +271,7 @@ int main(int argc, char* argv[])
             {
 				enemyShader.use();
 				mat4 enemymodel = translate(mat4(1.0f), enemy.Position);
-				enemymodel = rotate(enemymodel, radians(CharMove.GetDirection() + 90), vec3(0.0f, 1.0f, 0.0f));
+				enemymodel = rotate(enemymodel, radians(enemy.PlayerDirection + 90), vec3(0.0f, 1.0f, 0.0f));
 				enemyShader.setMat4("model", enemymodel);
 				enemyShader.setMat4("view", view);
 				enemyShader.setFloat("alpha", (CharMove.DistanceMoved == 0) ? 1.0f : CharMove.DistanceMoved);

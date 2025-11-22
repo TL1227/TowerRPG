@@ -19,6 +19,7 @@ public:
     std::vector<unsigned int> indices;
     glm::vec3 Position;
     int Texture;
+    float PlayerDirection;
 
     Enemy();
     void Draw();
