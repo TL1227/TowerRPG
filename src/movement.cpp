@@ -187,7 +187,7 @@ glm::vec3 Movement::GetNextEnemyTile(MoveAction action)
 
 void Movement::SetFrontTile()
 {
-	FrontTile = Map.GetTile(GetNextTile(CurrMovement));
+	FrontTile = Map.GetTile(GetNextTile(MoveAction::Forwards));
 }
 
 void Movement::MoveChar(float DeltaTime)

@@ -27,6 +27,8 @@ using namespace glm;
 
 static string GameVersion = "0.0.0";
 
+int SCREEN_WIDTH = 0;
+int SCREEN_HEIGHT = 0;
 
 //framerate
 static float DeltaTime = 0.0f;
@@ -36,6 +38,8 @@ static float FPS = 1.0 / 100.0;
 //directories
 string DataDir = "data";
 string MapPath = "maps";
+
+bool fullscreen = false;
 
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
@@ -67,8 +71,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 //screen
-static int SCREEN_WIDTH = 960;
-static int SCREEN_HEIGHT = 540;
 GLFWwindow* SetUpGlfw()
 {
     glfwInit();
@@ -76,7 +78,23 @@ GLFWwindow* SetUpGlfw()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tower RPG", NULL, NULL);
+    GLFWwindow* window = nullptr;
+    if (fullscreen)
+    {
+		SCREEN_WIDTH = 1920;
+		SCREEN_HEIGHT = 1080;
+
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tower RPG", monitor, NULL);
+    }
+    else
+    {
+		SCREEN_WIDTH = 960;
+		SCREEN_HEIGHT = 540;
+		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tower RPG", NULL, NULL);
+    }
+
 
     if (window == NULL)
     {
