@@ -40,15 +40,13 @@ public:
     Cardinal GetNextRightDir() const;
     Cardinal GetNextLeftDir() const;
     Cardinal GetOppositeDir() const;
-	void SetSurroundingTiles();
+	void SetFrontTile();
 	void SetMoveAction(MoveAction);
 	void MoveChar(float DeltaTime);
 	bool IsStill() const;
-	float GetDirection();
 	void EndBattle();
-
-	vector<glm::vec3> SurroundingTiles{4};
-	vector<glm::vec3> EnemyTiles{4};
+	glm::vec3 GetNextTile(MoveAction action);
+	glm::vec3 GetNextEnemyTile(MoveAction action);
 
 	Tile* FrontTile;
 	float DistanceMoved = 0.0f;

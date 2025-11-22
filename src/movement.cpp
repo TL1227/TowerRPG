@@ -5,15 +5,11 @@
 #include "movement.h"
 #include "args.h"
 
-//maybe do this?
-//#define FORWARD (int)MoveAction::Forwards
-
 static MoveAction NextMove = MoveAction::None;
 
 Movement::Movement(::Map& map, ::Camera& camera)
-	: Map{ map }, Camera{camera}
+	: Map{ map }, Camera{ camera }
 {
-	SetSurroundingTiles();
 }
 
 //TODO:: This does NOT belong in this file. Move it later
@@ -81,23 +77,20 @@ void Movement::SetMoveAction(MoveAction action)
 
 		Tile* nextTile = nullptr;
 
-		//note: a nullptr here means theres no tile, so an empty space
-		//once I've created explicit ground tiles we can get rid of this check
-		nextTile = Map.GetTile(SurroundingTiles[(int)action]);
+		nextTile = Map.GetTile(GetNextTile(action));
 		if (!nextTile || nextTile->IsWalkable)
 		{
-			Tile* enemyTile = Map.GetTile(EnemyTiles[(int)action]);
+			Tile* enemyTile = Map.GetTile(GetNextEnemyTile(action));
 			if (!enemyTile || enemyTile->IsWalkable)
 			{
 				if (EnemyCounter <= 0)
 				{
 					MovementSpeed = PreBattleMovementSpeed;
 					WeBattleNow = true;
-					Enemy->Position = EnemyTiles[(int)action];
+					Enemy->Position = GetNextEnemyTile(action);
 					Enemy->PlayerDirection = (float)CurrentDirection;
 					EnemyCounter = RandomNumber();
 
-					// turn to face the enemy
 					if (action == MoveAction::Left)
 					{
 						NextMove = MoveAction::TurnLeft;
@@ -156,24 +149,45 @@ glm::vec3 Movement::DirOffset(Cardinal dir)
 	return { 0,0,0 };
 }
 
-void Movement::SetSurroundingTiles()
+glm::vec3 Movement::GetNextTile(MoveAction action)
 {
 	glm::vec3 forward = DirOffset(CurrentDirection);
 	glm::vec3 right = { -forward.z, 0, forward.x };
 	glm::vec3 left = { forward.z, 0, -forward.x };
-	
-	//note: these match the MoveAction enums
-	SurroundingTiles[0] = Camera.CameraPos + forward;
-	SurroundingTiles[1] = Camera.CameraPos - forward;
-	SurroundingTiles[2] = Camera.CameraPos + left;
-	SurroundingTiles[3] = Camera.CameraPos + right;
 
-	EnemyTiles[0] = SurroundingTiles[0] + forward;
-	EnemyTiles[1] = SurroundingTiles[1] - forward;
-	EnemyTiles[2] = SurroundingTiles[2] + left;
-	EnemyTiles[3] = SurroundingTiles[3] + right;
+	if (action == MoveAction::Forwards)
+		return Camera.CameraPos + forward;
+	if (action == MoveAction::Backwards)
+		return Camera.CameraPos - forward;
+	if (action == MoveAction::Left)
+		return Camera.CameraPos + left;
+	if (action == MoveAction::Right)
+		return Camera.CameraPos + right;
+	else
+		return glm::vec3{};
+}
 
-	FrontTile = Map.GetTile(SurroundingTiles[0]);
+glm::vec3 Movement::GetNextEnemyTile(MoveAction action)
+{
+	glm::vec3 forward = DirOffset(CurrentDirection);
+	glm::vec3 right = { -forward.z, 0, forward.x };
+	glm::vec3 left = { forward.z, 0, -forward.x };
+
+	if (action == MoveAction::Forwards)
+		return (Camera.CameraPos + forward) + forward;
+	if (action == MoveAction::Backwards)
+		return Camera.CameraPos - forward - forward;
+	if (action == MoveAction::Left)
+		return Camera.CameraPos + left + left;
+	if (action == MoveAction::Right)
+		return Camera.CameraPos + right + right;
+	else
+		return glm::vec3{};
+}
+
+void Movement::SetFrontTile()
+{
+	FrontTile = Map.GetTile(GetNextTile(CurrMovement));
 }
 
 void Movement::MoveChar(float DeltaTime)
@@ -208,7 +222,6 @@ void Movement::MoveChar(float DeltaTime)
 
 		if (DistanceMoved > MovementUnit)
 		{
-			CurrMovement = MoveAction::None;
 			DistanceMoved = 0.0f;
 			Camera.CameraPos.x = floor(Camera.CameraPos.x + 0.5);
 			Camera.CameraPos.z = floor(Camera.CameraPos.z + 0.5);
@@ -233,10 +246,10 @@ void Movement::MoveChar(float DeltaTime)
 
 		if (Camera.HorRot > (int)CurrentDirection + 90)
 		{
-			CurrMovement = MoveAction::None;
             Camera.HorRot = (int)GetNextRightDir();
 			CurrentDirection = GetNextRightDir();
 			EndMovement();
+			CurrMovement = MoveAction::None;
 		}
     }
     else if (CurrMovement == MoveAction::TurnLeft)
@@ -245,7 +258,6 @@ void Movement::MoveChar(float DeltaTime)
 
 		if (Camera.HorRot < (int)CurrentDirection - 90)
 		{
-			CurrMovement = MoveAction::None;
             Camera.HorRot = (int)GetNextLeftDir();
 			CurrentDirection = GetNextLeftDir();
 			EndMovement();
@@ -257,7 +269,6 @@ void Movement::MoveChar(float DeltaTime)
 
 		if (Camera.HorRot < (int)CurrentDirection - 180)
 		{
-			CurrMovement = MoveAction::None;
             Camera.HorRot = (int)GetOppositeDir();
 			CurrentDirection = GetOppositeDir();
 			EndMovement();
@@ -265,14 +276,11 @@ void Movement::MoveChar(float DeltaTime)
     }
 }
 
-float Movement::GetDirection()
-{
-	return (float)CurrentDirection;
-}
-
 void Movement::EndMovement()
 {
-	SetSurroundingTiles();
+	SetFrontTile();
+
+	CurrMovement = MoveAction::None;
 
 	if (NextMove != MoveAction::None)
 	{
