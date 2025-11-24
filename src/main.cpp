@@ -181,8 +181,8 @@ int main(int argc, char* argv[])
     battleUiShader.use();
 	battleUiShader.setMat4("projection", projection);
     mat4 model(1.0f);
-    model = glm::translate(model, glm::vec3(SCREEN_WIDTH / 2, 100.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(300.0f, 100.0f, 1.0f));
+    model = glm::translate(model, glm::vec3(SCREEN_WIDTH / 2, 80.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(SCREEN_WIDTH * 0.8, SCREEN_HEIGHT * 0.2, 1.0f));
     battleUiShader.setMat4("model", model);
 
     //ui init
@@ -290,7 +290,7 @@ int main(int argc, char* argv[])
                 }
                 else if (CharMove.WeBattleNow)
                 {
-                    std::cout << "Drawing battle hud!" << std::endl;
+					ui.DrawBattle(battleUiShader);
                 }
             }
 
@@ -306,7 +306,6 @@ int main(int argc, char* argv[])
 				enemy.Draw();
             }
 
-            ui.DrawBattle(battleUiShader);
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;

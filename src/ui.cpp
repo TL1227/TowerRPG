@@ -133,7 +133,7 @@ void UI::InitQuad()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    BattleHudTex = LoadTexture("textures\\test.jpg");
+    BattleHudTex = LoadTexture("textures\\battlemenu.jpg");
     //BattleHudTex = LoadTexture("textures\\battlehud.jpg");
     //BattleHudTex = LoadTexture("textures\\sillymonster.jpg");
 
