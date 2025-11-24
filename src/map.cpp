@@ -23,11 +23,8 @@ void Map::Load()
 		Data.emplace_back(line.begin(), line.end());
 	}
 
-    //TODO: load this info from the map file itself
-    string headDir =  "C:\\Users\\Tosh\\Projects\\Crimson Tower\\"; //Home
-    //string headDir =  "C:\\Users\\lavelle.t\\Projects\\Personal\\"; //Work
-    ChestModel = { headDir + "TowerRPG\\models\\chest\\wooden_crate_01_4k.gltf" };
-    WallModel = { headDir + "TowerRPG\\models\\cube\\cube.gltf" };
+    ChestModel = {"models\\chest\\wooden_crate_01_4k.gltf" };
+    WallModel = {"models\\cube\\cube.gltf" };
 
     int rowSize = Data.size();
     int colSize = Data[0].size();
@@ -92,12 +89,8 @@ char Map::GetChar(int x, int z)
 Tile* Map::GetTile(int x, int z)
 {
     for (auto& tile : Tiles)
-    {
         if (tile.X == x && tile.Z == z)
-        {
             return &tile;
-        }
-    }
 
     return nullptr;
 }
@@ -105,12 +98,8 @@ Tile* Map::GetTile(int x, int z)
 Tile* Map::GetTile(glm::vec3 pos)
 {
     for (auto& tile : Tiles)
-    {
         if (tile.X == pos.x && tile.Z == pos.z)
-        {
             return &tile;
-        }
-    }
 
     return nullptr;
 }

@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include <vector>
@@ -15,16 +18,10 @@
 #include "tile.h"
 #include "enemy.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-
 using namespace std;
 using namespace glm;
 
 //file scoped variables
-
 static string GameVersion = "0.0.0";
 
 int SCREEN_WIDTH = 0;
@@ -145,7 +142,7 @@ int main(int argc, char* argv[])
 	glClearColor(0.7f, 1.0f, 1.0f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE); //NOTE: This is off because the enemy sprite currently has the wrong winding order and gets culled
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -164,7 +161,8 @@ int main(int argc, char* argv[])
 
     //build shaders
     Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
-    Shader uiShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
+    Shader textShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
+    Shader battleUiShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
 
     //perspective projection
@@ -174,10 +172,18 @@ int main(int argc, char* argv[])
 	enemyShader.use();
 	enemyShader.setMat4("projection", projection);
 
+
     //orthogonal projection
     projection = ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
-    uiShader.use();
-	uiShader.setMat4("projection", projection);
+    textShader.use();
+	textShader.setMat4("projection", projection);
+
+    battleUiShader.use();
+	battleUiShader.setMat4("projection", projection);
+    mat4 model(1.0f);
+    model = glm::translate(model, glm::vec3(SCREEN_WIDTH / 2, 100.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(300.0f, 100.0f, 1.0f));
+    battleUiShader.setMat4("model", model);
 
     //ui init
     UI ui {SCREEN_WIDTH, SCREEN_HEIGHT};
@@ -252,7 +258,7 @@ int main(int argc, char* argv[])
                 }
             }
 
-			//floor
+			//floor TODO:
 			for (int i = 0; i < LevelMap.Data.size(); i++)
 				for (int j = 0; j < LevelMap.Data[0].size(); j++)
 				{
@@ -279,8 +285,12 @@ int main(int argc, char* argv[])
                 {
                     if (!CharMove.FrontTile->InteractiveText.empty())
                     {
-                        ui.DrawText(uiShader, CharMove.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+                        //ui.DrawText(textShader, CharMove.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
                     }
+                }
+                else if (CharMove.WeBattleNow)
+                {
+                    std::cout << "Drawing battle hud!" << std::endl;
                 }
             }
 
@@ -292,9 +302,11 @@ int main(int argc, char* argv[])
 				enemymodel = rotate(enemymodel, radians(enemy.PlayerDirection + 90), vec3(0.0f, 1.0f, 0.0f));
 				enemyShader.setMat4("model", enemymodel);
 				enemyShader.setMat4("view", view);
-				enemyShader.setFloat("alpha", (CharMove.DistanceMoved == 0) ? 1.0f : CharMove.DistanceMoved);
+				enemyShader.setFloat("alpha", (CharMove.DistanceMoved == 0) ? 1.0f : CharMove.DistanceMoved); //TODO: animate this fade without using CharMove.DistanceMoved
 				enemy.Draw();
             }
+
+            ui.DrawBattle(battleUiShader);
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;

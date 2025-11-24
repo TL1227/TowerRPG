@@ -23,6 +23,7 @@ public:
 
     Enemy();
     void Draw();
+    void Draw(int tex);
 };
 
 #endif

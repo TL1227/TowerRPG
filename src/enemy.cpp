@@ -17,8 +17,8 @@ Enemy::Enemy()
 
 
     unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
+    0, 1, 3,
+    1, 2, 3
     };
 
     glGenVertexArrays(1, &VAO);
@@ -44,13 +44,22 @@ Enemy::Enemy()
     glEnableVertexAttribArray(2);
 
     Texture = LoadTexture("textures\\sillymonster.jpg");
-    //Texture = LoadTexture("textures\\wall_01.jpg");
+
+    glBindVertexArray(0);
 }
 
 void Enemy::Draw()
 {
     glBindVertexArray(VAO);
     glBindTexture(GL_TEXTURE_2D, Texture);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void Enemy::Draw(int tex)
+{
+    glBindVertexArray(VAO);
+    glBindTexture(GL_TEXTURE_2D, tex);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }

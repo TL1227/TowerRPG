@@ -27,15 +27,23 @@ class UI
 public:
     UI(int screenWidth, int screenHeight);
 	void InitUi();
+	void InitQuad();
 	void DrawText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color, TextAlign ta = TextAlign::None);
+	void DrawBattle(Shader& shader);
+	void DrawBattle(Shader& shader, int tex);
 
 	std::map<char, Character> Characters;
+    unsigned int QuadVAO;
+    unsigned int QuadVBO;
+    unsigned int QuadEBO;
+    int BattleHudTex;
 private:
     int GetStringPixelLength(std::string &text);
     unsigned int VAO;
     unsigned int VBO;
     int ScreenWidth;
     int ScreenHeight;
+
 };
 
 #endif
