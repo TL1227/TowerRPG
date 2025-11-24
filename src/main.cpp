@@ -4,6 +4,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #include <iostream>
 #include <vector>
 
@@ -178,12 +182,17 @@ int main(int argc, char* argv[])
     textShader.use();
 	textShader.setMat4("projection", projection);
 
+    //figure out how to make these values relative to screen size :)
+    float menux = 480.0f;
+    float menuy = 93.0f;
+    float menuscalex = 630.0f;
+    float menuscaley = 144.0f;
     battleUiShader.use();
 	battleUiShader.setMat4("projection", projection);
-    mat4 model(1.0f);
-    model = glm::translate(model, glm::vec3(SCREEN_WIDTH / 2, 80.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(SCREEN_WIDTH * 0.8, SCREEN_HEIGHT * 0.2, 1.0f));
-    battleUiShader.setMat4("model", model);
+	mat4 model(1.0f);
+	model = glm::translate(model, glm::vec3(menux, menuy, 0.0f));
+	model = glm::scale(model, glm::vec3(menuscalex, menuscaley, 1.0f));
+	battleUiShader.setMat4("model", model);
 
     //ui init
     UI ui {SCREEN_WIDTH, SCREEN_HEIGHT};
@@ -191,6 +200,20 @@ int main(int argc, char* argv[])
 
     Enemy enemy;
     CharMove.Enemy = &enemy;
+
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+    ImGui_ImplOpenGL3_Init();
+
+    float menuTextx = 50;
+    float menuTexty = 80;
 
     int frames = 0;
     float LastTime = glfwGetTime();
@@ -212,6 +235,14 @@ int main(int argc, char* argv[])
         if (DeltaTime >= FPS)
         {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            ImGui::Begin("Battle Text");
+            ImGui::SliderFloat("x", &menuTextx, 0, 800);
+            ImGui::SliderFloat("y", &menuTexty, 0, 800);
+            ImGui::End();
 
             if (CharMove.WeBattleNow)
             {
@@ -285,12 +316,14 @@ int main(int argc, char* argv[])
                 {
                     if (!CharMove.FrontTile->InteractiveText.empty())
                     {
-                        //ui.DrawText(textShader, CharMove.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+                        ui.DrawText(textShader, CharMove.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
                     }
                 }
                 else if (CharMove.WeBattleNow)
                 {
 					ui.DrawBattle(battleUiShader);
+					ui.DrawText(textShader, "Attack", 180, 130, 0.8f, glm::vec3(1.0, 1.0, 1.0));
+					ui.DrawText(textShader, "Defend", 180, 90, 0.8f, glm::vec3(1.0, 1.0, 1.0));
                 }
             }
 
@@ -306,6 +339,8 @@ int main(int argc, char* argv[])
 				enemy.Draw();
             }
 
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 			glfwSwapBuffers(window);
             LastFrame = currentFrame;
@@ -324,6 +359,10 @@ int main(int argc, char* argv[])
 
         glfwPollEvents();
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
