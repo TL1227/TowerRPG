@@ -1,0 +1,12 @@
+[
+  {
+    "directory": "C:/Users/lavelle.t/Projects/Personal/TowerRPG",
+    "file": "src/main.cpp",
+    "command": "cl /std:c++20 /I includes"
+  },
+  {
+    "directory": "C:/Users/lavelle.t/Projects/Personal/TowerRPG",
+    "file": "src/movement.cpp",
+    "command": "cl /std:c++20 /I includes"
+  }
+]
