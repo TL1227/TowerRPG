@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "glm/fwd.hpp"
 #include "textures.h"
 
 #include <glad/glad.h>
@@ -7,7 +8,6 @@
 UI::UI(int screenWidth, int screenHeight)
     : ScreenWidth {screenWidth}, ScreenHeight {screenHeight} 
 { 
-    InitQuad();
 }
 
 void UI::InitUi()
@@ -96,6 +96,7 @@ int UI::GetStringPixelLength(std::string &text)
     return advTotal;
 }
 
+/*
 void UI::InitQuad()
 {
     float vertices[] = {
@@ -134,13 +135,14 @@ void UI::InitQuad()
     glEnableVertexAttribArray(2);
 
     BattleHudTex = LoadTexture("textures\\battlemenu.jpg");
-    //BattleHudTex = LoadTexture("textures\\battlehud.jpg");
-    //BattleHudTex = LoadTexture("textures\\sillymonster.jpg");
 
     glBindVertexArray(0);
 }
+*/
 
-void UI::DrawBattle(Shader& shader)
+
+/*
+void UI::DrawBattleMenuBg(Shader& shader)
 {
     shader.use();
     glBindVertexArray(QuadVAO);
@@ -148,15 +150,7 @@ void UI::DrawBattle(Shader& shader)
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
-
-void UI::DrawBattle(Shader& shader, int tex)
-{
-    shader.use();
-    glBindVertexArray(QuadVAO);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}
+*/
 
 void UI::DrawText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color, TextAlign ta)
 {
@@ -209,4 +203,20 @@ void UI::DrawText(Shader& shader, std::string text, float x, float y, float scal
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void UI::DrawList(Shader& shader, std::vector<std::string> list, float x, float y, float scale, glm::vec3 color, TextAlign ta, int highlight)
+{
+    for (int i = 0; i < list.size(); i++)
+    {
+        if (highlight == i)
+        {
+            DrawText(shader, list[i], x, y, scale, glm::vec3(0.2, 1.0, 1.0));
+        }
+        else
+        {
+            DrawText(shader, list[i], x, y, scale, color);
+        }
+        y -= 30;
+    }
 }

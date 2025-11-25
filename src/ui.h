@@ -8,6 +8,8 @@
 #include "shader.h"
 
 #include <map>
+#include <vector>
+
 
 struct Character {
     unsigned int TextureID;  // ID handle of the glyph texture
@@ -29,8 +31,8 @@ public:
 	void InitUi();
 	void InitQuad();
 	void DrawText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color, TextAlign ta = TextAlign::None);
-	void DrawBattle(Shader& shader);
-	void DrawBattle(Shader& shader, int tex);
+	void DrawBattleMenuBg(Shader& shader);
+    void DrawList(Shader& shader, std::vector<std::string> list, float x, float y, float scale, glm::vec3 color, TextAlign ta = TextAlign::None, int highlight = -1);
 
 	std::map<char, Character> Characters;
     unsigned int QuadVAO;

@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "shader.h"
-#include "textures.h"
 #include "movement.h"
 #include "camera.h"
 #include "map.h"
@@ -20,7 +19,7 @@
 #include "model.h"
 #include "ui.h"
 #include "tile.h"
-#include "enemy.h"
+#include "quad.h"
 
 using namespace std;
 using namespace glm;
@@ -31,17 +30,29 @@ static string GameVersion = "0.0.0";
 int SCREEN_WIDTH = 0;
 int SCREEN_HEIGHT = 0;
 
-//framerate
-static float DeltaTime = 0.0f;
-static float LastFrame = 0.0f;
-static float FPS = 1.0 / 100.0;
-
 //directories
 string DataDir = "data";
 string MapPath = "maps";
 
 bool fullscreen = false;
 
+enum class Mode
+{
+    TowerExplore,
+    TowerBattle
+};
+
+enum class BattleChoice
+{
+    Attack,
+    Skill,
+    Item,
+    Run,
+    NUM_CHOICES
+};
+
+BattleChoice Choice = BattleChoice::Attack;
+Mode CurrentMode = Mode::TowerExplore;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -69,6 +80,32 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             WireFrameMode = true;
         }
     }
+
+    if (CurrentMode == Mode::TowerBattle)
+    {
+        if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+        {
+            Choice = static_cast<BattleChoice>((static_cast<int>(Choice) + 1) % (int)BattleChoice::NUM_CHOICES);
+        }
+        else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+        {
+            Choice = static_cast<BattleChoice>((static_cast<int>(Choice) - 1 + (int)BattleChoice::NUM_CHOICES) % (int)BattleChoice::NUM_CHOICES);
+        }
+    }
+}
+
+const float SLIDE_SPEED = 400;
+
+void SlideUp(float delta, float speed, float& var, float end)
+{
+    if (var < end)
+        var += speed * delta;
+}
+
+void SlideDown(float delta, float speed, float& var, float end)
+{
+    if (var > end)
+        var -= speed * delta;
 }
 
 //screen
@@ -137,6 +174,7 @@ void ConsoleSplashMessage()
 int main(int argc, char* argv[])
 {
     G_Args.Parse(argc, argv);
+
     GLFWwindow* window = SetUpGlfw();
     if (window == NULL) return -1;
     if (!SetUpGlad()) return -1;
@@ -166,7 +204,8 @@ int main(int argc, char* argv[])
     //build shaders
     Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
     Shader textShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
-    Shader battleUiShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
+    Shader battleMenuBgShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
+    Shader enemyHpShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
 
     //perspective projection
@@ -176,27 +215,32 @@ int main(int argc, char* argv[])
 	enemyShader.use();
 	enemyShader.setMat4("projection", projection);
 
-
     //orthogonal projection
     projection = ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
     textShader.use();
 	textShader.setMat4("projection", projection);
+    battleMenuBgShader.use();
+	battleMenuBgShader.setMat4("projection", projection);
+    enemyHpShader.use();
+	enemyHpShader.setMat4("projection", projection);
 
     //figure out how to make these values relative to screen size :)
-    float menux = 480.0f;
-    float menuy = 93.0f;
-    float menuscalex = 630.0f;
-    float menuscaley = 144.0f;
-    battleUiShader.use();
-	battleUiShader.setMat4("projection", projection);
-	mat4 model(1.0f);
-	model = glm::translate(model, glm::vec3(menux, menuy, 0.0f));
-	model = glm::scale(model, glm::vec3(menuscalex, menuscaley, 1.0f));
-	battleUiShader.setMat4("model", model);
+    Quad battleMenuQuad { "textures\\battlemenu.jpg" };
+    battleMenuQuad.x = SCREEN_WIDTH / 2.0f;;
+    battleMenuQuad.y = SCREEN_HEIGHT - (SCREEN_HEIGHT - 50);
+    battleMenuQuad.scalex = 630.0f;
+    battleMenuQuad.scaley = 144.0f;
+
+    Quad enemyHpInnerQuad { "textures\\enemyhealthinner.jpg" };
+    enemyHpInnerQuad.x = SCREEN_WIDTH / 2.0f;
+    enemyHpInnerQuad.y = SCREEN_HEIGHT + 50; //set it up for sliding on to screen
+    enemyHpInnerQuad.scalex = 630;
+    enemyHpInnerQuad.scaley = 15;
 
     //ui init
     UI ui {SCREEN_WIDTH, SCREEN_HEIGHT};
     ui.InitUi();
+
 
     Enemy enemy;
     CharMove.Enemy = &enemy;
@@ -215,7 +259,13 @@ int main(int argc, char* argv[])
     float menuTextx = 50;
     float menuTexty = 80;
 
+    int battleChoice = 0;
+    bool pressed = false;
+
     int frames = 0;
+    float DeltaTime = 0.0f;
+    float LastFrame = 0.0f;
+    float FPS = 1.0 / 100.0;
     float LastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
@@ -239,33 +289,62 @@ int main(int argc, char* argv[])
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
+
+            /*
             ImGui::Begin("Battle Text");
             ImGui::SliderFloat("x", &menuTextx, 0, 800);
             ImGui::SliderFloat("y", &menuTexty, 0, 800);
             ImGui::End();
+            */
 
             if (CharMove.WeBattleNow)
             {
                 //battle controls
-				if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE))
-					CharMove.EndBattle();
+                if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE))
+                {
+                    CharMove.EndBattle();
+                    enemyHpInnerQuad.y = SCREEN_HEIGHT + 50;
+                    battleMenuQuad.y = SCREEN_HEIGHT - (SCREEN_HEIGHT - 50);
+                }
+                else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN))
+                {
+                    battleChoice++;
+                }
+                else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_UP))
+                {
+                    battleChoice--;
+                }
             }
             else
             {
 				if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
+                {
 					CharMove.SetMoveAction(MoveAction::TurnRight);
+                }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
+                {
 					CharMove.SetMoveAction(MoveAction::TurnLeft);
+                }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT))
+                {
 					CharMove.SetMoveAction(MoveAction::Right);
+                }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT))
+                {
 					CharMove.SetMoveAction(MoveAction::Left);
+                }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN))
+                {
 					CharMove.SetMoveAction(MoveAction::TurnAround);
+                }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
+                {
 					CharMove.SetMoveAction(MoveAction::Forwards);
+                }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
+                {
 					CharMove.SetMoveAction(MoveAction::Backwards);
+                }
             }
 
 			CharMove.MoveChar(DeltaTime);
@@ -289,7 +368,7 @@ int main(int argc, char* argv[])
                 }
             }
 
-			//floor TODO:
+			//floor TODO: create a floor tile and add them to the towertool map maker
 			for (int i = 0; i < LevelMap.Data.size(); i++)
 				for (int j = 0; j < LevelMap.Data[0].size(); j++)
 				{
@@ -297,17 +376,6 @@ int main(int argc, char* argv[])
 					assetShader.setMat4("model", model);
 					LevelMap.WallModel.Draw(assetShader);
 				}
-
-			//roof
-            /*
-			for (int i = 0; i < rowSize; i++)
-				for (int j = 0; j < colSize; j++)
-				{
-					mat4 model = translate(mat4(1.0f), vec3(j,  1.0f, i));
-					assetShader.setMat4("model", model);
-					LevelMap.WallModel.Draw(assetShader);
-				}
-                */
 
             //UI DRAWING
             if (CharMove.IsStill())
@@ -319,11 +387,18 @@ int main(int argc, char* argv[])
                         ui.DrawText(textShader, CharMove.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
                     }
                 }
-                else if (CharMove.WeBattleNow)
+                else if (CharMove.WeBattleNow) //battle starts propa!
                 {
-					ui.DrawBattle(battleUiShader);
-					ui.DrawText(textShader, "Attack", 180, 130, 0.8f, glm::vec3(1.0, 1.0, 1.0));
-					ui.DrawText(textShader, "Defend", 180, 90, 0.8f, glm::vec3(1.0, 1.0, 1.0));
+                    CurrentMode = Mode::TowerBattle;
+
+                    SlideDown(DeltaTime, SLIDE_SPEED, enemyHpInnerQuad.y, SCREEN_HEIGHT * 0.9);
+                    enemyHpInnerQuad.Draw(enemyHpShader);
+
+                    battleMenuQuad.Draw(battleMenuBgShader);
+                    SlideUp(DeltaTime, SLIDE_SPEED, battleMenuQuad.y, 93.0);
+
+                    vector<string> bmenu = { "Attack", "Skill", "Item", "Run" };
+                    ui.DrawList(textShader, bmenu, 180, 130, 0.5f, glm::vec3(1.0, 1.0, 1.0), TextAlign::None, (int)Choice);
                 }
             }
 
@@ -338,6 +413,7 @@ int main(int argc, char* argv[])
 				enemyShader.setFloat("alpha", (CharMove.DistanceMoved == 0) ? 1.0f : CharMove.DistanceMoved); //TODO: animate this fade without using CharMove.DistanceMoved
 				enemy.Draw();
             }
+
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
