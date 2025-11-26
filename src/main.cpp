@@ -83,30 +83,44 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (CurrentMode == Mode::TowerBattle)
     {
-        if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
-        {
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))        {
             Choice = static_cast<BattleChoice>((static_cast<int>(Choice) + 1) % (int)BattleChoice::NUM_CHOICES);
         }
-        else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
-        {
+        else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_UP) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))        {
             Choice = static_cast<BattleChoice>((static_cast<int>(Choice) - 1 + (int)BattleChoice::NUM_CHOICES) % (int)BattleChoice::NUM_CHOICES);
         }
     }
 }
 
-const float SLIDE_SPEED = 400;
+void Waiting()
+{
 
-void SlideUp(float delta, float speed, float& var, float end)
+}
+
+bool SlideUp(float delta, float speed, float& var, float end)
 {
     if (var < end)
         var += speed * delta;
+
+    if (var > end)
+        var = end;
+
+    return var == end;
 }
 
-void SlideDown(float delta, float speed, float& var, float end)
+bool SlideDown(float delta, float speed, float& var, float end)
 {
     if (var > end)
         var -= speed * delta;
+    
+    if (var < end)
+        var = end;
+
+    return var == end;
 }
+
+//TODO: Look into different ways of scaling text
+int TEXT_UNIT;
 
 //screen
 GLFWwindow* SetUpGlfw()
@@ -121,6 +135,7 @@ GLFWwindow* SetUpGlfw()
     {
 		SCREEN_WIDTH = 1920;
 		SCREEN_HEIGHT = 1080;
+        TEXT_UNIT = 2;
 
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -130,6 +145,7 @@ GLFWwindow* SetUpGlfw()
     {
 		SCREEN_WIDTH = 960;
 		SCREEN_HEIGHT = 540;
+        TEXT_UNIT = 1;
 		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tower RPG", NULL, NULL);
     }
 
@@ -224,26 +240,39 @@ int main(int argc, char* argv[])
     enemyHpShader.use();
 	enemyHpShader.setMat4("projection", projection);
 
-    //figure out how to make these values relative to screen size :)
-    Quad battleMenuQuad { "textures\\battlemenu.jpg" };
-    battleMenuQuad.x = SCREEN_WIDTH / 2.0f;;
-    battleMenuQuad.y = SCREEN_HEIGHT - (SCREEN_HEIGHT - 50);
-    battleMenuQuad.scalex = 630.0f;
-    battleMenuQuad.scaley = 144.0f;
+    const float SlideSpeed = SCREEN_HEIGHT * 2.0f;
+    const float OffScreenDistance = (float)SCREEN_HEIGHT * 0.5f;
 
+    float BattleMenuQuadEndPosY = (float)SCREEN_HEIGHT * 0.2f;
+    Quad battleMenuQuad { "textures\\battlemenu.jpg" };
+    battleMenuQuad.x = (float)SCREEN_WIDTH / 2.0f;
+    battleMenuQuad.y = BattleMenuQuadEndPosY - OffScreenDistance;
+    battleMenuQuad.scalex = (float)SCREEN_WIDTH * 0.65f;
+    battleMenuQuad.scaley = (float)SCREEN_HEIGHT * 0.25f;
+
+    float EnemyHpInnerQuadEndPosY = (float)SCREEN_HEIGHT * 0.9f;
     Quad enemyHpInnerQuad { "textures\\enemyhealthinner.jpg" };
     enemyHpInnerQuad.x = SCREEN_WIDTH / 2.0f;
-    enemyHpInnerQuad.y = SCREEN_HEIGHT + 50; //set it up for sliding on to screen
-    enemyHpInnerQuad.scalex = 630;
-    enemyHpInnerQuad.scaley = 15;
+    enemyHpInnerQuad.y = EnemyHpInnerQuadEndPosY + OffScreenDistance; //set it up for sliding on to screen
+    enemyHpInnerQuad.scalex = (float)SCREEN_WIDTH * 0.65f;
+    enemyHpInnerQuad.scaley = (float)SCREEN_HEIGHT * 0.03f;
+
+    float BattleTextScale = 0.45f * TEXT_UNIT;
+    float BattleTextXPercent = 0.19f;
+    float BattleTextYPercent = 0.28f;
+    float BattleTextX = SCREEN_WIDTH * BattleTextXPercent;
+    float BattleTextY = SCREEN_HEIGHT * BattleTextYPercent;
+    float BattleMenuLineHeightPercent = 0.058;
+    float BattleMenuLineHeight = SCREEN_HEIGHT * BattleMenuLineHeightPercent;
 
     //ui init
     UI ui {SCREEN_WIDTH, SCREEN_HEIGHT};
     ui.InitUi();
 
-
+    BattleMessage BattleMessage;
     Enemy enemy;
     CharMove.Enemy = &enemy;
+    CharMove.BattleMessage = &BattleMessage;
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -265,8 +294,9 @@ int main(int argc, char* argv[])
     int frames = 0;
     float DeltaTime = 0.0f;
     float LastFrame = 0.0f;
-    float FPS = 1.0 / 100.0;
-    float LastTime = glfwGetTime();
+    float FPS = 1.0f / 100.0f;
+    float LastTime = (float)glfwGetTime();
+    float StartBattleTime;
     while (!glfwWindowShouldClose(window))
     {
         frames++;
@@ -292,30 +322,16 @@ int main(int argc, char* argv[])
 
             /*
             ImGui::Begin("Battle Text");
-            ImGui::SliderFloat("x", &menuTextx, 0, 800);
-            ImGui::SliderFloat("y", &menuTexty, 0, 800);
+            ImGui::InputFloat("X Percent", &BattleTextXPercent);
+            ImGui::InputFloat("Y Percent", &BattleTextYPercent);
+            ImGui::InputFloat("LineHeightPercent", &BattleMenuLineHeightPercent);
             ImGui::End();
             */
+            BattleTextX = SCREEN_WIDTH * BattleTextXPercent;
+            BattleTextY = SCREEN_HEIGHT * BattleTextYPercent;
+			BattleMenuLineHeight = SCREEN_HEIGHT * BattleMenuLineHeightPercent;
 
-            if (CharMove.WeBattleNow)
-            {
-                //battle controls
-                if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE))
-                {
-                    CharMove.EndBattle();
-                    enemyHpInnerQuad.y = SCREEN_HEIGHT + 50;
-                    battleMenuQuad.y = SCREEN_HEIGHT - (SCREEN_HEIGHT - 50);
-                }
-                else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN))
-                {
-                    battleChoice++;
-                }
-                else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_UP))
-                {
-                    battleChoice--;
-                }
-            }
-            else
+            if (BattleMessage.CurrentPhase == BattlePhase::End || BattleMessage.CurrentPhase == BattlePhase::Sighting)
             {
 				if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
                 {
@@ -344,6 +360,21 @@ int main(int argc, char* argv[])
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
                 {
 					CharMove.SetMoveAction(MoveAction::Backwards);
+                }
+            }
+            else
+            {
+                //battle controls
+                if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ENTER))
+                {
+                    if (Choice == BattleChoice::Run)
+                    {
+                        BattleMessage.SetBattlePhase(BattlePhase::End);
+						CharMove.EndBattle();
+                        enemy.SwitchToCalmTex();
+						enemyHpInnerQuad.y = EnemyHpInnerQuadEndPosY + OffScreenDistance; //set it up for sliding on to screen
+						battleMenuQuad.y = BattleMenuQuadEndPosY - OffScreenDistance;
+                    }
                 }
             }
 
@@ -377,6 +408,19 @@ int main(int argc, char* argv[])
 					LevelMap.WallModel.Draw(assetShader);
 				}
 
+            //Enemy Drawing
+            if (BattleMessage.CurrentPhase != BattlePhase::End)
+            {
+				enemyShader.use();
+				mat4 enemymodel = translate(mat4(1.0f), enemy.Position);
+				enemymodel = rotate(enemymodel, radians(enemy.PlayerDirection + 90), vec3(0.0f, 1.0f, 0.0f));
+                enemymodel = scale(enemymodel, vec3(0.8f, 0.8f, 0.0f));
+				enemyShader.setMat4("model", enemymodel);
+				enemyShader.setMat4("view", view);
+				enemyShader.setFloat("alpha", (CharMove.DistanceMoved == 0) ? 1.0f : CharMove.DistanceMoved); //TODO: animate this fade without using CharMove.DistanceMoved
+				enemy.Draw();
+            }
+
             //UI DRAWING
             if (CharMove.IsStill())
             {
@@ -387,33 +431,51 @@ int main(int argc, char* argv[])
                         ui.DrawText(textShader, CharMove.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
                     }
                 }
-                else if (CharMove.WeBattleNow) //battle starts propa!
+                else if (BattleMessage.CurrentPhase == BattlePhase::Preamble)
+                {
+                    double timepassed = glfwGetTime() -  BattleMessage.PreambleStartTime;
+                    if (timepassed > BattleMessage.PreambleLength)
+                    {
+                        BattleMessage.SetBattlePhase(BattlePhase::Snapin);
+                    }
+                    else
+                    {
+                        ui.DrawText(textShader, "Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+                    }
+                }
+                else if (BattleMessage.CurrentPhase == BattlePhase::Snapin) //battle starts propa!
+                {
+                    bool slide1complete = SlideDown(DeltaTime, SlideSpeed, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY);
+                    enemyHpInnerQuad.Draw(enemyHpShader);
+
+                    bool slide2complete = SlideUp(DeltaTime, SlideSpeed, battleMenuQuad.y, BattleMenuQuadEndPosY);
+                    battleMenuQuad.Draw(battleMenuBgShader);
+
+                    cout << slide1complete << ' ' << slide2complete << endl;
+
+                    if (slide1complete && slide2complete)
+                    {
+                        BattleMessage.SetBattlePhase(BattlePhase::Start);
+                        enemy.SwitchToAttackTex();
+                    }
+                }
+                else if (BattleMessage.CurrentPhase == BattlePhase::Start) //battle starts propa!
                 {
                     CurrentMode = Mode::TowerBattle;
 
-                    SlideDown(DeltaTime, SLIDE_SPEED, enemyHpInnerQuad.y, SCREEN_HEIGHT * 0.9);
                     enemyHpInnerQuad.Draw(enemyHpShader);
-
                     battleMenuQuad.Draw(battleMenuBgShader);
-                    SlideUp(DeltaTime, SLIDE_SPEED, battleMenuQuad.y, 93.0);
 
-                    vector<string> bmenu = { "Attack", "Skill", "Item", "Run" };
-                    ui.DrawList(textShader, bmenu, 180, 130, 0.5f, glm::vec3(1.0, 1.0, 1.0), TextAlign::None, (int)Choice);
+					vector<string> bmenu = { "Attack", "Skill", "Item", "Run" };
+					for (size_t i = 0; i < bmenu.size(); i++)
+					{
+						if ((int)Choice == i)
+							ui.DrawText(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(1.0, 1.0, 1.0));
+						else
+							ui.DrawText(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(0.3, 0.3, 0.3));
+					}
                 }
             }
-
-            //Enemy
-            if (CharMove.WeBattleNow)
-            {
-				enemyShader.use();
-				mat4 enemymodel = translate(mat4(1.0f), enemy.Position);
-				enemymodel = rotate(enemymodel, radians(enemy.PlayerDirection + 90), vec3(0.0f, 1.0f, 0.0f));
-				enemyShader.setMat4("model", enemymodel);
-				enemyShader.setMat4("view", view);
-				enemyShader.setFloat("alpha", (CharMove.DistanceMoved == 0) ? 1.0f : CharMove.DistanceMoved); //TODO: animate this fade without using CharMove.DistanceMoved
-				enemy.Draw();
-            }
-
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

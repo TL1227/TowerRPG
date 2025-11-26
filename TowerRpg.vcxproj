@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\args.cpp" />
     <ClCompile Include="src\audio.cpp" />
+    <ClCompile Include="src\battlemessage.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\enemy.cpp" />
     <ClCompile Include="src\glad.c" />
@@ -53,6 +54,7 @@
   <ItemGroup>
     <ClInclude Include="src\args.h" />
     <ClInclude Include="src\audio.h" />
+    <ClInclude Include="src\battlemessage.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\enemy.h" />
     <ClInclude Include="src\imconfig.h" />

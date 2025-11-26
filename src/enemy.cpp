@@ -43,7 +43,10 @@ Enemy::Enemy()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    Texture = LoadTexture("textures\\sillymonster.jpg");
+    AttackTexture= LoadTexture("textures\\goblinattack.jpg");
+    CalmTexture = LoadTexture("textures\\goblincalm.jpg");
+
+    ActiveTexture = CalmTexture;
 
     glBindVertexArray(0);
 }
@@ -51,15 +54,19 @@ Enemy::Enemy()
 void Enemy::Draw()
 {
     glBindVertexArray(VAO);
-    glBindTexture(GL_TEXTURE_2D, Texture);
+    glBindTexture(GL_TEXTURE_2D, ActiveTexture);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 
-void Enemy::Draw(int tex)
+void Enemy::SwitchToAttackTex()
 {
-    glBindVertexArray(VAO);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+    ActiveTexture = AttackTexture;
 }
+
+void Enemy::SwitchToCalmTex()
+{
+    ActiveTexture = CalmTexture;
+}
+
+

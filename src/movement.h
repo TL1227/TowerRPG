@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "map.h"
 #include "enemy.h"
+#include "battlemessage.h"
 
 enum class MoveAction
 {
@@ -16,6 +17,9 @@ enum class MoveAction
 	TurnRight,
 	TurnLeft,
 	TurnAround,
+	AutoTurnRight,
+	AutoTurnLeft,
+	AutoTurnAround,
 	None,
 };
 
@@ -40,7 +44,6 @@ public:
     Cardinal GetNextRightDir() const;
     Cardinal GetNextLeftDir() const;
     Cardinal GetOppositeDir() const;
-	void SetFrontTile();
 	void SetMoveAction(MoveAction);
 	void MoveChar(float DeltaTime);
 	bool IsStill() const;
@@ -50,24 +53,26 @@ public:
 
 	Tile* FrontTile;
 	float DistanceMoved = 0.0f;
-	bool WeBattleNow = false;
+
 	Enemy* Enemy;
+	BattleMessage* BattleMessage;
 
 private:
 	glm::vec3 DirOffset(Cardinal dir);
 	Map& Map;
 	Camera& Camera;
 	Cardinal CurrentDirection = Cardinal::East;
-	float MovementUnit = 1.0f;
+	const float MovementUnit = 1.0f;
 	const float NormalMovementSpeed = 2.0f;
 	const float PreBattleMovementSpeed = 1.0f;
 	float MovementSpeed = 2.0f;
 	const float RotationSpeed = 150.0f;
 	MoveAction CurrMovement = MoveAction::None;
-	std::string PrintDir();
+	std::string PrintCurrentDirection();
 	int EnemyCounter = 5;
 	void EndMovement();
-	glm::vec3 GetNextMoveActionTilePos(MoveAction action);
+	void EndTurnMovement();
+	bool IsAutoMove(MoveAction);
 };
 
 #endif

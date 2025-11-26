@@ -18,12 +18,15 @@ public:
     std::vector<EnemyVertex>       vertices;
     std::vector<unsigned int> indices;
     glm::vec3 Position;
-    int Texture;
+    int CalmTexture;
+    int AttackTexture;
+    int ActiveTexture;
     float PlayerDirection;
 
     Enemy();
     void Draw();
-    void Draw(int tex);
+    void SwitchToAttackTex();
+    void SwitchToCalmTex();
 };
 
 #endif

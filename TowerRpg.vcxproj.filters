@@ -39,6 +39,7 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="src\quad.cpp" />
+    <ClCompile Include="src\battlemessage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\uifrag.shader">
@@ -105,6 +106,7 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="src\quad.h" />
+    <ClInclude Include="src\battlemessage.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

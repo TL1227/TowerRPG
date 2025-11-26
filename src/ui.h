@@ -35,6 +35,7 @@ public:
     void DrawList(Shader& shader, std::vector<std::string> list, float x, float y, float scale, glm::vec3 color, TextAlign ta = TextAlign::None, int highlight = -1);
 
 	std::map<char, Character> Characters;
+    float LineHeight;
     unsigned int QuadVAO;
     unsigned int QuadVBO;
     unsigned int QuadEBO;
