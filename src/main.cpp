@@ -20,6 +20,7 @@
 #include "ui.h"
 #include "tile.h"
 #include "quad.h"
+#include "audio.h"
 
 using namespace std;
 using namespace glm;
@@ -112,6 +113,25 @@ bool SlideDown(float delta, float speed, float& var, float end)
         var = end;
 
     return var == end;
+}
+
+struct Slider {
+    float start;
+    float end;
+    float elapsed = 0.0f;
+    float duration = 2.6f;   // seconds
+};
+
+bool Slide(float delta, float& var, Slider& s)
+{
+    s.elapsed += delta;
+
+    float t = s.elapsed / s.duration;
+    if (t > 1.0f) t = 1.0f;
+
+    var = s.start + (s.end - s.start) * t;
+
+    return t >= 1.0f;
 }
 
 //TODO: Look into different ways of scaling text
@@ -245,7 +265,7 @@ int main(int argc, char* argv[])
     battleMenuQuad.scalex = (float)SCREEN_WIDTH * 0.65f;
     battleMenuQuad.scaley = (float)SCREEN_HEIGHT * 0.25f;
 
-    float EnemyHpInnerQuadEndPosY = (float)SCREEN_HEIGHT * 0.9f;
+    float EnemyHpInnerQuadEndPosY = (float)SCREEN_HEIGHT * 0.93f;
     Quad enemyHpInnerQuad { "textures\\enemyhealthinner.jpg" };
     enemyHpInnerQuad.x = SCREEN_WIDTH / 2.0f;
     enemyHpInnerQuad.y = EnemyHpInnerQuadEndPosY + OffScreenDistance; //set it up for sliding on to screen
@@ -264,7 +284,14 @@ int main(int argc, char* argv[])
     UI ui {SCREEN_WIDTH, SCREEN_HEIGHT};
     ui.InitUi();
 
+    Audio audio;
     BattleMessage BattleMessage;
+    BattleMessage.Audio = &audio;
+
+    Slider slider;
+    slider.duration = audio.PreBattleBgmLength * 0.2;
+    BattleMessage.PreambleLength = audio.PreBattleBgmLength * 0.8;
+
     Enemy enemy;
     CharMove.Enemy = &enemy;
     CharMove.BattleMessage = &BattleMessage;
@@ -292,6 +319,7 @@ int main(int argc, char* argv[])
     float FPS = 1.0f / 100.0f;
     float LastTime = (float)glfwGetTime();
     float StartBattleTime;
+
     while (!glfwWindowShouldClose(window))
     {
         frames++;
@@ -408,7 +436,7 @@ int main(int argc, char* argv[])
             {
 				enemyShader.use();
 				mat4 enemymodel = translate(mat4(1.0f), enemy.Position);
-				enemymodel = rotate(enemymodel, radians(enemy.PlayerDirection + 90), vec3(0.0f, 1.0f, 0.0f));
+				enemymodel = rotate(enemymodel, radians(enemy.PlayerDirection - 90), vec3(0.0f, 1.0f, 0.0f)); //TODO: the rotation will flip depending on player direction. Fix this.
                 enemymodel = scale(enemymodel, vec3(0.8f, 0.8f, 0.0f));
 				enemyShader.setMat4("model", enemymodel);
 				enemyShader.setMat4("view", view);
@@ -429,7 +457,9 @@ int main(int argc, char* argv[])
                 else if (BattleMessage.CurrentPhase == BattlePhase::Preamble)
                 {
                     double timepassed = glfwGetTime() -  BattleMessage.PreambleStartTime;
-                    if (timepassed > BattleMessage.PreambleLength)
+
+                    //TODO: This is roughly how long the sliding takes, we need to calculate this dynamically somehow
+                    if (timepassed >= BattleMessage.PreambleLength) 
                     {
                         BattleMessage.SetBattlePhase(BattlePhase::Slide);
                     }
@@ -440,13 +470,13 @@ int main(int argc, char* argv[])
                 }
                 else if (BattleMessage.CurrentPhase == BattlePhase::Slide) //battle starts propa!
                 {
-                    bool slide1complete = SlideDown(DeltaTime, SlideSpeed, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY - 10);
+                    //bool slide1complete = SlideDown(DeltaTime, SlideSpeed, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY - 10);
+                    bool slide1complete = Slide(DeltaTime, enemyHpInnerQuad.y, slider);
                     enemyHpInnerQuad.Draw(enemyHpShader);
 
-                    bool slide2complete = SlideUp(DeltaTime, SlideSpeed, battleMenuQuad.y, BattleMenuQuadEndPosY + 10);
+                    //bool slide2complete = SlideUp(DeltaTime, SlideSpeed, battleMenuQuad.y, BattleMenuQuadEndPosY + 10);
+                    bool slide2complete = Slide(DeltaTime, battleMenuQuad.y, slider);
                     battleMenuQuad.Draw(battleMenuBgShader);
-
-                    cout << slide1complete << ' ' << slide2complete << endl;
 
                     if (slide1complete && slide2complete)
                     {
@@ -456,13 +486,11 @@ int main(int argc, char* argv[])
                 }
                 else if (BattleMessage.CurrentPhase == BattlePhase::Snap)
                 {
-                    bool slide1complete = SlideUp(DeltaTime, SlideSpeed /2, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY);
+                    bool slide1complete = SlideUp(DeltaTime, SlideSpeed / 5, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY);
                     enemyHpInnerQuad.Draw(enemyHpShader);
 
-                    bool slide2complete = SlideDown(DeltaTime, SlideSpeed/2, battleMenuQuad.y, BattleMenuQuadEndPosY);
+                    bool slide2complete = SlideDown(DeltaTime, SlideSpeed / 5, battleMenuQuad.y, BattleMenuQuadEndPosY);
                     battleMenuQuad.Draw(battleMenuBgShader);
-
-                    cout << slide1complete << ' ' << slide2complete << endl;
 
                     if (slide1complete && slide2complete)
                     {
@@ -486,6 +514,7 @@ int main(int argc, char* argv[])
 					}
                 }
             }
+
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

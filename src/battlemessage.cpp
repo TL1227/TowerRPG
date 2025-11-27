@@ -10,9 +10,19 @@ void BattleMessage::SetBattlePhase(BattlePhase phase)
 	if (CurrentPhase == BattlePhase::Preamble)
 	{
 		PreambleStartTime = glfwGetTime();
+		PreambleLength = Audio->PlayPreBattleBgm();
+	}
+	else if (CurrentPhase == BattlePhase::Snap)
+	{
+		Audio->PlayBattleBgm();
+		Audio->StopPreBattleBgm();
+	}
+	else if (CurrentPhase == BattlePhase::End)
+	{
+		Audio->StopBattleBgm();
 	}
 
-	std::cout << "CurrentPhase: " << (int)phase << std::endl;
+	std::cout << "CurrentPhase: " << (int)phase << " Time: " << glfwGetTime() << std::endl;
 }
 
 void BattleMessage::DecreaseEnemyCounter()

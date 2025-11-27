@@ -1,10 +1,24 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
+#include <fmod/fmod.hpp>
 
 class Audio
 {
+public:
 	Audio();
+	void PlayPreBattleBgm();
+	void StopPreBattleBgm();
+	void PlayBattleBgm();
+	void StopBattleBgm();
+	double PreBattleBgmLength;
+
+private:
+	FMOD::System* System;
+	FMOD::Sound* PreBattleBgm;
+	FMOD::Channel* PreBattleBgmCh;
+	FMOD::Sound* BattleBgm;
+	FMOD::Channel* BattleBgmCh;
 };
 
 #endif
