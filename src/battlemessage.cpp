@@ -10,7 +10,7 @@ void BattleMessage::SetBattlePhase(BattlePhase phase)
 	if (CurrentPhase == BattlePhase::Preamble)
 	{
 		PreambleStartTime = glfwGetTime();
-		PreambleLength = Audio->PlayPreBattleBgm();
+		Audio->PlayPreBattleBgm();
 	}
 	else if (CurrentPhase == BattlePhase::Snap)
 	{
