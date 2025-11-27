@@ -92,11 +92,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-void Waiting()
-{
-
-}
-
 bool SlideUp(float delta, float speed, float& var, float end)
 {
     if (var < end)
@@ -436,19 +431,35 @@ int main(int argc, char* argv[])
                     double timepassed = glfwGetTime() -  BattleMessage.PreambleStartTime;
                     if (timepassed > BattleMessage.PreambleLength)
                     {
-                        BattleMessage.SetBattlePhase(BattlePhase::Snapin);
+                        BattleMessage.SetBattlePhase(BattlePhase::Slide);
                     }
                     else
                     {
                         ui.DrawText(textShader, "Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
                     }
                 }
-                else if (BattleMessage.CurrentPhase == BattlePhase::Snapin) //battle starts propa!
+                else if (BattleMessage.CurrentPhase == BattlePhase::Slide) //battle starts propa!
                 {
-                    bool slide1complete = SlideDown(DeltaTime, SlideSpeed, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY);
+                    bool slide1complete = SlideDown(DeltaTime, SlideSpeed, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY - 10);
                     enemyHpInnerQuad.Draw(enemyHpShader);
 
-                    bool slide2complete = SlideUp(DeltaTime, SlideSpeed, battleMenuQuad.y, BattleMenuQuadEndPosY);
+                    bool slide2complete = SlideUp(DeltaTime, SlideSpeed, battleMenuQuad.y, BattleMenuQuadEndPosY + 10);
+                    battleMenuQuad.Draw(battleMenuBgShader);
+
+                    cout << slide1complete << ' ' << slide2complete << endl;
+
+                    if (slide1complete && slide2complete)
+                    {
+                        BattleMessage.SetBattlePhase(BattlePhase::Snap);
+                        enemy.SwitchToAttackTex();
+                    }
+                }
+                else if (BattleMessage.CurrentPhase == BattlePhase::Snap)
+                {
+                    bool slide1complete = SlideUp(DeltaTime, SlideSpeed /2, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY);
+                    enemyHpInnerQuad.Draw(enemyHpShader);
+
+                    bool slide2complete = SlideDown(DeltaTime, SlideSpeed/2, battleMenuQuad.y, BattleMenuQuadEndPosY);
                     battleMenuQuad.Draw(battleMenuBgShader);
 
                     cout << slide1complete << ' ' << slide2complete << endl;
@@ -456,7 +467,6 @@ int main(int argc, char* argv[])
                     if (slide1complete && slide2complete)
                     {
                         BattleMessage.SetBattlePhase(BattlePhase::Start);
-                        enemy.SwitchToAttackTex();
                     }
                 }
                 else if (BattleMessage.CurrentPhase == BattlePhase::Start) //battle starts propa!

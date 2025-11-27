@@ -5,7 +5,8 @@ enum class BattlePhase
 {
 	Sighting,
 	Preamble,
-	Snapin,
+	Slide,
+	Snap,
 	Start,
 	End
 };
@@ -19,6 +20,8 @@ public:
 	double PreambleLength = 2; //TODO: set this using battle intro length
 	void SetBattlePhase(BattlePhase phase);
 	void DecreaseEnemyCounter();
+	bool UiSlideDone = false;
+	bool UiSnapDone = false;
 };
 
 #endif
