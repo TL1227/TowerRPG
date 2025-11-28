@@ -287,11 +287,17 @@ int main(int argc, char* argv[])
     Audio audio;
     BattleMessage BattleMessage;
     BattleMessage.Audio = &audio;
+    BattleMessage.PreambleLength = audio.PreBattleBgmLength * 0.9;
 
-    Slider slider;
-    slider.duration = audio.PreBattleBgmLength * 0.2;
-    BattleMessage.PreambleLength = audio.PreBattleBgmLength * 0.8;
-	slider.start = enemyHpInnerQuad.y;
+    Slider EnemyHealthSlider;
+    EnemyHealthSlider.duration = audio.PreBattleBgmLength * 0.1;
+	EnemyHealthSlider.start = enemyHpInnerQuad.y;
+    EnemyHealthSlider.end = EnemyHpInnerQuadEndPosY - 10;
+
+    Slider BattleMenuSlider;
+    BattleMenuSlider.duration = audio.PreBattleBgmLength * 0.1;
+	BattleMenuSlider.start = battleMenuQuad.y;
+    BattleMenuSlider.end = BattleMenuQuadEndPosY + 10;
 
     Enemy enemy;
     CharMove.Enemy = &enemy;
@@ -471,21 +477,18 @@ int main(int argc, char* argv[])
                 }
                 else if (BattleMessage.CurrentPhase == BattlePhase::Slide) //battle starts propa!
                 {
-                    //bool slide1complete = SlideDown(DeltaTime, SlideSpeed, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY - 10);
-                    slider.end = EnemyHpInnerQuadEndPosY - 10;
-                    bool slide1complete = Slide(DeltaTime, enemyHpInnerQuad.y, slider);
-                    cout << enemyHpInnerQuad.y << endl;
+                    bool slide1complete = Slide(DeltaTime, enemyHpInnerQuad.y, EnemyHealthSlider);
                     enemyHpInnerQuad.Draw(enemyHpShader);
 
-                    bool slide2complete = SlideUp(DeltaTime, SlideSpeed, battleMenuQuad.y, BattleMenuQuadEndPosY + 10);
-                    //bool slide2complete = Slide(DeltaTime, battleMenuQuad.y, slider);
-                    //battleMenuQuad.Draw(battleMenuBgShader);
+                    bool slide2complete = Slide(DeltaTime, battleMenuQuad.y, BattleMenuSlider);
+                    battleMenuQuad.Draw(battleMenuBgShader);
 
-                    //if (slide1complete && slide2complete)
-                    if (slide1complete)
+                    if (slide1complete && slide2complete)
                     {
                         BattleMessage.SetBattlePhase(BattlePhase::Snap);
                         enemy.SwitchToAttackTex();
+                        EnemyHealthSlider.elapsed = 0.0f; //Make a reset slider func
+                        BattleMenuSlider.elapsed = 0.0f;
                     }
                 }
                 else if (BattleMessage.CurrentPhase == BattlePhase::Snap)
@@ -493,11 +496,10 @@ int main(int argc, char* argv[])
                     bool slide1complete = SlideUp(DeltaTime, SlideSpeed / 5, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY);
                     enemyHpInnerQuad.Draw(enemyHpShader);
 
-                    //bool slide2complete = SlideDown(DeltaTime, SlideSpeed / 5, battleMenuQuad.y, BattleMenuQuadEndPosY);
-                    //battleMenuQuad.Draw(battleMenuBgShader);
+                    bool slide2complete = SlideDown(DeltaTime, SlideSpeed / 5, battleMenuQuad.y, BattleMenuQuadEndPosY);
+                    battleMenuQuad.Draw(battleMenuBgShader);
 
-                    //if (slide1complete && slide2complete)
-                    if (slide1complete)
+                    if (slide1complete && slide2complete)
                     {
                         BattleMessage.SetBattlePhase(BattlePhase::Start);
                     }
