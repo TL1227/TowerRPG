@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
 	enemyHpShader.setMat4("projection", projection);
 
     const float SlideSpeed = SCREEN_HEIGHT * 2.0f;
-    const float OffScreenDistance = (float)SCREEN_HEIGHT * 0.5f;
+    float OffScreenDistance = (float)SCREEN_HEIGHT * 0.5f;
 
     float BattleMenuQuadEndPosY = (float)SCREEN_HEIGHT * 0.2f;
     Quad battleMenuQuad { "textures\\battlemenu.jpg" };
@@ -287,15 +287,15 @@ int main(int argc, char* argv[])
     Audio audio;
     BattleMessage BattleMessage;
     BattleMessage.Audio = &audio;
-    BattleMessage.PreambleLength = audio.PreBattleBgmLength * 0.9;
+    BattleMessage.PreambleLength = audio.PreBattleBgmLength * 0.8;
 
     Slider EnemyHealthSlider;
-    EnemyHealthSlider.duration = audio.PreBattleBgmLength * 0.1;
+    EnemyHealthSlider.duration = audio.PreBattleBgmLength * 0.2;
 	EnemyHealthSlider.start = enemyHpInnerQuad.y;
     EnemyHealthSlider.end = EnemyHpInnerQuadEndPosY - 10;
 
     Slider BattleMenuSlider;
-    BattleMenuSlider.duration = audio.PreBattleBgmLength * 0.1;
+    BattleMenuSlider.duration = audio.PreBattleBgmLength * 0.2;
 	BattleMenuSlider.start = battleMenuQuad.y;
     BattleMenuSlider.end = BattleMenuQuadEndPosY + 10;
 
@@ -350,13 +350,10 @@ int main(int argc, char* argv[])
 			ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            /*
             ImGui::Begin("Battle Text");
-            ImGui::InputFloat("X Percent", &BattleTextXPercent);
-            ImGui::InputFloat("Y Percent", &BattleTextYPercent);
-            ImGui::InputFloat("LineHeightPercent", &BattleMenuLineHeightPercent);
+            ImGui::InputFloat("BMQ y", &battleMenuQuad.y);
             ImGui::End();
-            */
+
             BattleTextX = SCREEN_WIDTH * BattleTextXPercent;
             BattleTextY = SCREEN_HEIGHT * BattleTextYPercent;
 			BattleMenuLineHeight = SCREEN_HEIGHT * BattleMenuLineHeightPercent;
