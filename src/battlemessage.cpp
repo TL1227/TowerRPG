@@ -3,8 +3,16 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-void BattleMessage::SetBattlePhase(BattlePhase phase)
+
+void BattleMessageAnnouncer::SetBattlePhase(BattlePhase phase)
 {
+    for(auto& lisenter : Listeners)
+    {
+        lisenter.PhaseChange(phase);
+    }
+
+    return;
+
 	CurrentPhase = phase;
 
 	if (CurrentPhase == BattlePhase::Preamble)
@@ -25,7 +33,7 @@ void BattleMessage::SetBattlePhase(BattlePhase phase)
 	std::cout << "CurrentPhase: " << (int)phase << " Time: " << glfwGetTime() << std::endl;
 }
 
-void BattleMessage::DecreaseEnemyCounter()
+void BattleMessageAnnouncer::DecreaseEnemyCounter()
 {
 	EnemyCounter--;
 	std::cout << EnemyCounter << std::endl;

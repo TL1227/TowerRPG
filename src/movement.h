@@ -6,7 +6,7 @@
 #include "camera.h"
 #include "map.h"
 #include "enemy.h"
-#include "battlemessage.h"
+#include "battlemessagelistener.h"
 
 enum class MoveAction
 {
@@ -37,7 +37,7 @@ enum class Cardinal
 	East = 0,
 };
 
-class Movement
+class Movement : BattleMessageListener
 {
 public:
 	Movement(Map& map, Camera& c);
@@ -56,6 +56,8 @@ public:
 
 	Enemy* Enemy;
 	BattleMessage* BattleMessage;
+    
+    overide 
 
 private:
 	glm::vec3 DirOffset(Cardinal dir);

@@ -2,18 +2,12 @@
 #define BATTLEMESSAGE_H
 
 #include "audio.h"
+#include "battlemessagelistener.h"
 
-enum class BattlePhase
-{
-	Sighting,
-	Preamble,
-	Slide,
-	Snap,
-	Start,
-	End
-};
+#include <vector>
 
-class BattleMessage
+
+class BattleMessageAnnouncer
 {
 public:
 	BattlePhase CurrentPhase = BattlePhase::End;
@@ -25,6 +19,7 @@ public:
 	bool UiSlideDone = false;
 	bool UiSnapDone = false;
 	Audio* Audio;
+    std::vector<BattleMessageListener> Listeners;
 };
 
 #endif
