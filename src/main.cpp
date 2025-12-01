@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "shader.h"
-#include "movement.h"
+#include "movementsystem.h"
 #include "camera.h"
 #include "map.h"
 #include "args.h"
@@ -84,10 +84,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (CurrentMode == Mode::TowerBattle)
     {
-        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))        {
+        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
+        {
             Choice = static_cast<BattleChoice>((static_cast<int>(Choice) + 1) % (int)BattleChoice::NUM_CHOICES);
         }
-        else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_UP) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))        {
+        else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_UP) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
+        {
             Choice = static_cast<BattleChoice>((static_cast<int>(Choice) - 1 + (int)BattleChoice::NUM_CHOICES) % (int)BattleChoice::NUM_CHOICES);
         }
     }
@@ -230,7 +232,7 @@ int main(int argc, char* argv[])
 
     Camera.CameraPos = LevelMap.PlayerStartPos;
 
-    Movement CharMove{ LevelMap, Camera };
+    MovementSystem CharacterMovement{ LevelMap, Camera };
 
     //build shaders
     Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
@@ -285,9 +287,9 @@ int main(int argc, char* argv[])
     ui.InitUi();
 
     Audio audio;
-    BattleMessage BattleMessage;
-    BattleMessage.Audio = &audio;
-    BattleMessage.PreambleLength = audio.PreBattleBgmLength * 0.8;
+    BattleSystem BattleSystem;
+    BattleSystem.Audio = &audio;
+    BattleSystem.PreambleLength = audio.PreBattleBgmLength * 0.8;
 
     Slider EnemyHealthSlider;
     EnemyHealthSlider.duration = audio.PreBattleBgmLength * 0.2;
@@ -300,8 +302,14 @@ int main(int argc, char* argv[])
     BattleMenuSlider.end = BattleMenuQuadEndPosY + 10;
 
     Enemy enemy;
-    CharMove.Enemy = &enemy;
-    CharMove.BattleMessage = &BattleMessage;
+    CharacterMovement.Enemy = &enemy;
+    CharacterMovement.BattleSystem = &BattleSystem;
+
+    //subcribe to battle events
+    BattleEvent Be;
+    Be.AddListener(CharacterMovement);
+    Be.AddListener(audio);
+    BattleSystem.BattleEvent = &Be;
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -350,43 +358,45 @@ int main(int argc, char* argv[])
 			ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
+            /*
             ImGui::Begin("Battle Text");
             ImGui::InputFloat("BMQ y", &battleMenuQuad.y);
             ImGui::End();
+            */
 
             BattleTextX = SCREEN_WIDTH * BattleTextXPercent;
             BattleTextY = SCREEN_HEIGHT * BattleTextYPercent;
 			BattleMenuLineHeight = SCREEN_HEIGHT * BattleMenuLineHeightPercent;
 
-            if (BattleMessage.CurrentPhase == BattlePhase::End || BattleMessage.CurrentPhase == BattlePhase::Sighting)
+            if (BattleSystem.GetPhase() == BattlePhase::End || BattleSystem.GetPhase() == BattlePhase::Sighting)
             {
 				if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
                 {
-					CharMove.SetMoveAction(MoveAction::TurnRight);
+					CharacterMovement.SetMoveAction(MoveAction::TurnRight);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
                 {
-					CharMove.SetMoveAction(MoveAction::TurnLeft);
+					CharacterMovement.SetMoveAction(MoveAction::TurnLeft);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT))
                 {
-					CharMove.SetMoveAction(MoveAction::Right);
+					CharacterMovement.SetMoveAction(MoveAction::Right);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT))
                 {
-					CharMove.SetMoveAction(MoveAction::Left);
+					CharacterMovement.SetMoveAction(MoveAction::Left);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN))
                 {
-					CharMove.SetMoveAction(MoveAction::TurnAround);
+					CharacterMovement.SetMoveAction(MoveAction::TurnAround);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
                 {
-					CharMove.SetMoveAction(MoveAction::Forwards);
+					CharacterMovement.SetMoveAction(MoveAction::Forwards);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
                 {
-					CharMove.SetMoveAction(MoveAction::Backwards);
+					CharacterMovement.SetMoveAction(MoveAction::Backwards);
                 }
             }
             else
@@ -396,8 +406,7 @@ int main(int argc, char* argv[])
                 {
                     if (Choice == BattleChoice::Run)
                     {
-                        BattleMessage.SetBattlePhase(BattlePhase::End);
-						CharMove.EndBattle();
+                        BattleSystem.SetBattlePhase(BattlePhase::End);
                         enemy.SwitchToCalmTex();
 						enemyHpInnerQuad.y = EnemyHpInnerQuadEndPosY + OffScreenDistance; //set it up for sliding on to screen
 						battleMenuQuad.y = BattleMenuQuadEndPosY - OffScreenDistance;
@@ -405,7 +414,7 @@ int main(int argc, char* argv[])
                 }
             }
 
-			CharMove.MoveChar(DeltaTime);
+			CharacterMovement.MoveChar(DeltaTime);
 
             //TODO: This could probably get called in MoveChar itself 
             Camera.UpdateCameraRotation();
@@ -436,7 +445,7 @@ int main(int argc, char* argv[])
 				}
 
             //Enemy Drawing
-            if (BattleMessage.CurrentPhase != BattlePhase::End)
+            if (BattleSystem.GetPhase() != BattlePhase::End)
             {
 				enemyShader.use();
 				mat4 enemymodel = translate(mat4(1.0f), enemy.Position);
@@ -444,35 +453,35 @@ int main(int argc, char* argv[])
                 enemymodel = scale(enemymodel, vec3(0.8f, 0.8f, 0.0f));
 				enemyShader.setMat4("model", enemymodel);
 				enemyShader.setMat4("view", view);
-				enemyShader.setFloat("alpha", (CharMove.DistanceMoved == 0) ? 1.0f : CharMove.DistanceMoved); //TODO: animate this fade without using CharMove.DistanceMoved
+				enemyShader.setFloat("alpha", (CharacterMovement.DistanceMoved == 0) ? 1.0f : CharacterMovement.DistanceMoved); //TODO: animate this fade without using CharMove.DistanceMoved
 				enemy.Draw();
             }
 
             //UI DRAWING
-            if (CharMove.IsStill())
+            if (CharacterMovement.IsStill())
             {
-                if (CharMove.FrontTile)
+                if (CharacterMovement.FrontTile)
                 {
-                    if (!CharMove.FrontTile->InteractiveText.empty())
+                    if (!CharacterMovement.FrontTile->InteractiveText.empty())
                     {
-                        ui.DrawText(textShader, CharMove.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+                        ui.DrawText(textShader, CharacterMovement.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
                     }
                 }
-                else if (BattleMessage.CurrentPhase == BattlePhase::Preamble)
+                else if (BattleSystem.GetPhase() == BattlePhase::Preamble)
                 {
-                    double timepassed = glfwGetTime() -  BattleMessage.PreambleStartTime;
+                    double timepassed = glfwGetTime() -  BattleSystem.PreambleStartTime;
 
                     //TODO: This is roughly how long the sliding takes, we need to calculate this dynamically somehow
-                    if (timepassed >= BattleMessage.PreambleLength) 
+                    if (timepassed >= BattleSystem.PreambleLength) 
                     {
-                        BattleMessage.SetBattlePhase(BattlePhase::Slide);
+                        BattleSystem.SetBattlePhase(BattlePhase::Slide);
                     }
                     else
                     {
                         ui.DrawText(textShader, "Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
                     }
                 }
-                else if (BattleMessage.CurrentPhase == BattlePhase::Slide) //battle starts propa!
+                else if (BattleSystem.GetPhase() == BattlePhase::Slide) //battle starts propa!
                 {
                     bool slide1complete = Slide(DeltaTime, enemyHpInnerQuad.y, EnemyHealthSlider);
                     enemyHpInnerQuad.Draw(enemyHpShader);
@@ -482,13 +491,13 @@ int main(int argc, char* argv[])
 
                     if (slide1complete && slide2complete)
                     {
-                        BattleMessage.SetBattlePhase(BattlePhase::Snap);
+                        BattleSystem.SetBattlePhase(BattlePhase::Snap);
                         enemy.SwitchToAttackTex();
                         EnemyHealthSlider.elapsed = 0.0f; //Make a reset slider func
                         BattleMenuSlider.elapsed = 0.0f;
                     }
                 }
-                else if (BattleMessage.CurrentPhase == BattlePhase::Snap)
+                else if (BattleSystem.GetPhase() == BattlePhase::Snap)
                 {
                     bool slide1complete = SlideUp(DeltaTime, SlideSpeed / 5, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY);
                     enemyHpInnerQuad.Draw(enemyHpShader);
@@ -498,10 +507,10 @@ int main(int argc, char* argv[])
 
                     if (slide1complete && slide2complete)
                     {
-                        BattleMessage.SetBattlePhase(BattlePhase::Start);
+                        BattleSystem.SetBattlePhase(BattlePhase::Start);
                     }
                 }
-                else if (BattleMessage.CurrentPhase == BattlePhase::Start) //battle starts propa!
+                else if (BattleSystem.GetPhase() == BattlePhase::Start) //battle starts propa!
                 {
                     CurrentMode = Mode::TowerBattle;
 

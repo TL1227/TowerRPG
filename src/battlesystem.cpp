@@ -1,0 +1,43 @@
+#include "battlesystem.h"
+
+#include <GLFW/glfw3.h>
+#include <iostream>
+
+void BattleSystem::SetBattlePhase(BattlePhase phase)
+{
+	CurrentBattlePhase = phase;
+
+	if (CurrentBattlePhase == BattlePhase::Preamble)
+	{
+		PreambleStartTime = glfwGetTime();
+	}
+
+	BattleEvent->OnPhaseChange(phase);
+
+    return;
+}
+
+BattlePhase BattleSystem::GetPhase()
+{
+    return CurrentBattlePhase;
+}
+
+void BattleSystem::AutoMoveFinished()
+{
+	if (CurrentBattlePhase == BattlePhase::Sighting)
+	{
+		SetBattlePhase(BattlePhase::Preamble);
+	}
+}
+
+void BattleSystem::DecreaseEnemyCounter()
+{
+	EnemyCounter--;
+
+	if (EnemyCounter <= 0)
+	{
+		SetBattlePhase(BattlePhase::Sighting);
+		EnemyCounter = 5;
+	}
+}
+

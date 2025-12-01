@@ -5,7 +5,7 @@
 
 Enemy::Enemy()
 {
-    //TODO: Make this more "c++" later
+    //TODO: make this a quad class
 
     float vertices[] = {
         // positions          // colors           // texture coords
@@ -67,6 +67,11 @@ void Enemy::SwitchToAttackTex()
 void Enemy::SwitchToCalmTex()
 {
     ActiveTexture = CalmTexture;
+}
+
+void Enemy::OnMoveActionChange()
+{
+
 }
 
 

@@ -2,8 +2,9 @@
 #define AUDIO_H
 
 #include <fmod/fmod.hpp>
+#include "battleeventlistener.h"
 
-class Audio
+class Audio : public BattleEventListener
 {
 public:
 	Audio();
@@ -19,6 +20,7 @@ private:
 	FMOD::Channel* PreBattleBgmCh;
 	FMOD::Sound* BattleBgm;
 	FMOD::Channel* BattleBgmCh;
+	void OnPhaseChange(BattlePhase bp) override;
 };
 
 #endif

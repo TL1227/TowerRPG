@@ -6,29 +6,11 @@
 #include "camera.h"
 #include "map.h"
 #include "enemy.h"
-#include "battlemessagelistener.h"
+#include "battleeventlistener.h"
+#include "battlesystem.h"
+#include "moveaction.h"
 
-enum class MoveAction
-{
-	Forwards,
-	Backwards,
-	Left,
-	Right,
-	TurnRight,
-	TurnLeft,
-	TurnAround,
-	AutoTurnRight,
-	AutoTurnLeft,
-	AutoTurnAround,
-	None,
-};
-
-struct TilePos
-{
-	int X;
-	int Z;
-};
-
+//TODO: move this to it's own file one day
 enum class Cardinal
 {
 	South = 90,
@@ -37,10 +19,10 @@ enum class Cardinal
 	East = 0,
 };
 
-class Movement : BattleMessageListener
+class MovementSystem : public BattleEventListener
 {
 public:
-	Movement(Map& map, Camera& c);
+	MovementSystem(Map& map, Camera& c);
     Cardinal GetNextRightDir() const;
     Cardinal GetNextLeftDir() const;
     Cardinal GetOppositeDir() const;
@@ -55,9 +37,9 @@ public:
 	float DistanceMoved = 0.0f;
 
 	Enemy* Enemy;
-	BattleMessage* BattleMessage;
+	BattleSystem* BattleSystem;
     
-    overide 
+	void OnPhaseChange(BattlePhase bp) override ;
 
 private:
 	glm::vec3 DirOffset(Cardinal dir);
@@ -69,12 +51,14 @@ private:
 	const float PreBattleMovementSpeed = 1.0f;
 	float MovementSpeed = 2.0f;
 	const float RotationSpeed = 150.0f;
-	MoveAction CurrMovement = MoveAction::None;
+	MoveAction CurrentMoveAction = MoveAction::None;
+	MoveAction InputMoveAction = MoveAction::None;
 	std::string PrintCurrentDirection();
 	int EnemyCounter = 5;
 	void EndMovement();
 	void EndTurnMovement();
 	bool IsAutoMove(MoveAction);
+	BattlePhase CurrentBattlePhase;
 };
 
 #endif

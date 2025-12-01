@@ -49,3 +49,31 @@ void Audio::StopBattleBgm()
 }
 
 
+void Audio::OnPhaseChange(BattlePhase bp)
+{
+    switch (bp)
+    {
+    case BattlePhase::Preamble:
+    {
+		PlayPreBattleBgm();
+    }
+        break;
+    case BattlePhase::Slide:
+        break;
+    case BattlePhase::Snap:
+    {
+		PlayBattleBgm();
+		StopPreBattleBgm();
+    }
+        break;
+    case BattlePhase::Start:
+        break;
+    case BattlePhase::End:
+    {
+		StopBattleBgm();
+    }
+        break;
+    default:
+        break;
+    }
+}

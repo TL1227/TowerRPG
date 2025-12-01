@@ -2,8 +2,9 @@
 #define ENEMY_H
 
 #include <vector>
-
 #include <glm/glm.hpp>
+
+#include "movementeventlistener.h"
 
 struct EnemyVertex
 {
@@ -11,7 +12,7 @@ struct EnemyVertex
     glm::vec2 TexCoords;
 };
 
-class Enemy
+class Enemy : public MovementEventListener
 {
 public:
     unsigned int VBO, EBO, VAO;
@@ -27,6 +28,8 @@ public:
     void Draw();
     void SwitchToAttackTex();
     void SwitchToCalmTex();
+private:
+    void OnMoveActionChange() override;
 };
 
 #endif

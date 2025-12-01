@@ -2,12 +2,12 @@
 #include <fstream>
 #include <random>
 
-#include "movement.h"
+#include "movementsystem.h"
 #include "args.h"
 
 static MoveAction NextMove = MoveAction::None;
 
-Movement::Movement(::Map& map, ::Camera& camera)
+MovementSystem::MovementSystem(::Map& map, ::Camera& camera)
 	: Map{ map }, Camera{ camera }
 {
 }
@@ -22,7 +22,7 @@ static int RandomNumber()
 	return distrib(gen);
 }
 
-Cardinal Movement::GetNextRightDir() const
+Cardinal MovementSystem::GetNextRightDir() const
 {
 	if (CurrentDirection == Cardinal::North)
 		return Cardinal::East;
@@ -34,7 +34,7 @@ Cardinal Movement::GetNextRightDir() const
 		return Cardinal::North;
 }
 
-Cardinal Movement::GetNextLeftDir() const
+Cardinal MovementSystem::GetNextLeftDir() const
 {
 	if (CurrentDirection == Cardinal::North)
 		return Cardinal::West;
@@ -46,7 +46,7 @@ Cardinal Movement::GetNextLeftDir() const
 		return Cardinal::North;
 }
 
-Cardinal Movement::GetOppositeDir() const
+Cardinal MovementSystem::GetOppositeDir() const
 {
 	if (CurrentDirection == Cardinal::North)
 		return Cardinal::South;
@@ -63,9 +63,11 @@ bool BlockIsSolid(char ch)
 	return (ch == '#' || ch == 'c');
 }
 
-void Movement::SetMoveAction(MoveAction action)
+
+
+void MovementSystem::SetMoveAction(MoveAction action)
 {
-	if (CurrMovement == MoveAction::None)
+	if (CurrentMoveAction == MoveAction::None)
 	{
 		if (action == MoveAction::TurnRight ||
 			action == MoveAction::TurnLeft ||
@@ -74,7 +76,7 @@ void Movement::SetMoveAction(MoveAction action)
 			action == MoveAction::AutoTurnLeft ||
 			action == MoveAction::AutoTurnAround)
 		{
-			CurrMovement = action;
+			CurrentMoveAction = action;
 			return;
 		}
 
@@ -86,7 +88,7 @@ void Movement::SetMoveAction(MoveAction action)
 			Tile* enemyTile = Map.GetTile(GetNextEnemyTile(action));
 			if (!enemyTile || enemyTile->IsWalkable)
 			{
-				if (BattleMessage->CurrentPhase == BattlePhase::Sighting)
+				if (BattleSystem->GetPhase() == BattlePhase::Sighting)
 				{
 					MovementSpeed = PreBattleMovementSpeed;
 					Enemy->Position = GetNextEnemyTile(action);
@@ -110,17 +112,12 @@ void Movement::SetMoveAction(MoveAction action)
 				}
 			}
 
-			CurrMovement = action;
+			CurrentMoveAction = action;
 		}
 	}
 }
 
-void Movement::EndBattle()
-{
-	MovementSpeed = NormalMovementSpeed;
-}
-
-std::string Movement::PrintCurrentDirection()
+std::string MovementSystem::PrintCurrentDirection()
 {
 	switch (CurrentDirection)
 	{
@@ -131,12 +128,12 @@ std::string Movement::PrintCurrentDirection()
 	}
 }
 
-bool Movement::IsStill() const
+bool MovementSystem::IsStill() const
 {
-	return CurrMovement == MoveAction::None;
+	return CurrentMoveAction == MoveAction::None;
 }
 
-glm::vec3 Movement::DirOffset(Cardinal dir)
+glm::vec3 MovementSystem::DirOffset(Cardinal dir)
 {
 	switch (dir)
 	{
@@ -149,7 +146,7 @@ glm::vec3 Movement::DirOffset(Cardinal dir)
 	return { 0,0,0 };
 }
 
-glm::vec3 Movement::GetNextTile(MoveAction action)
+glm::vec3 MovementSystem::GetNextTile(MoveAction action)
 {
 	glm::vec3 forward = DirOffset(CurrentDirection);
 	glm::vec3 right = { -forward.z, 0, forward.x };
@@ -167,7 +164,7 @@ glm::vec3 Movement::GetNextTile(MoveAction action)
 		return glm::vec3{};
 }
 
-glm::vec3 Movement::GetNextEnemyTile(MoveAction action)
+glm::vec3 MovementSystem::GetNextEnemyTile(MoveAction action)
 {
 	glm::vec3 forward = DirOffset(CurrentDirection);
 	glm::vec3 right = { -forward.z, 0, forward.x };
@@ -185,14 +182,14 @@ glm::vec3 Movement::GetNextEnemyTile(MoveAction action)
 		return glm::vec3{};
 }
 
-void Movement::MoveChar(float DeltaTime)
+void MovementSystem::MoveChar(float DeltaTime)
 {
-    if (CurrMovement == MoveAction::None) 
+    if (CurrentMoveAction == MoveAction::None) 
 		return;
 
 	glm::vec3 moveDir(0.0f);  // initialize to zero
 
-	switch (CurrMovement) {
+	switch (CurrentMoveAction) {
 	case MoveAction::Forwards:
 		moveDir = Camera.CameraFront;
 		break;
@@ -232,7 +229,7 @@ void Movement::MoveChar(float DeltaTime)
 			}
 		}
 	}
-    else if (CurrMovement == MoveAction::TurnRight || CurrMovement == MoveAction::AutoTurnRight)
+    else if (CurrentMoveAction == MoveAction::TurnRight || CurrentMoveAction == MoveAction::AutoTurnRight)
     {
         Camera.HorRot += RotationSpeed * DeltaTime;
 
@@ -243,7 +240,7 @@ void Movement::MoveChar(float DeltaTime)
 			EndTurnMovement();
 		}
     }
-    else if (CurrMovement == MoveAction::TurnLeft || CurrMovement == MoveAction::AutoTurnLeft)
+    else if (CurrentMoveAction == MoveAction::TurnLeft || CurrentMoveAction == MoveAction::AutoTurnLeft)
     {
         Camera.HorRot -= RotationSpeed * DeltaTime;
 
@@ -254,7 +251,7 @@ void Movement::MoveChar(float DeltaTime)
 			EndTurnMovement();
 		}
     }
-    else if (CurrMovement == MoveAction::TurnAround || CurrMovement == MoveAction::AutoTurnAround)
+    else if (CurrentMoveAction == MoveAction::TurnAround || CurrentMoveAction == MoveAction::AutoTurnAround)
     {
         Camera.HorRot -= RotationSpeed * DeltaTime;
 
@@ -267,51 +264,74 @@ void Movement::MoveChar(float DeltaTime)
     }
 }
 
-bool Movement::IsAutoMove(MoveAction ma)
+bool MovementSystem::IsAutoMove(MoveAction ma)
 {
 	return (ma == MoveAction::AutoTurnAround ||
 		    ma == MoveAction::AutoTurnRight  ||
 		    ma == MoveAction::AutoTurnLeft);
 }
 
-void Movement::EndTurnMovement()
+void MovementSystem::EndTurnMovement()
 {
-	if (IsAutoMove(CurrMovement))
+	if (IsAutoMove(CurrentMoveAction))
 	{
-		if (BattleMessage->CurrentPhase == BattlePhase::Sighting)
-		{
-			BattleMessage->SetBattlePhase(BattlePhase::Preamble);
-		}
+		BattleSystem->AutoMoveFinished();
 	}
 
-	CurrMovement = MoveAction::None;
+	CurrentMoveAction = MoveAction::None;
 }
 
-void Movement::EndMovement()
+void MovementSystem::EndMovement()
 {
-	if (BattleMessage->CurrentPhase == BattlePhase::Sighting)
+	if (BattleSystem->GetPhase() == BattlePhase::Sighting)
 	{
 		if (NextMove != MoveAction::None)
 		{
-			auto move = NextMove;
+			MoveAction move = NextMove;
 			NextMove = MoveAction::None;
-			CurrMovement = MoveAction::None;
+			CurrentMoveAction = MoveAction::None;
 			SetMoveAction(move);
 			return;
 		}
 		else
 		{
-			Tile* enemyTile = Map.GetTile(GetNextTile(CurrMovement));
+			Tile* enemyTile = Map.GetTile(GetNextTile(CurrentMoveAction));
 			if (!enemyTile || enemyTile->IsWalkable)
 			{
-				BattleMessage->SetBattlePhase(BattlePhase::Preamble);
+				BattleSystem->SetBattlePhase(BattlePhase::Preamble);
 			}
 		}
 	}
 	else
 	{
-		BattleMessage->DecreaseEnemyCounter();
+		BattleSystem->DecreaseEnemyCounter();
 	}
 
-	CurrMovement = MoveAction::None;
+	CurrentMoveAction = MoveAction::None;
+}
+
+void MovementSystem::OnPhaseChange(BattlePhase bp)
+{
+	switch (bp)
+	{
+	case BattlePhase::Sighting:
+	{
+	}
+	break;
+	case BattlePhase::Preamble:
+	break;
+	case BattlePhase::Slide:
+		break;
+	case BattlePhase::Snap:
+		break;
+	case BattlePhase::Start:
+		break;
+	case BattlePhase::End:
+	{
+		MovementSpeed = NormalMovementSpeed;
+	}
+		break;
+	default:
+		break;
+	}
 }
