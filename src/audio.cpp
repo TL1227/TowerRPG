@@ -48,8 +48,7 @@ void Audio::StopBattleBgm()
     BattleBgmCh->stop();
 }
 
-
-void Audio::OnPhaseChange(BattlePhase bp)
+void Audio::OnBattlePhaseChange(BattlePhase bp)
 {
     switch (bp)
     {

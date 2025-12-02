@@ -63,9 +63,25 @@ bool BlockIsSolid(char ch)
 	return (ch == '#' || ch == 'c');
 }
 
+void MovementSystem::SetCurrentMoveAction(MoveAction ma)
+{
+	CurrentMoveAction = ma;
+	Event->DispatchMoveActionChange(ma);
+}
 
+void MovementSystem::SetCurrentDirection(Cardinal dr)
+{
+	CurrentDirection = dr;
+	Event->DispatchDirectionChange(dr);
+}
 
-void MovementSystem::SetMoveAction(MoveAction action)
+void MovementSystem::SetMoveDistance(float d)
+{
+	DistanceMoved = d;
+	Event->DispatchMoveDistanceChange(d);
+}
+
+void MovementSystem::ProcessMoveAction(MoveAction action)
 {
 	if (CurrentMoveAction == MoveAction::None)
 	{
@@ -76,7 +92,7 @@ void MovementSystem::SetMoveAction(MoveAction action)
 			action == MoveAction::AutoTurnLeft ||
 			action == MoveAction::AutoTurnAround)
 		{
-			CurrentMoveAction = action;
+			SetCurrentMoveAction(action);
 			return;
 		}
 
@@ -92,7 +108,6 @@ void MovementSystem::SetMoveAction(MoveAction action)
 				{
 					MovementSpeed = PreBattleMovementSpeed;
 					Enemy->Position = GetNextEnemyTile(action);
-					Enemy->PlayerDirection = (float)CurrentDirection;
 
 					if (action == MoveAction::Left)
 					{
@@ -112,7 +127,7 @@ void MovementSystem::SetMoveAction(MoveAction action)
 				}
 			}
 
-			CurrentMoveAction = action;
+			SetCurrentMoveAction(action);
 		}
 	}
 }
@@ -182,7 +197,7 @@ glm::vec3 MovementSystem::GetNextEnemyTile(MoveAction action)
 		return glm::vec3{};
 }
 
-void MovementSystem::MoveChar(float DeltaTime)
+void MovementSystem::Tick(float DeltaTime)
 {
     if (CurrentMoveAction == MoveAction::None) 
 		return;
@@ -210,7 +225,7 @@ void MovementSystem::MoveChar(float DeltaTime)
 	{
 		float moveAmount = MovementSpeed * DeltaTime;
 		Camera.CameraPos += moveDir * moveAmount;
-		DistanceMoved += moveAmount;
+		SetMoveDistance(DistanceMoved + moveAmount);
 
 		if (DistanceMoved > MovementUnit)
 		{
@@ -236,7 +251,7 @@ void MovementSystem::MoveChar(float DeltaTime)
 		if (Camera.HorRot > (int)CurrentDirection + 90)
 		{
             Camera.HorRot = (int)GetNextRightDir();
-			CurrentDirection = GetNextRightDir();
+			SetCurrentDirection(GetNextRightDir());
 			EndTurnMovement();
 		}
     }
@@ -247,7 +262,7 @@ void MovementSystem::MoveChar(float DeltaTime)
 		if (Camera.HorRot < (int)CurrentDirection - 90)
 		{
             Camera.HorRot = (int)GetNextLeftDir();
-			CurrentDirection = GetNextLeftDir();
+			SetCurrentDirection(GetNextLeftDir());
 			EndTurnMovement();
 		}
     }
@@ -258,7 +273,7 @@ void MovementSystem::MoveChar(float DeltaTime)
 		if (Camera.HorRot < (int)CurrentDirection - 180)
 		{
             Camera.HorRot = (int)GetOppositeDir();
-			CurrentDirection = GetOppositeDir();
+			SetCurrentDirection(GetOppositeDir());
 			EndTurnMovement();
 		}
     }
@@ -275,10 +290,11 @@ void MovementSystem::EndTurnMovement()
 {
 	if (IsAutoMove(CurrentMoveAction))
 	{
+		//TODO: movement finished event
 		BattleSystem->AutoMoveFinished();
 	}
 
-	CurrentMoveAction = MoveAction::None;
+	SetCurrentMoveAction(MoveAction::None);
 }
 
 void MovementSystem::EndMovement()
@@ -289,8 +305,8 @@ void MovementSystem::EndMovement()
 		{
 			MoveAction move = NextMove;
 			NextMove = MoveAction::None;
-			CurrentMoveAction = MoveAction::None;
-			SetMoveAction(move);
+			SetCurrentMoveAction(MoveAction::None);
+			ProcessMoveAction(move);
 			return;
 		}
 		else
@@ -307,30 +323,19 @@ void MovementSystem::EndMovement()
 		BattleSystem->DecreaseEnemyCounter();
 	}
 
-	CurrentMoveAction = MoveAction::None;
+	SetCurrentMoveAction(MoveAction::None);
 }
 
-void MovementSystem::OnPhaseChange(BattlePhase bp)
+void MovementSystem::OnBattlePhaseChange(BattlePhase bp)
 {
 	switch (bp)
 	{
-	case BattlePhase::Sighting:
-	{
-	}
-	break;
-	case BattlePhase::Preamble:
-	break;
-	case BattlePhase::Slide:
-		break;
-	case BattlePhase::Snap:
-		break;
-	case BattlePhase::Start:
-		break;
-	case BattlePhase::End:
-	{
-		MovementSpeed = NormalMovementSpeed;
-	}
-		break;
+	case BattlePhase::Sighting: break;
+	case BattlePhase::Preamble: break;
+	case BattlePhase::Slide: break;
+	case BattlePhase::Snap: break;
+	case BattlePhase::Start: break;
+	case BattlePhase::End: { MovementSpeed = NormalMovementSpeed; } break;
 	default:
 		break;
 	}

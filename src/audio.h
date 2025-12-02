@@ -20,7 +20,7 @@ private:
 	FMOD::Channel* PreBattleBgmCh;
 	FMOD::Sound* BattleBgm;
 	FMOD::Channel* BattleBgmCh;
-	void OnPhaseChange(BattlePhase bp) override;
+	void OnBattlePhaseChange(BattlePhase bp) override;
 };
 
 #endif

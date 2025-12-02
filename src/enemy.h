@@ -5,31 +5,34 @@
 #include <glm/glm.hpp>
 
 #include "movementeventlistener.h"
+#include "battleeventlistener.h"
+#include "shader.h"
 
-struct EnemyVertex
-{
-    glm::vec3 Position;
-    glm::vec2 TexCoords;
-};
-
-class Enemy : public MovementEventListener
+class Enemy : public MovementEventListener, public BattleEventListener
 {
 public:
     unsigned int VBO, EBO, VAO;
-    std::vector<EnemyVertex>       vertices;
-    std::vector<unsigned int> indices;
     glm::vec3 Position;
     int CalmTexture;
+    int PreAttackTexture;
     int AttackTexture;
     int ActiveTexture;
     float PlayerDirection;
+    float Alpha = 0.0f;
+    Shader Shader;
+    glm::mat4 ModelMat;
 
-    Enemy();
-    void Draw();
+    Enemy(::Shader&);
+    void Tick(glm::mat4);
     void SwitchToAttackTex();
     void SwitchToCalmTex();
 private:
-    void OnMoveActionChange() override;
+    void OnMoveActionChange(MoveAction) override;
+    void OnDirectionChange(Cardinal) override;
+    void OnMoveDistanceChange(float) override;
+
+    void OnBattlePhaseChange(BattlePhase) override;
+    bool DrawMe = false;
 };
 
 #endif

@@ -9,15 +9,10 @@
 #include "battleeventlistener.h"
 #include "battlesystem.h"
 #include "moveaction.h"
+#include "movementevent.h"
+#include "cardinal.h"
 
 //TODO: move this to it's own file one day
-enum class Cardinal
-{
-	South = 90,
-	West = 180,
-	North = 270,
-	East = 0,
-};
 
 class MovementSystem : public BattleEventListener
 {
@@ -26,10 +21,9 @@ public:
     Cardinal GetNextRightDir() const;
     Cardinal GetNextLeftDir() const;
     Cardinal GetOppositeDir() const;
-	void SetMoveAction(MoveAction);
-	void MoveChar(float DeltaTime);
+	void ProcessMoveAction(MoveAction);
+	void Tick(float DeltaTime);
 	bool IsStill() const;
-	void EndBattle();
 	glm::vec3 GetNextTile(MoveAction action);
 	glm::vec3 GetNextEnemyTile(MoveAction action);
 
@@ -38,8 +32,10 @@ public:
 
 	Enemy* Enemy;
 	BattleSystem* BattleSystem;
+
+	MovementEvent* Event;
     
-	void OnPhaseChange(BattlePhase bp) override ;
+	void OnBattlePhaseChange(BattlePhase bp) override ;
 
 private:
 	glm::vec3 DirOffset(Cardinal dir);
@@ -59,6 +55,9 @@ private:
 	void EndTurnMovement();
 	bool IsAutoMove(MoveAction);
 	BattlePhase CurrentBattlePhase;
+	void SetCurrentMoveAction(MoveAction);
+	void SetCurrentDirection(Cardinal);
+	void SetMoveDistance(float);
 };
 
 #endif

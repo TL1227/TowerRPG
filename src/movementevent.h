@@ -8,7 +8,9 @@ class MovementEvent
 {
 public:
 	void AddListener(MovementEventListener&);
-	void OnMoveActionChange(MoveAction);
+	void DispatchMoveActionChange(MoveAction);
+	void DispatchDirectionChange(Cardinal);
+	void DispatchMoveDistanceChange(float);
 
 private:
 	std::vector<MovementEventListener*> Listeners;

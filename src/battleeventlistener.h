@@ -6,7 +6,7 @@
 class BattleEventListener
 {
 public:
-    virtual void OnPhaseChange(BattlePhase bp) = 0;
+    virtual void OnBattlePhaseChange(BattlePhase bp) = 0;
     virtual ~BattleEventListener() = default;
 };
 

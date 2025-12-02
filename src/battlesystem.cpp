@@ -12,7 +12,7 @@ void BattleSystem::SetBattlePhase(BattlePhase phase)
 		PreambleStartTime = glfwGetTime();
 	}
 
-	BattleEvent->OnPhaseChange(phase);
+	BattleEvent->DispatchPhaseChange(phase);
 
     return;
 }

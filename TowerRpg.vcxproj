@@ -42,6 +42,7 @@
     <ClCompile Include="src\quad.cpp" />
     <ClCompile Include="src\textures.cpp" />
     <ClCompile Include="src\tile.cpp" />
+    <ClCompile Include="src\text.cpp" />
     <ClCompile Include="src\ui.cpp" />
     <ClCompile Include="src\win32.cpp" />
   </ItemGroup>
@@ -61,6 +62,7 @@
     <ClInclude Include="src\battlephase.h" />
     <ClInclude Include="src\battlesystem.h" />
     <ClInclude Include="src\camera.h" />
+    <ClInclude Include="src\cardinal.h" />
     <ClInclude Include="src\enemy.h" />
     <ClInclude Include="src\imconfig.h" />
     <ClInclude Include="src\imgui.h" />
@@ -83,6 +85,7 @@
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\textures.h" />
     <ClInclude Include="src\tile.h" />
+    <ClInclude Include="src\text.h" />
     <ClInclude Include="src\ui.h" />
     <ClInclude Include="thirdparty_src\stb_image.h" />
   </ItemGroup>

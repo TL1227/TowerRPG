@@ -48,13 +48,13 @@ Quad::Quad(const std::string& texturePath)
     glBindVertexArray(0);
 }
 
-void Quad::Draw(Shader& shader) const
+void Quad::Draw()
 {
-    shader.use();
+    Shader.use();
     glm::mat4 model(1.0f);
 	model = glm::translate(model, glm::vec3(x, y, 0.0f));
 	model = glm::scale(model, glm::vec3(scalex, scaley, 1.0f));
-	shader.setMat4("model", model);
+	Shader.setMat4("model", model);
     glBindVertexArray(VAO);
     glBindTexture(GL_TEXTURE_2D, Texture);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

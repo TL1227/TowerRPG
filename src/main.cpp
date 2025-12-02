@@ -17,10 +17,11 @@
 #include "map.h"
 #include "args.h"
 #include "model.h"
-#include "ui.h"
+#include "text.h"
 #include "tile.h"
 #include "quad.h"
 #include "audio.h"
+#include "ui.h"
 
 using namespace std;
 using namespace glm;
@@ -101,9 +102,7 @@ bool SlideUp(float delta, float speed, float& var, float end)
         var += speed * delta;
 
     if (var > end)
-        var = end;
-
-    return var == end;
+        var = end;    return var == end;
 }
 
 bool SlideDown(float delta, float speed, float& var, float end)
@@ -232,7 +231,7 @@ int main(int argc, char* argv[])
 
     Camera.CameraPos = LevelMap.PlayerStartPos;
 
-    MovementSystem CharacterMovement{ LevelMap, Camera };
+    MovementSystem MovementSystem{ LevelMap, Camera };
 
     //build shaders
     Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
@@ -256,6 +255,8 @@ int main(int argc, char* argv[])
 	battleMenuBgShader.setMat4("projection", projection);
     enemyHpShader.use();
 	enemyHpShader.setMat4("projection", projection);
+
+    UI ui;
 
     const float SlideSpeed = SCREEN_HEIGHT * 2.0f;
     float OffScreenDistance = (float)SCREEN_HEIGHT * 0.5f;
@@ -283,8 +284,7 @@ int main(int argc, char* argv[])
     float BattleMenuLineHeight = SCREEN_HEIGHT * BattleMenuLineHeightPercent;
 
     //ui init
-    UI ui {SCREEN_WIDTH, SCREEN_HEIGHT};
-    ui.InitUi();
+    Text Text {SCREEN_WIDTH, SCREEN_HEIGHT};
 
     Audio audio;
     BattleSystem BattleSystem;
@@ -301,15 +301,22 @@ int main(int argc, char* argv[])
 	BattleMenuSlider.start = battleMenuQuad.y;
     BattleMenuSlider.end = BattleMenuQuadEndPosY + 10;
 
-    Enemy enemy;
-    CharacterMovement.Enemy = &enemy;
-    CharacterMovement.BattleSystem = &BattleSystem;
+    Enemy Enemy{enemyShader};
+    MovementSystem.Enemy = &Enemy;
+    MovementSystem.BattleSystem = &BattleSystem;
 
-    //subcribe to battle events
+    //subscribe to Battle events
     BattleEvent Be;
-    Be.AddListener(CharacterMovement);
+    Be.AddListener(MovementSystem);
+    Be.AddListener(Enemy);
     Be.AddListener(audio);
     BattleSystem.BattleEvent = &Be;
+
+    //subscribe to Movement events
+    MovementEvent Me;
+    Me.AddListener(Enemy);
+    MovementSystem.Event = &Me;
+
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -372,31 +379,31 @@ int main(int argc, char* argv[])
             {
 				if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
                 {
-					CharacterMovement.SetMoveAction(MoveAction::TurnRight);
+					MovementSystem.ProcessMoveAction(MoveAction::TurnRight);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
                 {
-					CharacterMovement.SetMoveAction(MoveAction::TurnLeft);
+					MovementSystem.ProcessMoveAction(MoveAction::TurnLeft);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT))
                 {
-					CharacterMovement.SetMoveAction(MoveAction::Right);
+					MovementSystem.ProcessMoveAction(MoveAction::Right);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT))
                 {
-					CharacterMovement.SetMoveAction(MoveAction::Left);
+					MovementSystem.ProcessMoveAction(MoveAction::Left);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN))
                 {
-					CharacterMovement.SetMoveAction(MoveAction::TurnAround);
+					MovementSystem.ProcessMoveAction(MoveAction::TurnAround);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
                 {
-					CharacterMovement.SetMoveAction(MoveAction::Forwards);
+					MovementSystem.ProcessMoveAction(MoveAction::Forwards);
                 }
 				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
                 {
-					CharacterMovement.SetMoveAction(MoveAction::Backwards);
+					MovementSystem.ProcessMoveAction(MoveAction::Backwards);
                 }
             }
             else
@@ -407,16 +414,16 @@ int main(int argc, char* argv[])
                     if (Choice == BattleChoice::Run)
                     {
                         BattleSystem.SetBattlePhase(BattlePhase::End);
-                        enemy.SwitchToCalmTex();
+                        Enemy.SwitchToCalmTex();
 						enemyHpInnerQuad.y = EnemyHpInnerQuadEndPosY + OffScreenDistance; //set it up for sliding on to screen
 						battleMenuQuad.y = BattleMenuQuadEndPosY - OffScreenDistance;
                     }
                 }
             }
 
-			CharacterMovement.MoveChar(DeltaTime);
+			MovementSystem.Tick(DeltaTime);
 
-            //TODO: This could probably get called in MoveChar itself 
+            //TODO: Maybe call this after direction change
             Camera.UpdateCameraRotation();
 
             assetShader.use();
@@ -444,30 +451,12 @@ int main(int argc, char* argv[])
 					LevelMap.WallModel.Draw(assetShader);
 				}
 
-            //Enemy Drawing
-            if (BattleSystem.GetPhase() != BattlePhase::End)
-            {
-				enemyShader.use();
-				mat4 enemymodel = translate(mat4(1.0f), enemy.Position);
-				enemymodel = rotate(enemymodel, radians(enemy.PlayerDirection - 90), vec3(0.0f, 1.0f, 0.0f)); //TODO: the rotation will flip depending on player direction. Fix this.
-                enemymodel = scale(enemymodel, vec3(0.8f, 0.8f, 0.0f));
-				enemyShader.setMat4("model", enemymodel);
-				enemyShader.setMat4("view", view);
-				enemyShader.setFloat("alpha", (CharacterMovement.DistanceMoved == 0) ? 1.0f : CharacterMovement.DistanceMoved); //TODO: animate this fade without using CharMove.DistanceMoved
-				enemy.Draw();
-            }
+			Enemy.Tick(view);
 
             //UI DRAWING
-            if (CharacterMovement.IsStill())
-            {
-                if (CharacterMovement.FrontTile)
-                {
-                    if (!CharacterMovement.FrontTile->InteractiveText.empty())
-                    {
-                        ui.DrawText(textShader, CharacterMovement.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
-                    }
-                }
-                else if (BattleSystem.GetPhase() == BattlePhase::Preamble)
+            //if (MovementSystem.IsStill())
+            //{
+                if (BattleSystem.GetPhase() == BattlePhase::Preamble)
                 {
                     double timepassed = glfwGetTime() -  BattleSystem.PreambleStartTime;
 
@@ -478,7 +467,7 @@ int main(int argc, char* argv[])
                     }
                     else
                     {
-                        ui.DrawText(textShader, "Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+                        Text.Draw(textShader, "Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
                     }
                 }
                 else if (BattleSystem.GetPhase() == BattlePhase::Slide) //battle starts propa!
@@ -492,7 +481,7 @@ int main(int argc, char* argv[])
                     if (slide1complete && slide2complete)
                     {
                         BattleSystem.SetBattlePhase(BattlePhase::Snap);
-                        enemy.SwitchToAttackTex();
+                        Enemy.SwitchToAttackTex();
                         EnemyHealthSlider.elapsed = 0.0f; //Make a reset slider func
                         BattleMenuSlider.elapsed = 0.0f;
                     }
@@ -521,13 +510,23 @@ int main(int argc, char* argv[])
 					for (size_t i = 0; i < bmenu.size(); i++)
 					{
 						if ((int)Choice == i)
-							ui.DrawText(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(1.0, 1.0, 1.0));
+							Text.Draw(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(1.0, 1.0, 1.0));
 						else
-							ui.DrawText(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(0.3, 0.3, 0.3));
+							Text.Draw(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(0.3, 0.3, 0.3));
 					}
                 }
-            }
+            //}
 
+			//TODO: come back to this once we've cleaned up main
+			/*
+			if (MovementSystem.FrontTile)
+			{
+				if (!MovementSystem.FrontTile->InteractiveText.empty())
+				{
+					Text.DrawText(textShader, MovementSystem.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+				}
+			}
+			*/
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

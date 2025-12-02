@@ -8,7 +8,7 @@ class BattleEvent
 {
 public:
 	void AddListener(BattleEventListener&);
-	void OnPhaseChange(BattlePhase);
+	void DispatchPhaseChange(BattlePhase);
 
 private:
 	std::vector<BattleEventListener*> Listeners;
