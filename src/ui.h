@@ -16,7 +16,7 @@ public:
 	UI();
 
 private:
-	Quad BattleMenu;
+	Quad BattleMenu{};
 	Slider BattleMenuSlider;
 	Quad EnemyHealthBar;
 	Slider EnemyHealthBarSlider;

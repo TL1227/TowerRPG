@@ -236,8 +236,6 @@ int main(int argc, char* argv[])
     //build shaders
     Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
     Shader textShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
-    Shader battleMenuBgShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
-    Shader enemyHpShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
 
     //perspective projection
@@ -251,29 +249,12 @@ int main(int argc, char* argv[])
     projection = ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
     textShader.use();
 	textShader.setMat4("projection", projection);
-    battleMenuBgShader.use();
-	battleMenuBgShader.setMat4("projection", projection);
-    enemyHpShader.use();
-	enemyHpShader.setMat4("projection", projection);
 
     UI ui;
 
     const float SlideSpeed = SCREEN_HEIGHT * 2.0f;
     float OffScreenDistance = (float)SCREEN_HEIGHT * 0.5f;
 
-    float BattleMenuQuadEndPosY = (float)SCREEN_HEIGHT * 0.2f;
-    Quad battleMenuQuad { "textures\\battlemenu.jpg" };
-    battleMenuQuad.x = (float)SCREEN_WIDTH / 2.0f;
-    battleMenuQuad.y = BattleMenuQuadEndPosY - OffScreenDistance;
-    battleMenuQuad.scalex = (float)SCREEN_WIDTH * 0.65f;
-    battleMenuQuad.scaley = (float)SCREEN_HEIGHT * 0.25f;
-
-    float EnemyHpInnerQuadEndPosY = (float)SCREEN_HEIGHT * 0.93f;
-    Quad enemyHpInnerQuad { "textures\\enemyhealthinner.jpg" };
-    enemyHpInnerQuad.x = SCREEN_WIDTH / 2.0f;
-    enemyHpInnerQuad.y = EnemyHpInnerQuadEndPosY + OffScreenDistance; //set it up for sliding on to screen
-    enemyHpInnerQuad.scalex = (float)SCREEN_WIDTH * 0.65f;
-    enemyHpInnerQuad.scaley = (float)SCREEN_HEIGHT * 0.03f;
 
     float BattleTextScale = 0.45f * TEXT_UNIT;
     float BattleTextXPercent = 0.19f;
@@ -291,10 +272,6 @@ int main(int argc, char* argv[])
     BattleSystem.Audio = &audio;
     BattleSystem.PreambleLength = audio.PreBattleBgmLength * 0.8;
 
-    Slider EnemyHealthSlider;
-    EnemyHealthSlider.duration = audio.PreBattleBgmLength * 0.2;
-	EnemyHealthSlider.start = enemyHpInnerQuad.y;
-    EnemyHealthSlider.end = EnemyHpInnerQuadEndPosY - 10;
 
     Slider BattleMenuSlider;
     BattleMenuSlider.duration = audio.PreBattleBgmLength * 0.2;

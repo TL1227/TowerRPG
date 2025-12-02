@@ -6,7 +6,8 @@
 #include <glad/glad.h>
 #include "textures.h"
 
-Quad::Quad(const std::string& texturePath)
+Quad::Quad(const std::string& texturePath, ::Shader shader)
+    : Shader { shader }
 {
     float vertices[] = {
         // positions          // colors           // texture coords

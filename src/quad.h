@@ -6,7 +6,8 @@
 class Quad
 {
 public:
-    Quad(const std::string& texturePath);
+    Quad() = default;
+    Quad(const std::string& texturePath, Shader shader);
     void Draw();
     unsigned int VAO, VBO, EBO, Texture;
     float x, y, scalex, scaley;
