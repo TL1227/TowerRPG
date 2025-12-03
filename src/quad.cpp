@@ -6,6 +6,8 @@
 #include <glad/glad.h>
 #include "textures.h"
 
+Quad::Quad(){};
+
 Quad::Quad(const std::string& texturePath, ::Shader shader)
     : Shader { shader }
 {

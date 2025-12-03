@@ -7,6 +7,6 @@ void BattleEvent::AddListener(BattleEventListener& ls)
 
 void BattleEvent::DispatchPhaseChange(BattlePhase bp)
 {
-    for (auto* lisenter : Listeners)
-        lisenter->OnBattlePhaseChange(bp);
+	for (auto* lisenter : Listeners)
+		lisenter->OnBattlePhaseChange(bp);
 }

@@ -116,25 +116,6 @@ bool SlideDown(float delta, float speed, float& var, float end)
     return var == end;
 }
 
-struct Slider {
-    float start;
-    float end;
-    float elapsed = 0.0f;
-    float duration = 2.6f;   // seconds
-};
-
-bool Slide(float delta, float& var, Slider& s)
-{
-    s.elapsed += delta;
-
-    float t = s.elapsed / s.duration;
-    if (t > 1.0f) t = 1.0f;
-
-    var = s.start + (s.end - s.start) * t;
-
-    return t >= 1.0f;
-}
-
 //TODO: Look into different ways of scaling text
 int TEXT_UNIT;
 
@@ -250,11 +231,9 @@ int main(int argc, char* argv[])
     textShader.use();
 	textShader.setMat4("projection", projection);
 
-    UI ui;
 
     const float SlideSpeed = SCREEN_HEIGHT * 2.0f;
     float OffScreenDistance = (float)SCREEN_HEIGHT * 0.5f;
-
 
     float BattleTextScale = 0.45f * TEXT_UNIT;
     float BattleTextXPercent = 0.19f;
@@ -272,11 +251,9 @@ int main(int argc, char* argv[])
     BattleSystem.Audio = &audio;
     BattleSystem.PreambleLength = audio.PreBattleBgmLength * 0.8;
 
-
-    Slider BattleMenuSlider;
-    BattleMenuSlider.duration = audio.PreBattleBgmLength * 0.2;
-	BattleMenuSlider.start = battleMenuQuad.y;
-    BattleMenuSlider.end = BattleMenuQuadEndPosY + 10;
+    float preambleLength = audio.PreBattleBgmLength * 0.2; 
+    UI Ui { preambleLength, BattleSystem, SCREEN_HEIGHT, SCREEN_WIDTH };
+    //TODO: ADD SCREENHEIGHT AND WIDTH TO THE DAMN UI 
 
     Enemy Enemy{enemyShader};
     MovementSystem.Enemy = &Enemy;
@@ -287,6 +264,7 @@ int main(int argc, char* argv[])
     Be.AddListener(MovementSystem);
     Be.AddListener(Enemy);
     Be.AddListener(audio);
+    Be.AddListener(Ui);
     BattleSystem.BattleEvent = &Be;
 
     //subscribe to Movement events
@@ -342,15 +320,12 @@ int main(int argc, char* argv[])
 			ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            /*
-            ImGui::Begin("Battle Text");
-            ImGui::InputFloat("BMQ y", &battleMenuQuad.y);
-            ImGui::End();
-            */
-
-            BattleTextX = SCREEN_WIDTH * BattleTextXPercent;
-            BattleTextY = SCREEN_HEIGHT * BattleTextYPercent;
-			BattleMenuLineHeight = SCREEN_HEIGHT * BattleMenuLineHeightPercent;
+            //ImGui::Begin("Battle Menu");
+            //ImGui::SliderFloat("y", &Ui.BattleMenu.y, 100, 1000);
+            //ImGui::SliderFloat("x", &Ui.BattleMenu.x, 100, 1000);
+            //ImGui::SliderFloat("scale x", &Ui.BattleMenu.scalex, 100, 1000);
+            //ImGui::SliderFloat("scale y", &Ui.BattleMenu.scaley, 100, 1000);
+            //ImGui::End();
 
             if (BattleSystem.GetPhase() == BattlePhase::End || BattleSystem.GetPhase() == BattlePhase::Sighting)
             {
@@ -392,8 +367,6 @@ int main(int argc, char* argv[])
                     {
                         BattleSystem.SetBattlePhase(BattlePhase::End);
                         Enemy.SwitchToCalmTex();
-						enemyHpInnerQuad.y = EnemyHpInnerQuadEndPosY + OffScreenDistance; //set it up for sliding on to screen
-						battleMenuQuad.y = BattleMenuQuadEndPosY - OffScreenDistance;
                     }
                 }
             }
@@ -431,68 +404,35 @@ int main(int argc, char* argv[])
 			Enemy.Tick(view);
 
             //UI DRAWING
-            //if (MovementSystem.IsStill())
-            //{
-                if (BattleSystem.GetPhase() == BattlePhase::Preamble)
-                {
-                    double timepassed = glfwGetTime() -  BattleSystem.PreambleStartTime;
+            Ui.Tick(DeltaTime);
 
-                    //TODO: This is roughly how long the sliding takes, we need to calculate this dynamically somehow
-                    if (timepassed >= BattleSystem.PreambleLength) 
-                    {
-                        BattleSystem.SetBattlePhase(BattlePhase::Slide);
-                    }
-                    else
-                    {
-                        Text.Draw(textShader, "Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
-                    }
-                }
-                else if (BattleSystem.GetPhase() == BattlePhase::Slide) //battle starts propa!
-                {
-                    bool slide1complete = Slide(DeltaTime, enemyHpInnerQuad.y, EnemyHealthSlider);
-                    enemyHpInnerQuad.Draw(enemyHpShader);
+			if (BattleSystem.GetPhase() == BattlePhase::Preamble)
+			{
+				double timepassed = glfwGetTime() - BattleSystem.PreambleStartTime;
 
-                    bool slide2complete = Slide(DeltaTime, battleMenuQuad.y, BattleMenuSlider);
-                    battleMenuQuad.Draw(battleMenuBgShader);
+				//TODO: This is roughly how long the sliding takes, we need to calculate this dynamically somehow
+				if (timepassed >= BattleSystem.PreambleLength)
+				{
+					BattleSystem.SetBattlePhase(BattlePhase::Slide);
+				}
+				else
+				{
+					Text.Draw(textShader, "Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+				}
+			}
+			else if (BattleSystem.GetPhase() == BattlePhase::Start) //battle starts propa!
+			{
+				CurrentMode = Mode::TowerBattle;
 
-                    if (slide1complete && slide2complete)
-                    {
-                        BattleSystem.SetBattlePhase(BattlePhase::Snap);
-                        Enemy.SwitchToAttackTex();
-                        EnemyHealthSlider.elapsed = 0.0f; //Make a reset slider func
-                        BattleMenuSlider.elapsed = 0.0f;
-                    }
-                }
-                else if (BattleSystem.GetPhase() == BattlePhase::Snap)
-                {
-                    bool slide1complete = SlideUp(DeltaTime, SlideSpeed / 5, enemyHpInnerQuad.y, EnemyHpInnerQuadEndPosY);
-                    enemyHpInnerQuad.Draw(enemyHpShader);
-
-                    bool slide2complete = SlideDown(DeltaTime, SlideSpeed / 5, battleMenuQuad.y, BattleMenuQuadEndPosY);
-                    battleMenuQuad.Draw(battleMenuBgShader);
-
-                    if (slide1complete && slide2complete)
-                    {
-                        BattleSystem.SetBattlePhase(BattlePhase::Start);
-                    }
-                }
-                else if (BattleSystem.GetPhase() == BattlePhase::Start) //battle starts propa!
-                {
-                    CurrentMode = Mode::TowerBattle;
-
-                    enemyHpInnerQuad.Draw(enemyHpShader);
-                    battleMenuQuad.Draw(battleMenuBgShader);
-
-					vector<string> bmenu = { "Attack", "Skill", "Item", "Run" };
-					for (size_t i = 0; i < bmenu.size(); i++)
-					{
-						if ((int)Choice == i)
-							Text.Draw(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(1.0, 1.0, 1.0));
-						else
-							Text.Draw(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(0.3, 0.3, 0.3));
-					}
-                }
-            //}
+				vector<string> bmenu = { "Attack", "Skill", "Item", "Run" };
+				for (size_t i = 0; i < bmenu.size(); i++)
+				{
+					if ((int)Choice == i)
+						Text.Draw(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(1.0, 1.0, 1.0));
+					else
+						Text.Draw(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(0.3, 0.3, 0.3));
+				}
+			}
 
 			//TODO: come back to this once we've cleaned up main
 			/*

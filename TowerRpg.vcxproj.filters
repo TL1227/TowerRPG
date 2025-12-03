@@ -3,7 +3,6 @@
   <ItemGroup>
     <ClCompile Include="src\textures.cpp" />
     <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\movement.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\map.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -39,7 +38,11 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="src\quad.cpp" />
-    <ClCompile Include="src\battlemessage.cpp" />
+    <ClCompile Include="src\battleevent.cpp" />
+    <ClCompile Include="src\battlesystem.cpp" />
+    <ClCompile Include="src\movementevent.cpp" />
+    <ClCompile Include="src\movementsystem.cpp" />
+    <ClCompile Include="src\text.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\uifrag.shader">
@@ -60,11 +63,16 @@
     <None Include="shaders\frag.shader">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\battleuifrag.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\battleuivert.shader">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\textures.h" />
     <ClInclude Include="thirdparty_src\stb_image.h" />
-    <ClInclude Include="src\movement.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\map.h" />
     <ClInclude Include="src\args.h" />
@@ -106,7 +114,16 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="src\quad.h" />
-    <ClInclude Include="src\battlemessage.h" />
+    <ClInclude Include="src\battleevent.h" />
+    <ClInclude Include="src\battleeventlistener.h" />
+    <ClInclude Include="src\battlephase.h" />
+    <ClInclude Include="src\battlesystem.h" />
+    <ClInclude Include="src\cardinal.h" />
+    <ClInclude Include="src\moveaction.h" />
+    <ClInclude Include="src\movementevent.h" />
+    <ClInclude Include="src\movementeventlistener.h" />
+    <ClInclude Include="src\movementsystem.h" />
+    <ClInclude Include="src\text.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

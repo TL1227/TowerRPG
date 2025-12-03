@@ -1,7 +1,10 @@
 #ifndef UI_H
 #define UI_H
 
+#include "battlesystem.h"
+#include "battleeventlistener.h"
 #include "quad.h"
+#include "text.h"
 
 struct Slider {
     float start;
@@ -10,18 +13,36 @@ struct Slider {
     float duration = 2.6f;   // seconds
 };
 
-class UI
+class UI : public BattleEventListener
 {
 public:
-	UI();
+	UI(float, BattleSystem&, int screenHeight, int screenWidth);
+    void ResetSliders();
+    void Tick(float delta);
 
 private:
-	Quad BattleMenu{};
-	Slider BattleMenuSlider;
-	Quad EnemyHealthBar;
-	Slider EnemyHealthBarSlider;
 	int ScreenHeight;
 	int ScreenWidth;
+    float OffScreenDistance;
+
+    //TODO: make a ui element struct?
+    float BattleMenuOnScreenY;
+	Slider BattleMenuSlider;
+
+	Quad EnemyHealthBar;
+    float EnemyHealthBarOnScreenY;
+	Slider EnemyHealthBarSlider;
+
+    bool IsSliding = false;
+    bool Slide(float, float&, Slider&);
+
+	Quad BattleMenu;
+    BattleSystem &BattleSystem;
+    bool IsBattle = false;
+
+    Text Text;
+
+    void OnBattlePhaseChange(BattlePhase) override;
 };
 
 #endif
