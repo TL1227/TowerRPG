@@ -23,6 +23,7 @@ public:
 private:
 	int ScreenHeight;
 	int ScreenWidth;
+    int ScreenScale;
     float OffScreenDistance;
 
     //TODO: make a ui element struct?
@@ -33,13 +34,10 @@ private:
     float EnemyHealthBarOnScreenY;
 	Slider EnemyHealthBarSlider;
 
-    bool IsSliding = false;
     bool Slide(float, float&, Slider&);
 
 	Quad BattleMenu;
     BattleSystem &BattleSystem;
-    bool IsBattle = false;
-
     Text Text;
 
     void OnBattlePhaseChange(BattlePhase) override;

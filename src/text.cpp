@@ -1,12 +1,11 @@
 #include "text.h"
 #include "glm/fwd.hpp"
-#include "textures.h"
 
 #include <glad/glad.h>
 #include <iostream>
 
-Text::Text(int screenWidth, int screenHeight)
-    : ScreenWidth {screenWidth}, ScreenHeight {screenHeight} 
+Text::Text(int screenWidth, int screenHeight, ::Shader shader)
+    : ScreenWidth {screenWidth}, ScreenHeight {screenHeight}, Shader { shader } 
 { 
     FT_Library ft;
     if (FT_Init_FreeType(&ft))
@@ -95,11 +94,11 @@ int Text::GetStringPixelLength(std::string &text)
     return advTotal;
 }
 
-void Text::Draw(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color, TextAlign ta)
+void Text::Draw(std::string text, float x, float y, float scale, glm::vec3 color, TextAlign ta)
 {
     // activate corresponding render state	
-    shader.use();
-    glUniform3f(glGetUniformLocation(shader.ID, "textColor"), color.x, color.y, color.z);
+    Shader.use();
+    glUniform3f(glGetUniformLocation(Shader.ID, "textColor"), color.x, color.y, color.z);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
 
@@ -148,17 +147,17 @@ void Text::Draw(Shader& shader, std::string text, float x, float y, float scale,
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Text::DrawList(Shader& shader, std::vector<std::string> list, float x, float y, float scale, glm::vec3 color, TextAlign ta, int highlight)
+void Text::DrawList(std::vector<std::string> list, float x, float y, float scale, glm::vec3 color, TextAlign ta, int highlight)
 {
     for (int i = 0; i < list.size(); i++)
     {
         if (highlight == i)
         {
-            Draw(shader, list[i], x, y, scale, glm::vec3(0.2, 1.0, 1.0));
+            Draw(list[i], x, y, scale, glm::vec3(0.2, 1.0, 1.0));
         }
         else
         {
-            Draw(shader, list[i], x, y, scale, color);
+            Draw(list[i], x, y, scale, color);
         }
 
         y -= LineHeight * scale;

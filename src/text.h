@@ -26,9 +26,10 @@ enum class TextAlign
 class Text
 {
 public:
-    Text(int screenWidth, int screenHeight);
-	void Draw(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color, TextAlign ta = TextAlign::None);
-    void DrawList(Shader& shader, std::vector<std::string> list, float x, float y, float scale, glm::vec3 color, TextAlign ta = TextAlign::None, int highlight = -1);
+    Text() = default;
+    Text(int screenWidth, int screenHeight, Shader shader);
+	void Draw(std::string text, float x, float y, float scale, glm::vec3 color, TextAlign ta = TextAlign::None);
+    void DrawList(std::vector<std::string> list, float x, float y, float scale, glm::vec3 color, TextAlign ta = TextAlign::None, int highlight = -1);
 private:
     int GetStringPixelLength(std::string &text);
     unsigned int VAO;
@@ -37,6 +38,7 @@ private:
     int ScreenHeight;
     float LineHeight;
 	std::map<char, Character> Characters;
+    Shader Shader;
 };
 
 #endif

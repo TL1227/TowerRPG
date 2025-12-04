@@ -5,11 +5,23 @@
 #include <glm/gtc/type_ptr.hpp>
 
 UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, int screenWidth)
-    : BattleSystem{ battleSystem }, ScreenHeight{ screenHeight }, ScreenWidth{ screenWidth }
+    : BattleSystem{ battleSystem }
+    , ScreenHeight{ screenHeight }
+    , ScreenWidth{ screenWidth }
 {
+    //This is so our text can scale with our screensize
+    //I've picked 540 because it's the screen size I'm usually using when developing (half of 1080)
+    ScreenScale = ScreenWidth / 540;
+
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(ScreenWidth), 0.0f, static_cast<float>(ScreenHeight));
     OffScreenDistance = (float)ScreenHeight * 0.5f;
 
+    Shader textShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
+    textShader.use();
+	textShader.setMat4("projection", projection);
+    Text = { ScreenWidth, ScreenHeight, textShader };
+
+    //TODO: these should probably be in some kind of UI component class
     Shader battleMenuShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     battleMenuShader.use();
 	battleMenuShader.setMat4("projection", projection);
@@ -31,7 +43,7 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     EnemyHealthBarOnScreenY = (float)ScreenHeight * 0.93f;
     EnemyHealthBar = { "textures\\enemyhealthinner.jpg", enemyHpShader };
     EnemyHealthBar.x = ScreenWidth / 2.0f;
-    EnemyHealthBar.y = EnemyHealthBarOnScreenY + OffScreenDistance; //set it up for sliding on to screen
+    EnemyHealthBar.y = EnemyHealthBarOnScreenY + OffScreenDistance;
     EnemyHealthBar.scalex = (float)ScreenWidth * 0.65f;
     EnemyHealthBar.scaley = (float)ScreenHeight * 0.03f;
 
@@ -42,7 +54,11 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 
 void UI::Tick(float deltaTime)
 {
-    if (IsSliding)
+    if (BattleSystem.GetPhase() == BattlePhase::Preamble)
+    {
+        Text.Draw("Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+    }
+    else if (BattleSystem.GetPhase() == BattlePhase::Slide)
     {
         bool slide1complete = Slide(deltaTime, EnemyHealthBar.y, EnemyHealthBarSlider);
         EnemyHealthBar.Draw();
@@ -54,10 +70,9 @@ void UI::Tick(float deltaTime)
         {
             BattleSystem.SetBattlePhase(BattlePhase::Start);
             ResetSliders();
-            IsSliding = false;
         }
     }
-    else if (IsBattle)
+    else if (BattleSystem.GetPhase() == BattlePhase::Start)
     {
         BattleMenu.Draw();
         EnemyHealthBar.Draw();
@@ -66,8 +81,7 @@ void UI::Tick(float deltaTime)
 
 		for (size_t i = 0; i < bmenu.size(); i++)
 		{
-            //TODO: move text into ui
-			//Text.Draw(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(1.0, 1.0, 1.0));
+			Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), ScreenScale, glm::vec3(1.0, 1.0, 1.0));
 		}
     }
 }
@@ -97,13 +111,5 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
         ResetSliders();
         BattleMenu.y = BattleMenuOnScreenY - OffScreenDistance;
         EnemyHealthBar.y = EnemyHealthBarOnScreenY + OffScreenDistance; //set it up for sliding on to screen
-    }
-    else if (bp == BattlePhase::Slide)
-    {
-        IsSliding = true;
-    }
-    else if (bp == BattlePhase::Start)
-    {
-        IsBattle = true;
     }
 }

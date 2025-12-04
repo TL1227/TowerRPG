@@ -142,7 +142,7 @@ GLFWwindow* SetUpGlfw()
     {
 		SCREEN_WIDTH = 960;
 		SCREEN_HEIGHT = 540;
-        TEXT_UNIT = 1;
+            TEXT_UNIT = 1;
 		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tower RPG", NULL, NULL);
     }
 
@@ -216,7 +216,6 @@ int main(int argc, char* argv[])
 
     //build shaders
     Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
-    Shader textShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
     Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
 
     //perspective projection
@@ -228,23 +227,6 @@ int main(int argc, char* argv[])
 
     //orthogonal projection
     projection = ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
-    textShader.use();
-	textShader.setMat4("projection", projection);
-
-
-    const float SlideSpeed = SCREEN_HEIGHT * 2.0f;
-    float OffScreenDistance = (float)SCREEN_HEIGHT * 0.5f;
-
-    float BattleTextScale = 0.45f * TEXT_UNIT;
-    float BattleTextXPercent = 0.19f;
-    float BattleTextYPercent = 0.28f;
-    float BattleTextX = SCREEN_WIDTH * BattleTextXPercent;
-    float BattleTextY = SCREEN_HEIGHT * BattleTextYPercent;
-    float BattleMenuLineHeightPercent = 0.058;
-    float BattleMenuLineHeight = SCREEN_HEIGHT * BattleMenuLineHeightPercent;
-
-    //ui init
-    Text Text {SCREEN_WIDTH, SCREEN_HEIGHT};
 
     Audio audio;
     BattleSystem BattleSystem;
@@ -410,28 +392,14 @@ int main(int argc, char* argv[])
 			{
 				double timepassed = glfwGetTime() - BattleSystem.PreambleStartTime;
 
-				//TODO: This is roughly how long the sliding takes, we need to calculate this dynamically somehow
 				if (timepassed >= BattleSystem.PreambleLength)
 				{
 					BattleSystem.SetBattlePhase(BattlePhase::Slide);
-				}
-				else
-				{
-					Text.Draw(textShader, "Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
 				}
 			}
 			else if (BattleSystem.GetPhase() == BattlePhase::Start) //battle starts propa!
 			{
 				CurrentMode = Mode::TowerBattle;
-
-				vector<string> bmenu = { "Attack", "Skill", "Item", "Run" };
-				for (size_t i = 0; i < bmenu.size(); i++)
-				{
-					if ((int)Choice == i)
-						Text.Draw(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(1.0, 1.0, 1.0));
-					else
-						Text.Draw(textShader, bmenu[i], BattleTextX, BattleTextY - (i * BattleMenuLineHeight), BattleTextScale, glm::vec3(0.3, 0.3, 0.3));
-				}
 			}
 
 			//TODO: come back to this once we've cleaned up main
