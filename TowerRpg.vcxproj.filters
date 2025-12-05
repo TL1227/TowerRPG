@@ -43,6 +43,8 @@
     <ClCompile Include="src\movementevent.cpp" />
     <ClCompile Include="src\movementsystem.cpp" />
     <ClCompile Include="src\text.cpp" />
+    <ClCompile Include="src\input.cpp" />
+    <ClCompile Include="src\inputevent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\uifrag.shader">
@@ -119,11 +121,14 @@
     <ClInclude Include="src\battlephase.h" />
     <ClInclude Include="src\battlesystem.h" />
     <ClInclude Include="src\cardinal.h" />
-    <ClInclude Include="src\moveaction.h" />
+    <ClInclude Include="src\inputaction.h" />
     <ClInclude Include="src\movementevent.h" />
     <ClInclude Include="src\movementeventlistener.h" />
     <ClInclude Include="src\movementsystem.h" />
     <ClInclude Include="src\text.h" />
+    <ClInclude Include="src\input.h" />
+    <ClInclude Include="src\inputevent.h" />
+    <ClInclude Include="src\inputeventlistener.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

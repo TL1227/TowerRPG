@@ -15,6 +15,7 @@ public:
 	BattlePhase GetPhase();
 	void AutoMoveFinished();
 	void DecreaseEnemyCounter();
+	void Tick(float delta);
 	Audio* Audio;
 	double PreambleStartTime;
 	double PreambleLength = 1; //TODO: set this using battle intro length

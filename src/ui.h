@@ -3,6 +3,7 @@
 
 #include "battlesystem.h"
 #include "battleeventlistener.h"
+#include "inputeventlistener.h"
 #include "quad.h"
 #include "text.h"
 
@@ -13,7 +14,7 @@ struct Slider {
     float duration = 2.6f;   // seconds
 };
 
-class UI : public BattleEventListener
+class UI : public BattleEventListener, public InputEventListener
 {
 public:
 	UI(float, BattleSystem&, int screenHeight, int screenWidth);
@@ -38,9 +39,13 @@ private:
 
 	Quad BattleMenu;
     BattleSystem &BattleSystem;
+    int BattleMenuChoice = 0;
     Text Text;
 
+	std::vector<std::string> bmenu = { "Attack", "Skill", "Item", "Run" };
+
     void OnBattlePhaseChange(BattlePhase) override;
+    void OnButtonPress(InputAction) override;
 };
 
 #endif

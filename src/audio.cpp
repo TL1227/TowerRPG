@@ -62,8 +62,8 @@ void Audio::OnBattlePhaseChange(BattlePhase bp)
     case BattlePhase::Snap:
         break;
     case BattlePhase::Start:
-		PlayBattleBgm();
 		StopPreBattleBgm();
+		PlayBattleBgm();
         break;
     case BattlePhase::End:
     {

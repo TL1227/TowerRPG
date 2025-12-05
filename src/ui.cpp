@@ -77,12 +77,14 @@ void UI::Tick(float deltaTime)
         BattleMenu.Draw();
         EnemyHealthBar.Draw();
 
-		std::vector<std::string> bmenu = { "Attack", "Skill", "Item", "Run" };
-
 		for (size_t i = 0; i < bmenu.size(); i++)
 		{
-			Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), ScreenScale, glm::vec3(1.0, 1.0, 1.0));
+            if(i == BattleMenuChoice)
+				Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), ScreenScale, glm::vec3(1.0, 1.0, 1.0));
+            else
+				Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), ScreenScale, glm::vec3(0.8, 0.8, 0.8));
 		}
+
     }
 }
 
@@ -111,5 +113,30 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
         ResetSliders();
         BattleMenu.y = BattleMenuOnScreenY - OffScreenDistance;
         EnemyHealthBar.y = EnemyHealthBarOnScreenY + OffScreenDistance; //set it up for sliding on to screen
+    }
+}
+
+void UI::OnButtonPress(InputAction IA)
+{
+    switch (IA)
+    {
+	case InputAction::Confim:
+		if (BattleMenuChoice == 3) //TODO: This needs to be an enum or something
+			BattleSystem.SetBattlePhase(BattlePhase::End);
+		break;
+	case InputAction::Cancel:
+		break;
+	case InputAction::MenuUp:
+        if (--BattleMenuChoice < 0)
+			BattleMenuChoice = bmenu.size() - 1;
+		break;
+	case InputAction::MenuDown:
+        if (++BattleMenuChoice > bmenu.size())
+			BattleMenuChoice = 0;
+		break;
+	case InputAction::MenuRight:
+		break;
+	case InputAction::MenuLeft:
+		break;
     }
 }

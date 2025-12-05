@@ -17,11 +17,10 @@
 #include "map.h"
 #include "args.h"
 #include "model.h"
-#include "text.h"
 #include "tile.h"
-#include "quad.h"
 #include "audio.h"
 #include "ui.h"
+#include "input.h"
 
 using namespace std;
 using namespace glm;
@@ -53,9 +52,6 @@ enum class BattleChoice
     NUM_CHOICES
 };
 
-BattleChoice Choice = BattleChoice::Attack;
-Mode CurrentMode = Mode::TowerExplore;
-
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -80,18 +76,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             WireFrameMode = true;
-        }
-    }
-
-    if (CurrentMode == Mode::TowerBattle)
-    {
-        if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
-        {
-            Choice = static_cast<BattleChoice>((static_cast<int>(Choice) + 1) % (int)BattleChoice::NUM_CHOICES);
-        }
-        else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_UP) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
-        {
-            Choice = static_cast<BattleChoice>((static_cast<int>(Choice) - 1 + (int)BattleChoice::NUM_CHOICES) % (int)BattleChoice::NUM_CHOICES);
         }
     }
 }
@@ -254,6 +238,11 @@ int main(int argc, char* argv[])
     Me.AddListener(Enemy);
     MovementSystem.Event = &Me;
 
+    //Input
+    InputEvent Ie;
+    Ie.AddListener(MovementSystem);
+    Ie.AddListener(Ui);
+    Input Input{ window, &Ie, &BattleSystem };
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -309,53 +298,21 @@ int main(int argc, char* argv[])
             //ImGui::SliderFloat("scale y", &Ui.BattleMenu.scaley, 100, 1000);
             //ImGui::End();
 
-            if (BattleSystem.GetPhase() == BattlePhase::End || BattleSystem.GetPhase() == BattlePhase::Sighting)
-            {
-				if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_D))
-                {
-					MovementSystem.ProcessMoveAction(MoveAction::TurnRight);
-                }
-				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_A))
-                {
-					MovementSystem.ProcessMoveAction(MoveAction::TurnLeft);
-                }
-				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_RIGHT))
-                {
-					MovementSystem.ProcessMoveAction(MoveAction::Right);
-                }
-				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_LEFT))
-                {
-					MovementSystem.ProcessMoveAction(MoveAction::Left);
-                }
-				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_DOWN))
-                {
-					MovementSystem.ProcessMoveAction(MoveAction::TurnAround);
-                }
-				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_W))
-                {
-					MovementSystem.ProcessMoveAction(MoveAction::Forwards);
-                }
-				else if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_S))
-                {
-					MovementSystem.ProcessMoveAction(MoveAction::Backwards);
-                }
-            }
-            else
-            {
-                //battle controls
-                if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ENTER))
-                {
-                    if (Choice == BattleChoice::Run)
-                    {
-                        BattleSystem.SetBattlePhase(BattlePhase::End);
-                        Enemy.SwitchToCalmTex();
-                    }
-                }
-            }
+            Input.Read();
+
+			//battle controls
+            /*
+			if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ENTER))
+			{
+				if (Choice == BattleChoice::Run)
+				{
+					BattleSystem.SetBattlePhase(BattlePhase::End);
+					Enemy.SwitchToCalmTex();
+				}
+			}
+            */
 
 			MovementSystem.Tick(DeltaTime);
-
-            //TODO: Maybe call this after direction change
             Camera.UpdateCameraRotation();
 
             assetShader.use();
@@ -363,6 +320,7 @@ int main(int argc, char* argv[])
             mat4 view = Camera.GetView();
 			assetShader.setMat4("view", view);
 
+            //render level
             for (auto& tile : LevelMap.Tiles)
             {
 				mat4 model = translate(mat4(1.0f), tile.Position);
@@ -384,23 +342,8 @@ int main(int argc, char* argv[])
 				}
 
 			Enemy.Tick(view);
-
-            //UI DRAWING
             Ui.Tick(DeltaTime);
-
-			if (BattleSystem.GetPhase() == BattlePhase::Preamble)
-			{
-				double timepassed = glfwGetTime() - BattleSystem.PreambleStartTime;
-
-				if (timepassed >= BattleSystem.PreambleLength)
-				{
-					BattleSystem.SetBattlePhase(BattlePhase::Slide);
-				}
-			}
-			else if (BattleSystem.GetPhase() == BattlePhase::Start) //battle starts propa!
-			{
-				CurrentMode = Mode::TowerBattle;
-			}
+            BattleSystem.Tick(DeltaTime);
 
 			//TODO: come back to this once we've cleaned up main
 			/*

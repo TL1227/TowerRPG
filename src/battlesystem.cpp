@@ -3,6 +3,19 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+void BattleSystem::Tick(float delta)
+{
+	if (CurrentBattlePhase == BattlePhase::Preamble)
+	{
+		double timepassed = glfwGetTime() - PreambleStartTime;
+
+		if (timepassed >= PreambleLength)
+		{
+			SetBattlePhase(BattlePhase::Slide);
+		}
+	}
+}
+
 void BattleSystem::SetBattlePhase(BattlePhase phase)
 {
 	CurrentBattlePhase = phase;
@@ -40,4 +53,3 @@ void BattleSystem::DecreaseEnemyCounter()
 		EnemyCounter = 5;
 	}
 }
-

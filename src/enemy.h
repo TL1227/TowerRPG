@@ -27,7 +27,7 @@ public:
     void SwitchToAttackTex();
     void SwitchToCalmTex();
 private:
-    void OnMoveActionChange(MoveAction) override;
+    void OnMoveActionChange(InputAction) override;
     void OnDirectionChange(Cardinal) override;
     void OnMoveDistanceChange(float) override;
 

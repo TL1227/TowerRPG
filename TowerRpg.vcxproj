@@ -34,6 +34,8 @@
     <ClCompile Include="src\imgui_impl_win32.cpp" />
     <ClCompile Include="src\imgui_tables.cpp" />
     <ClCompile Include="src\imgui_widgets.cpp" />
+    <ClCompile Include="src\input.cpp" />
+    <ClCompile Include="src\inputevent.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\map.cpp" />
     <ClCompile Include="src\movementevent.cpp" />
@@ -76,10 +78,13 @@
     <ClInclude Include="src\imstb_rectpack.h" />
     <ClInclude Include="src\imstb_textedit.h" />
     <ClInclude Include="src\imstb_truetype.h" />
+    <ClInclude Include="src\input.h" />
+    <ClInclude Include="src\inputevent.h" />
+    <ClInclude Include="src\inputeventlistener.h" />
     <ClInclude Include="src\map.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\model.h" />
-    <ClInclude Include="src\moveaction.h" />
+    <ClInclude Include="src\inputaction.h" />
     <ClInclude Include="src\movementevent.h" />
     <ClInclude Include="src\movementeventlistener.h" />
     <ClInclude Include="src\movementsystem.h" />

@@ -8,7 +8,7 @@ class MovementEvent
 {
 public:
 	void AddListener(MovementEventListener&);
-	void DispatchMoveActionChange(MoveAction);
+	void DispatchMoveActionChange(InputAction);
 	void DispatchDirectionChange(Cardinal);
 	void DispatchMoveDistanceChange(float);
 

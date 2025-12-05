@@ -5,7 +5,7 @@
 #include "movementsystem.h"
 #include "args.h"
 
-static MoveAction NextMove = MoveAction::None;
+static InputAction NextMove = InputAction::None;
 
 MovementSystem::MovementSystem(::Map& map, ::Camera& camera)
 	: Map{ map }, Camera{ camera }
@@ -63,7 +63,7 @@ bool BlockIsSolid(char ch)
 	return (ch == '#' || ch == 'c');
 }
 
-void MovementSystem::SetCurrentMoveAction(MoveAction ma)
+void MovementSystem::SetCurrentMoveAction(InputAction ma)
 {
 	CurrentMoveAction = ma;
 	Event->DispatchMoveActionChange(ma);
@@ -81,16 +81,16 @@ void MovementSystem::SetMoveDistance(float d)
 	Event->DispatchMoveDistanceChange(d);
 }
 
-void MovementSystem::ProcessMoveAction(MoveAction action)
+void MovementSystem::ProcessMoveAction(InputAction action)
 {
-	if (CurrentMoveAction == MoveAction::None)
+	if (CurrentMoveAction == InputAction::None)
 	{
-		if (action == MoveAction::TurnRight ||
-			action == MoveAction::TurnLeft ||
-			action == MoveAction::TurnAround ||
-			action == MoveAction::AutoTurnRight ||
-			action == MoveAction::AutoTurnLeft ||
-			action == MoveAction::AutoTurnAround)
+		if (action == InputAction::TurnRight ||
+			action == InputAction::TurnLeft ||
+			action == InputAction::TurnAround ||
+			action == InputAction::AutoTurnRight ||
+			action == InputAction::AutoTurnLeft ||
+			action == InputAction::AutoTurnAround)
 		{
 			SetCurrentMoveAction(action);
 			return;
@@ -109,19 +109,19 @@ void MovementSystem::ProcessMoveAction(MoveAction action)
 					MovementSpeed = PreBattleMovementSpeed;
 					Enemy->Position = GetNextEnemyTile(action);
 
-					if (action == MoveAction::Left)
+					if (action == InputAction::MoveLeft)
 					{
-						NextMove = MoveAction::AutoTurnLeft;
+						NextMove = InputAction::AutoTurnLeft;
 						Enemy->PlayerDirection = (float)GetNextLeftDir();
 					}
-					if (action == MoveAction::Right)
+					if (action == InputAction::MoveRight)
 					{
-						NextMove = MoveAction::AutoTurnRight;
+						NextMove = InputAction::AutoTurnRight;
 						Enemy->PlayerDirection = (float)GetNextRightDir();
 					}
-					if (action == MoveAction::Backwards)
+					if (action == InputAction::MoveBackwards)
 					{
-						NextMove = MoveAction::AutoTurnAround;
+						NextMove = InputAction::AutoTurnAround;
 						Enemy->PlayerDirection = (float)GetOppositeDir();
 					}
 				}
@@ -145,7 +145,7 @@ std::string MovementSystem::PrintCurrentDirection()
 
 bool MovementSystem::IsStill() const
 {
-	return CurrentMoveAction == MoveAction::None;
+	return CurrentMoveAction == InputAction::None;
 }
 
 glm::vec3 MovementSystem::DirOffset(Cardinal dir)
@@ -161,37 +161,37 @@ glm::vec3 MovementSystem::DirOffset(Cardinal dir)
 	return { 0,0,0 };
 }
 
-glm::vec3 MovementSystem::GetNextTile(MoveAction action)
+glm::vec3 MovementSystem::GetNextTile(InputAction action)
 {
 	glm::vec3 forward = DirOffset(CurrentDirection);
 	glm::vec3 right = { -forward.z, 0, forward.x };
 	glm::vec3 left = { forward.z, 0, -forward.x };
 
-	if (action == MoveAction::Forwards)
+	if (action == InputAction::MoveForwards)
 		return Camera.CameraPos + forward;
-	if (action == MoveAction::Backwards)
+	if (action == InputAction::MoveBackwards)
 		return Camera.CameraPos - forward;
-	if (action == MoveAction::Left)
+	if (action == InputAction::MoveLeft)
 		return Camera.CameraPos + left;
-	if (action == MoveAction::Right)
+	if (action == InputAction::MoveRight)
 		return Camera.CameraPos + right;
 	else
 		return glm::vec3{};
 }
 
-glm::vec3 MovementSystem::GetNextEnemyTile(MoveAction action)
+glm::vec3 MovementSystem::GetNextEnemyTile(InputAction action)
 {
 	glm::vec3 forward = DirOffset(CurrentDirection);
 	glm::vec3 right = { -forward.z, 0, forward.x };
 	glm::vec3 left = { forward.z, 0, -forward.x };
 
-	if (action == MoveAction::Forwards)
+	if (action == InputAction::MoveForwards)
 		return (Camera.CameraPos + forward) + forward;
-	if (action == MoveAction::Backwards)
+	if (action == InputAction::MoveBackwards)
 		return Camera.CameraPos - forward - forward;
-	if (action == MoveAction::Left)
+	if (action == InputAction::MoveLeft)
 		return Camera.CameraPos + left + left;
-	if (action == MoveAction::Right)
+	if (action == InputAction::MoveRight)
 		return Camera.CameraPos + right + right;
 	else
 		return glm::vec3{};
@@ -199,22 +199,22 @@ glm::vec3 MovementSystem::GetNextEnemyTile(MoveAction action)
 
 void MovementSystem::Tick(float DeltaTime)
 {
-    if (CurrentMoveAction == MoveAction::None) 
+    if (CurrentMoveAction == InputAction::None) 
 		return;
 
 	glm::vec3 moveDir(0.0f);  // initialize to zero
 
 	switch (CurrentMoveAction) {
-	case MoveAction::Forwards:
+	case InputAction::MoveForwards:
 		moveDir = Camera.CameraFront;
 		break;
-	case MoveAction::Backwards:
+	case InputAction::MoveBackwards:
 		moveDir = -Camera.CameraFront;
 		break;
-	case MoveAction::Left:
+	case InputAction::MoveLeft:
 		moveDir = -glm::normalize(glm::cross(Camera.CameraFront, Camera.CameraUp));
 		break;
-	case MoveAction::Right:
+	case InputAction::MoveRight:
 		moveDir = glm::normalize(glm::cross(Camera.CameraFront, Camera.CameraUp));
 		break;
 	default:
@@ -244,7 +244,7 @@ void MovementSystem::Tick(float DeltaTime)
 			}
 		}
 	}
-    else if (CurrentMoveAction == MoveAction::TurnRight || CurrentMoveAction == MoveAction::AutoTurnRight)
+    else if (CurrentMoveAction == InputAction::TurnRight || CurrentMoveAction == InputAction::AutoTurnRight)
     {
         Camera.HorRot += RotationSpeed * DeltaTime;
 
@@ -255,7 +255,7 @@ void MovementSystem::Tick(float DeltaTime)
 			EndTurnMovement();
 		}
     }
-    else if (CurrentMoveAction == MoveAction::TurnLeft || CurrentMoveAction == MoveAction::AutoTurnLeft)
+    else if (CurrentMoveAction == InputAction::TurnLeft || CurrentMoveAction == InputAction::AutoTurnLeft)
     {
         Camera.HorRot -= RotationSpeed * DeltaTime;
 
@@ -266,7 +266,7 @@ void MovementSystem::Tick(float DeltaTime)
 			EndTurnMovement();
 		}
     }
-    else if (CurrentMoveAction == MoveAction::TurnAround || CurrentMoveAction == MoveAction::AutoTurnAround)
+    else if (CurrentMoveAction == InputAction::TurnAround || CurrentMoveAction == InputAction::AutoTurnAround)
     {
         Camera.HorRot -= RotationSpeed * DeltaTime;
 
@@ -279,11 +279,11 @@ void MovementSystem::Tick(float DeltaTime)
     }
 }
 
-bool MovementSystem::IsAutoMove(MoveAction ma)
+bool MovementSystem::IsAutoMove(InputAction ma)
 {
-	return (ma == MoveAction::AutoTurnAround ||
-		    ma == MoveAction::AutoTurnRight  ||
-		    ma == MoveAction::AutoTurnLeft);
+	return (ma == InputAction::AutoTurnAround ||
+		    ma == InputAction::AutoTurnRight  ||
+		    ma == InputAction::AutoTurnLeft);
 }
 
 void MovementSystem::EndTurnMovement()
@@ -294,18 +294,18 @@ void MovementSystem::EndTurnMovement()
 		BattleSystem->AutoMoveFinished();
 	}
 
-	SetCurrentMoveAction(MoveAction::None);
+	SetCurrentMoveAction(InputAction::None);
 }
 
 void MovementSystem::EndMovement()
 {
 	if (BattleSystem->GetPhase() == BattlePhase::Sighting)
 	{
-		if (NextMove != MoveAction::None)
+		if (NextMove != InputAction::None)
 		{
-			MoveAction move = NextMove;
-			NextMove = MoveAction::None;
-			SetCurrentMoveAction(MoveAction::None);
+			InputAction move = NextMove;
+			NextMove = InputAction::None;
+			SetCurrentMoveAction(InputAction::None);
 			ProcessMoveAction(move);
 			return;
 		}
@@ -323,7 +323,7 @@ void MovementSystem::EndMovement()
 		BattleSystem->DecreaseEnemyCounter();
 	}
 
-	SetCurrentMoveAction(MoveAction::None);
+	SetCurrentMoveAction(InputAction::None);
 }
 
 void MovementSystem::OnBattlePhaseChange(BattlePhase bp)
@@ -339,4 +339,9 @@ void MovementSystem::OnBattlePhaseChange(BattlePhase bp)
 	default:
 		break;
 	}
+}
+
+void MovementSystem::OnButtonPress(InputAction action)
+{
+	ProcessMoveAction(action);
 }

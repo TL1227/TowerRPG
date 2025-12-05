@@ -69,7 +69,7 @@ void Enemy::Tick(glm::mat4 view)
     }
 }
 
-void Enemy::OnMoveActionChange(MoveAction m)
+void Enemy::OnMoveActionChange(InputAction m)
 {
     
 }
