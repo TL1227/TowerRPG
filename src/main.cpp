@@ -225,6 +225,12 @@ int main(int argc, char* argv[])
     MovementSystem.Enemy = &Enemy;
     MovementSystem.BattleSystem = &BattleSystem;
 
+    //Input
+    InputEvent Ie;
+    Ie.AddListener(MovementSystem);
+    Ie.AddListener(Ui);
+    Input Input{ window, &Ie, &BattleSystem };
+
     //subscribe to Battle events
     BattleEvent Be;
     Be.AddListener(MovementSystem);
@@ -238,11 +244,6 @@ int main(int argc, char* argv[])
     Me.AddListener(Enemy);
     MovementSystem.Event = &Me;
 
-    //Input
-    InputEvent Ie;
-    Ie.AddListener(MovementSystem);
-    Ie.AddListener(Ui);
-    Input Input{ window, &Ie, &BattleSystem };
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

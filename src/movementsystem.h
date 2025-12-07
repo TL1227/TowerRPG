@@ -8,7 +8,6 @@
 #include "enemy.h"
 #include "battleeventlistener.h"
 #include "battlesystem.h"
-#include "inputaction.h"
 #include "movementevent.h"
 #include "cardinal.h"
 #include "inputeventlistener.h"
@@ -22,11 +21,11 @@ public:
     Cardinal GetNextRightDir() const;
     Cardinal GetNextLeftDir() const;
     Cardinal GetOppositeDir() const;
-	void ProcessMoveAction(InputAction);
+	void ProcessMoveAction(MoveAction);
 	void Tick(float DeltaTime);
 	bool IsStill() const;
-	glm::vec3 GetNextTile(InputAction action);
-	glm::vec3 GetNextEnemyTile(InputAction action);
+	glm::vec3 GetNextTile(MoveAction action);
+	glm::vec3 GetNextEnemyTile(MoveAction action);
 
 	Tile* FrontTile;
 	float DistanceMoved = 0.0f;
@@ -37,7 +36,7 @@ public:
 	MovementEvent* Event;
     
 	void OnBattlePhaseChange(BattlePhase bp) override;
-	void OnButtonPress(InputAction action) override;
+	void OnMoveActionButtonPress(MoveAction action) override;
 
 private:
 	glm::vec3 DirOffset(Cardinal dir);
@@ -49,15 +48,15 @@ private:
 	const float PreBattleMovementSpeed = 1.0f;
 	float MovementSpeed = 2.0f;
 	const float RotationSpeed = 150.0f;
-	InputAction CurrentMoveAction = InputAction::None;
-	InputAction InputMoveAction = InputAction::None;
+	MoveAction CurrentMoveAction = MoveAction::None;
+	MoveAction InputMoveAction = MoveAction::None;
 	std::string PrintCurrentDirection();
 	int EnemyCounter = 5;
 	void EndMovement();
 	void EndTurnMovement();
-	bool IsAutoMove(InputAction);
+	bool IsAutoMove(MoveAction);
 	BattlePhase CurrentBattlePhase;
-	void SetCurrentMoveAction(InputAction);
+	void SetCurrentMoveAction(MoveAction);
 	void SetCurrentDirection(Cardinal);
 	void SetMoveDistance(float);
 	bool CanMove();

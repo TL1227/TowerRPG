@@ -2,6 +2,8 @@
 
 #include "inputaction.h"
 
+#include <iostream>
+
 Input::Input(GLFWwindow* window, InputEvent* event, ::BattleSystem* battleSystem)
 	: Window{ window }
 	, Event{ event }
@@ -16,51 +18,57 @@ void Input::Read()
     {
 		if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_D))
 		{
-			Event->DispatchButtonPress(InputAction::TurnRight);
+			Event->DispatchButtonPress(MoveAction::TurnRight);
 		}
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_A))
 		{
-			Event->DispatchButtonPress(InputAction::TurnLeft);
+			Event->DispatchButtonPress(MoveAction::TurnLeft);
 		}
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_RIGHT))
 		{
-			Event->DispatchButtonPress(InputAction::MoveRight);
+			Event->DispatchButtonPress(MoveAction::Right);
 		}
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_LEFT))
 		{
-			Event->DispatchButtonPress(InputAction::MoveLeft);
+			Event->DispatchButtonPress(MoveAction::Left);
 		}
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_DOWN))
 		{
-			Event->DispatchButtonPress(InputAction::TurnAround);
+			Event->DispatchButtonPress(MoveAction::TurnAround);
 		}
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_W))
 		{
-			Event->DispatchButtonPress(InputAction::MoveForwards);
+            std::cout << "MoveForward" << std::endl;
+			Event->DispatchButtonPress(MoveAction::Forwards);
 		}
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_S))
 		{
-			Event->DispatchButtonPress(InputAction::MoveBackwards);
+			Event->DispatchButtonPress(MoveAction::Backwards);
 		}
     }
-	else
+    else
 	{
 		if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_D))
-			RegisterActionPress(InputAction::MenuRight);
+			RegisterActionPress(MenuAction::Right);
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_A))
-			RegisterActionPress(InputAction::MenuLeft);
+			RegisterActionPress(MenuAction::Left);
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_W))
-			RegisterActionPress(InputAction::MenuUp);
+			RegisterActionPress(MenuAction::Up);
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_S))
-			RegisterActionPress(InputAction::MenuDown);
-		else if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_S))
-			RegisterActionKeyUp(InputAction::MenuDown);
-		else if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_D))
-			RegisterActionKeyUp(InputAction::MenuRight);
-		else if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_A))
-			RegisterActionKeyUp(InputAction::MenuLeft);
-		else if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_W))
-			RegisterActionKeyUp(InputAction::MenuUp);
+			RegisterActionPress(MenuAction::Down);
+		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_ENTER))
+			RegisterActionPress(MenuAction::Confirm);
+
+		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_S))
+			RegisterActionKeyUp(MenuAction::Down);
+		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_D))
+			RegisterActionKeyUp(MenuAction::Right);
+		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_A))
+			RegisterActionKeyUp(MenuAction::Left);
+		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_W))
+			RegisterActionKeyUp(MenuAction::Up);
+		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_ENTER))
+			RegisterActionKeyUp(MenuAction::Confirm);
 	}
 }
 
@@ -78,5 +86,49 @@ void Input::RegisterActionKeyUp(InputAction action)
 	if (InputActionState[(int)action])
 	{
 		InputActionState[(int)action] = false;
+	}
+}
+
+void Input::RegisterActionPress(MoveAction action)
+{
+	if (!MoveActionState[(int)action])
+	{
+		Event->DispatchButtonPress(action);
+		MoveActionState[(int)action] = true;
+	}
+}
+
+void Input::RegisterActionKeyUp(MoveAction action)
+{
+	if (MoveActionState[(int)action])
+	{
+		MoveActionState[(int)action] = false;
+	}
+}
+
+void Input::RegisterActionPress(MenuAction action)
+{
+	if (action == MenuAction::Confirm)
+	{
+		std::cout << "Confirm Pressed" << std::endl;
+	}
+
+	if (!MenuActionState[(int)action])
+	{
+		Event->DispatchButtonPress(action);
+		MenuActionState[(int)action] = true;
+	}
+}
+
+void Input::RegisterActionKeyUp(MenuAction action)
+{
+	if (MenuActionState[(int)action])
+	{
+		if (action == MenuAction::Confirm)
+		{
+			std::cout << "Confirm Released" << std::endl;
+		}
+
+		MenuActionState[(int)action] = false;
 	}
 }

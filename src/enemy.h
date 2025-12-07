@@ -1,7 +1,6 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
-#include <vector>
 #include <glm/glm.hpp>
 
 #include "movementeventlistener.h"
@@ -27,7 +26,7 @@ public:
     void SwitchToAttackTex();
     void SwitchToCalmTex();
 private:
-    void OnMoveActionChange(InputAction) override;
+    void OnMoveActionChange(MoveAction) override;
     void OnDirectionChange(Cardinal) override;
     void OnMoveDistanceChange(float) override;
 

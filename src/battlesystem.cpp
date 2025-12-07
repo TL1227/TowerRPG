@@ -16,6 +16,7 @@ void BattleSystem::Tick(float delta)
 	}
 }
 
+
 void BattleSystem::SetBattlePhase(BattlePhase phase)
 {
 	CurrentBattlePhase = phase;
@@ -24,6 +25,8 @@ void BattleSystem::SetBattlePhase(BattlePhase phase)
 	{
 		PreambleStartTime = glfwGetTime();
 	}
+
+    std::cout << (int)CurrentBattlePhase << std::endl;
 
 	BattleEvent->DispatchPhaseChange(phase);
 

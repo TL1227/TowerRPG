@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, int screenWidth)
     : BattleSystem{ battleSystem }
@@ -80,9 +81,9 @@ void UI::Tick(float deltaTime)
 		for (size_t i = 0; i < bmenu.size(); i++)
 		{
             if(i == BattleMenuChoice)
-				Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), ScreenScale, glm::vec3(1.0, 1.0, 1.0));
+				Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), (float)ScreenScale, glm::vec3(1.0, 1.0, 1.0));
             else
-				Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), ScreenScale, glm::vec3(0.8, 0.8, 0.8));
+				Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), (float)ScreenScale, glm::vec3(0.8, 0.8, 0.8));
 		}
 
     }
@@ -116,27 +117,33 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
     }
 }
 
-void UI::OnButtonPress(InputAction IA)
+void UI::OnMenuActionButtonPress(MenuAction button)
 {
-    switch (IA)
+    switch (button)
     {
-	case InputAction::Confim:
+	case MenuAction::Confirm:
 		if (BattleMenuChoice == 3) //TODO: This needs to be an enum or something
 			BattleSystem.SetBattlePhase(BattlePhase::End);
+
+            std::cout << BattleMenuChoice << std::endl;
 		break;
-	case InputAction::Cancel:
+	case MenuAction::Cancel:
 		break;
-	case InputAction::MenuUp:
+	case MenuAction::Up:
         if (--BattleMenuChoice < 0)
-			BattleMenuChoice = bmenu.size() - 1;
+			BattleMenuChoice = (int)bmenu.size() - 1;
+
+            std::cout << BattleMenuChoice << std::endl;
 		break;
-	case InputAction::MenuDown:
-        if (++BattleMenuChoice > bmenu.size())
+	case MenuAction::Down:
+        if (++BattleMenuChoice >= bmenu.size())
 			BattleMenuChoice = 0;
+
+            std::cout << BattleMenuChoice << std::endl;
 		break;
-	case InputAction::MenuRight:
+	case MenuAction::Right:
 		break;
-	case InputAction::MenuLeft:
+	case MenuAction::Left:
 		break;
     }
 }

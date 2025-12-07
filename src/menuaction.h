@@ -1,15 +1,15 @@
-#ifndef INPUTACTION_H
-#define INPUTACTION_H
+#ifndef MENUACTION_H
+#define MENUACTION_H
 
-enum class InputAction
+enum class MenuAction
 {
     None,
     Confirm,
     Cancel,
     Up,
     Down,
-    Left,
     Right,
+    Left,
 };
 
 #endif

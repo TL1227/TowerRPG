@@ -82,9 +82,11 @@
     <ClInclude Include="src\inputevent.h" />
     <ClInclude Include="src\inputeventlistener.h" />
     <ClInclude Include="src\map.h" />
+    <ClInclude Include="src\menuaction.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\model.h" />
     <ClInclude Include="src\inputaction.h" />
+    <ClInclude Include="src\moveaction.h" />
     <ClInclude Include="src\movementevent.h" />
     <ClInclude Include="src\movementeventlistener.h" />
     <ClInclude Include="src\movementsystem.h" />

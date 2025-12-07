@@ -129,6 +129,8 @@
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\inputevent.h" />
     <ClInclude Include="src\inputeventlistener.h" />
+    <ClInclude Include="src\menuaction.h" />
+    <ClInclude Include="src\moveaction.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

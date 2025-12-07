@@ -45,7 +45,7 @@ private:
 	std::vector<std::string> bmenu = { "Attack", "Skill", "Item", "Run" };
 
     void OnBattlePhaseChange(BattlePhase) override;
-    void OnButtonPress(InputAction) override;
+    void OnMenuActionButtonPress(MenuAction button) override;
 };
 
 #endif

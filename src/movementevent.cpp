@@ -5,7 +5,7 @@ void MovementEvent::AddListener(MovementEventListener& ls)
     Listeners.push_back(&ls);
 }
 
-void MovementEvent::DispatchMoveActionChange(InputAction ma)
+void MovementEvent::DispatchMoveActionChange(MoveAction ma)
 {
     if (Listeners.size() > 0)
 		for (auto* lisenter : Listeners)
