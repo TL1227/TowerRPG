@@ -6,6 +6,7 @@
 #include <filesystem>
 
 #include "tile.h"
+#include "shader.h"
 
 class Map
 {
@@ -17,6 +18,7 @@ public:
 	Map(const std::string& filePath);
 	void Load();
 	void Load(const std::string& filePath);
+    void Draw(glm::mat4 view);
 	bool HasChanged();
 	char GetChar(int x, int z);
 	Tile* GetTile(int x, int z);
@@ -32,6 +34,7 @@ public:
 private:
 	std::filesystem::file_time_type _lastChecked;
 	std::string _filePath;
+    Shader Shader{ "shaders\\vert.shader", "shaders\\frag.shader" };
 };
 
 #endif

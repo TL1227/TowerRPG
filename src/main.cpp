@@ -37,21 +37,6 @@ string MapPath = "maps";
 
 bool fullscreen = false;
 
-enum class Mode
-{
-    TowerExplore,
-    TowerBattle
-};
-
-enum class BattleChoice
-{
-    Attack,
-    Skill,
-    Item,
-    Run,
-    NUM_CHOICES
-};
-
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -80,29 +65,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-bool SlideUp(float delta, float speed, float& var, float end)
-{
-    if (var < end)
-        var += speed * delta;
-
-    if (var > end)
-        var = end;    return var == end;
-}
-
-bool SlideDown(float delta, float speed, float& var, float end)
-{
-    if (var > end)
-        var -= speed * delta;
-    
-    if (var < end)
-        var = end;
-
-    return var == end;
-}
-
-//TODO: Look into different ways of scaling text
-int TEXT_UNIT;
-
 //screen
 GLFWwindow* SetUpGlfw()
 {
@@ -116,7 +78,6 @@ GLFWwindow* SetUpGlfw()
     {
 		SCREEN_WIDTH = 1920;
 		SCREEN_HEIGHT = 1080;
-        TEXT_UNIT = 2;
 
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -126,10 +87,8 @@ GLFWwindow* SetUpGlfw()
     {
 		SCREEN_WIDTH = 960;
 		SCREEN_HEIGHT = 540;
-            TEXT_UNIT = 1;
 		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tower RPG", NULL, NULL);
     }
-
 
     if (window == NULL)
     {
@@ -161,13 +120,6 @@ bool SetUpGlad()
     return true;
 }
 
-void ConsoleSplashMessage()
-{
-    cout << "Tower RPG" << endl;
-    cout << "by T-Level Games" << endl;
-    cout << "Version" << GameVersion << endl;
-}
-
 int main(int argc, char* argv[])
 {
     G_Args.Parse(argc, argv);
@@ -176,7 +128,9 @@ int main(int argc, char* argv[])
     if (window == NULL) return -1;
     if (!SetUpGlad()) return -1;
 
-    ConsoleSplashMessage();
+    cout << "Tower RPG" << endl;
+    cout << "by T-Level Games" << endl;
+    cout << "Version" << GameVersion << endl;
 
 	glClearColor(0.7f, 1.0f, 1.0f, 1.0f);
 
@@ -199,13 +153,10 @@ int main(int argc, char* argv[])
     MovementSystem MovementSystem{ LevelMap, Camera };
 
     //build shaders
-    Shader assetShader{ "shaders\\vert.shader", "shaders\\frag.shader" };
     Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
 
     //perspective projection
 	mat4 projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
-    assetShader.use();
-	assetShader.setMat4("projection", projection);
 	enemyShader.use();
 	enemyShader.setMat4("projection", projection);
 
@@ -301,47 +252,12 @@ int main(int argc, char* argv[])
 
             Input.Read();
 
-			//battle controls
-            /*
-			if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_SPACE) || GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ENTER))
-			{
-				if (Choice == BattleChoice::Run)
-				{
-					BattleSystem.SetBattlePhase(BattlePhase::End);
-					Enemy.SwitchToCalmTex();
-				}
-			}
-            */
-
 			MovementSystem.Tick(DeltaTime);
+
             Camera.UpdateCameraRotation();
-
-            assetShader.use();
-
             mat4 view = Camera.GetView();
-			assetShader.setMat4("view", view);
 
-            //render level
-            for (auto& tile : LevelMap.Tiles)
-            {
-				mat4 model = translate(mat4(1.0f), tile.Position);
-				assetShader.setMat4("model", model);
-
-                if (tile.Model)
-                {
-					tile.Model->Draw(assetShader);
-                }
-            }
-
-			//floor TODO: create a floor tile and add them to the towertool map maker
-			for (int i = 0; i < LevelMap.Data.size(); i++)
-				for (int j = 0; j < LevelMap.Data[0].size(); j++)
-				{
-					mat4 model = translate(mat4(1.0f), vec3(j, -1.0f, i));
-					assetShader.setMat4("model", model);
-					LevelMap.WallModel.Draw(assetShader);
-				}
-
+            LevelMap.Draw(view);
 			Enemy.Tick(view);
             Ui.Tick(DeltaTime);
             BattleSystem.Tick(DeltaTime);

@@ -51,6 +51,11 @@ Quad::Quad(const std::string& texturePath, ::Shader shader)
     glBindVertexArray(0);
 }
 
+float Quad::Top()    { return y + scaley / 2.0f; }
+float Quad::Right()  { return x + scalex / 2.0f; }
+float Quad::Bottom() { return y - scaley / 2.0f; }
+float Quad::Left()   { return x - scalex / 2.0f; }
+
 void Quad::Draw()
 {
     Shader.use();

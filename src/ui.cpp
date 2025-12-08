@@ -5,6 +5,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+
 UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, int screenWidth)
     : BattleSystem{ battleSystem }
     , ScreenHeight{ screenHeight }
@@ -13,6 +18,7 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     //This is so our text can scale with our screensize
     //I've picked 540 because it's the screen size I'm usually using when developing (half of 1080)
     ScreenScale = ScreenWidth / 540;
+    TextScale = ScreenScale * 0.5;
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(ScreenWidth), 0.0f, static_cast<float>(ScreenHeight));
     OffScreenDistance = (float)ScreenHeight * 0.5f;
@@ -81,11 +87,10 @@ void UI::Tick(float deltaTime)
 		for (size_t i = 0; i < bmenu.size(); i++)
 		{
             if(i == BattleMenuChoice)
-				Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), (float)ScreenScale, glm::vec3(1.0, 1.0, 1.0));
+				Text.Draw(bmenu[i], BattleMenu.Left() + 20, (BattleMenu.Top() - 30) - (i * TextScale * 60), TextScale, glm::vec3(1.0, 1.0, 1.0));
             else
-				Text.Draw(bmenu[i], ScreenWidth * 0.019f, ScreenHeight * 0.28f - (i * ScreenHeight * 0.058f), (float)ScreenScale, glm::vec3(0.8, 0.8, 0.8));
+				Text.Draw(bmenu[i], BattleMenu.Left() + 20, (BattleMenu.Top() - 30) - (i * TextScale * 60), TextScale, glm::vec3(0.8, 0.8, 0.8));
 		}
-
     }
 }
 

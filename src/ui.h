@@ -24,7 +24,8 @@ public:
 private:
 	int ScreenHeight;
 	int ScreenWidth;
-    int ScreenScale;
+    float ScreenScale;
+    float TextScale;
     float OffScreenDistance;
 
     //TODO: make a ui element struct?

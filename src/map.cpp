@@ -10,6 +10,33 @@ Map::Map(const std::string& filePath) : _filePath{ filePath }
     Load();
 }
 
+void Map::Draw(glm::mat4 view)
+{
+    Shader.use();
+    Shader.setMat4("view", view);
+
+    //render level
+    for (auto& tile : Tiles)
+    {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), tile.Position);
+        Shader.setMat4("model", model);
+
+        if (tile.Model)
+        {
+            tile.Model->Draw(Shader);
+        }
+    }
+
+    //floor TODO: create a floor tile and add them to the towertool map maker
+    for (int i = 0; i < Data.size(); i++)
+        for (int j = 0; j < Data[0].size(); j++)
+        {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(j, -1.0f, i));
+            Shader.setMat4("model", model);
+            WallModel.Draw(Shader);
+        }
+}
+
 void Map::Load()
 {
 	Data.clear();
@@ -41,7 +68,7 @@ void Map::Load()
             {
                 tile.TileType = TileType::Wall;
                 tile.Model = &WallModel;
-            }
+           }
             if (Data[i][j] == 'c')
             {
                 tile.TileType = TileType::Chest;
@@ -58,6 +85,10 @@ void Map::Load()
 
 			Tiles.push_back(tile);
         }
+
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
+    Shader.use();
+    Shader.setMat4("projection", projection);
 }
 
 void Map::Load(const std::string& filePath)

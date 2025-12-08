@@ -11,6 +11,10 @@ public:
     void Draw();
     unsigned int VAO, VBO, EBO, Texture;
     float x, y, scalex, scaley;
+    float Top();
+    float Right();
+    float Bottom();
+    float Left();
 private:
     Shader Shader;
 };
