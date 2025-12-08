@@ -35,7 +35,8 @@ int SCREEN_HEIGHT = 0;
 string DataDir = "data";
 string MapPath = "maps";
 
-bool fullscreen = false;
+//bool fullscreen = false;
+bool fullscreen = true;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -168,7 +169,7 @@ int main(int argc, char* argv[])
     BattleSystem.Audio = &audio;
     BattleSystem.PreambleLength = audio.PreBattleBgmLength * 0.8;
 
-    float preambleLength = audio.PreBattleBgmLength * 0.2; 
+    float preambleLength = audio.PreBattleBgmLength * 0.2f; 
     UI Ui { preambleLength, BattleSystem, SCREEN_HEIGHT, SCREEN_WIDTH };
     //TODO: ADD SCREENHEIGHT AND WIDTH TO THE DAMN UI 
 
@@ -218,7 +219,6 @@ int main(int argc, char* argv[])
     float LastFrame = 0.0f;
     float FPS = 1.0f / 100.0f;
     float LastTime = (float)glfwGetTime();
-    float StartBattleTime;
 
     while (!glfwWindowShouldClose(window))
     {

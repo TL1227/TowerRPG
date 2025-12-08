@@ -6,9 +6,9 @@
 #include <iostream>
 
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 
+static float TopMarg = 58;
+static float LeftMarg = 20;
 
 UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, int screenWidth)
     : BattleSystem{ battleSystem }
@@ -17,8 +17,8 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 {
     //This is so our text can scale with our screensize
     //I've picked 540 because it's the screen size I'm usually using when developing (half of 1080)
-    ScreenScale = ScreenWidth / 540;
-    TextScale = ScreenScale * 0.5;
+    ScreenScale = (float)ScreenWidth / 960;
+    TextScale = ScreenScale * 0.5f;
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(ScreenWidth), 0.0f, static_cast<float>(ScreenHeight));
     OffScreenDistance = (float)ScreenHeight * 0.5f;
@@ -86,10 +86,11 @@ void UI::Tick(float deltaTime)
 
 		for (size_t i = 0; i < bmenu.size(); i++)
 		{
-            if(i == BattleMenuChoice)
-				Text.Draw(bmenu[i], BattleMenu.Left() + 20, (BattleMenu.Top() - 30) - (i * TextScale * 60), TextScale, glm::vec3(1.0, 1.0, 1.0));
-            else
-				Text.Draw(bmenu[i], BattleMenu.Left() + 20, (BattleMenu.Top() - 30) - (i * TextScale * 60), TextScale, glm::vec3(0.8, 0.8, 0.8));
+            glm::vec3 tColour = (i == BattleMenuChoice) ? glm::vec3{ 1.0, 1.0, 1.0 } : glm::vec3{ 0.5, 0.5, 0.5 };
+            float textX = BattleMenu.Left() + (LeftMarg * TextScale);
+            float textY = BattleMenu.Top() - (TopMarg * TextScale * (i + 1));
+
+            Text.Draw(bmenu[i], textX, textY, TextScale, tColour);
 		}
     }
 }
