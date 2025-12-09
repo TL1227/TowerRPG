@@ -51,17 +51,17 @@ Quad::Quad(const std::string& texturePath, ::Shader shader)
     glBindVertexArray(0);
 }
 
-float Quad::Top()    { return y + scaley / 2.0f; }
-float Quad::Right()  { return x + scalex / 2.0f; }
-float Quad::Bottom() { return y - scaley / 2.0f; }
-float Quad::Left()   { return x - scalex / 2.0f; }
+float Quad::Top()    { return y + height / 2.0f; }
+float Quad::Right()  { return x + width / 2.0f; }
+float Quad::Bottom() { return y - height / 2.0f; }
+float Quad::Left()   { return x - width / 2.0f; }
 
 void Quad::Draw()
 {
     Shader.use();
     glm::mat4 model(1.0f);
 	model = glm::translate(model, glm::vec3(x, y, 0.0f));
-	model = glm::scale(model, glm::vec3(scalex, scaley, 1.0f));
+	model = glm::scale(model, glm::vec3(width, height, 1.0f));
 	Shader.setMat4("model", model);
     glBindVertexArray(VAO);
     glBindTexture(GL_TEXTURE_2D, Texture);

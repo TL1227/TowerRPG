@@ -35,8 +35,8 @@ int SCREEN_HEIGHT = 0;
 string DataDir = "data";
 string MapPath = "maps";
 
-//bool fullscreen = false;
-bool fullscreen = true;
+bool fullscreen = false;
+//bool fullscreen = true;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {

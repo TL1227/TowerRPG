@@ -10,7 +10,7 @@ public:
     Quad(const std::string& texturePath, Shader shader);
     void Draw();
     unsigned int VAO, VBO, EBO, Texture;
-    float x, y, scalex, scaley;
+    float x, y, width, height;
     float Top();
     float Right();
     float Bottom();

@@ -9,6 +9,7 @@
 
 static float TopMarg = 58;
 static float LeftMarg = 20;
+static float multi = 0.2f;
 
 UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, int screenWidth)
     : BattleSystem{ battleSystem }
@@ -33,15 +34,19 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     battleMenuShader.use();
 	battleMenuShader.setMat4("projection", projection);
 
-    BattleMenuOnScreenY = (float)ScreenHeight * 0.2f;
+    //BattleMenuOnScreenY = (float)ScreenHeight * 0.07f;
+
     BattleMenu = { "textures\\battlemenu.jpg", battleMenuShader};
+    BattleMenu.width = (float)ScreenWidth * 0.65f;
+    BattleMenu.height = (float)ScreenHeight * 0.25f;
     BattleMenu.x = (float)ScreenWidth / 2.0f;
-    BattleMenu.y = BattleMenuOnScreenY - OffScreenDistance;
-    BattleMenu.scalex = (float)ScreenWidth * 0.65f;
-    BattleMenu.scaley = (float)ScreenHeight * 0.25f;
+    BattleMenuOnScreenY = BattleMenu.height / 2.0f; //snap to bottom of screen
     BattleMenuSlider.duration = preambleDuration;
 	BattleMenuSlider.start = BattleMenu.y;
     BattleMenuSlider.end = BattleMenuOnScreenY;
+
+    //Set the menu to be "off screen"
+    BattleMenu.y = BattleMenuOnScreenY - OffScreenDistance;
 
     Shader enemyHpShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     enemyHpShader.use();
@@ -51,8 +56,8 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     EnemyHealthBar = { "textures\\enemyhealthinner.jpg", enemyHpShader };
     EnemyHealthBar.x = ScreenWidth / 2.0f;
     EnemyHealthBar.y = EnemyHealthBarOnScreenY + OffScreenDistance;
-    EnemyHealthBar.scalex = (float)ScreenWidth * 0.65f;
-    EnemyHealthBar.scaley = (float)ScreenHeight * 0.03f;
+    EnemyHealthBar.width = (float)ScreenWidth * 0.65f;
+    EnemyHealthBar.height = (float)ScreenHeight * 0.03f;
 
     EnemyHealthBarSlider.duration = preambleDuration;
 	EnemyHealthBarSlider.start = EnemyHealthBar.y;
@@ -83,6 +88,20 @@ void UI::Tick(float deltaTime)
     {
         BattleMenu.Draw();
         EnemyHealthBar.Draw();
+
+        float top = BattleMenu.Top();
+        float right = BattleMenu.Right();
+        float bottom = BattleMenu.Bottom();
+        float left = BattleMenu.Left();
+
+        ImGui::Begin("Battle Menu");
+        ImGui::InputFloat("BattleMenu Y", &BattleMenu.y, 0, 600);
+        ImGui::InputFloat("BattleMenu On Screen Y", &BattleMenuOnScreenY, 0, 600);
+        ImGui::InputFloat("Top", &top, 0, 600);
+        ImGui::InputFloat("Right", &right, 0, 600);
+        ImGui::InputFloat("Bottom", &bottom, 0, 600);
+        ImGui::InputFloat("Left", &left, 0, 600);
+        ImGui::End();
 
 		for (size_t i = 0; i < bmenu.size(); i++)
 		{
