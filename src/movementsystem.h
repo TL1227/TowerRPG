@@ -51,7 +51,6 @@ private:
 	MoveAction CurrentMoveAction = MoveAction::None;
 	MoveAction InputMoveAction = MoveAction::None;
 	std::string PrintCurrentDirection();
-	int EnemyCounter = 5;
 	void EndMovement();
 	void EndTurnMovement();
 	bool IsAutoMove(MoveAction);

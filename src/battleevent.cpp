@@ -10,3 +10,9 @@ void BattleEvent::DispatchPhaseChange(BattlePhase bp)
 	for (auto* lisenter : Listeners)
 		lisenter->OnBattlePhaseChange(bp);
 }
+
+void BattleEvent::DispatchEnemyDamage(float dmgPercent)
+{
+	for (auto* lisenter : Listeners)
+		lisenter->OnEnemyDamage(dmgPercent);
+}

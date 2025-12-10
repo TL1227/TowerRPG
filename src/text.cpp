@@ -26,7 +26,8 @@ Text::Text(int screenWidth, int screenHeight, ::Shader shader)
         std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;  
     }
 
-    LineHeight = face->size->metrics.height >> 6;
+    auto lh = face->size->metrics.height >> 6;
+    LineHeight = (float)lh;
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
 
@@ -61,7 +62,7 @@ Text::Text(int screenWidth, int screenHeight, ::Shader shader)
             texture,
             glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
             glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-            face->glyph->advance.x
+            (unsigned int)face->glyph->advance.x
         };
         Characters.insert(std::pair<char, Character>(c, character));
     }
@@ -108,7 +109,7 @@ void Text::Draw(std::string text, float x, float y, float scale, glm::vec3 color
 		int halfStringLength = stringLength / 2;
 		int halfScreenwidth = ScreenWidth / 2;
 
-		x = halfScreenwidth - halfStringLength;
+		x = (float)halfScreenwidth - (float)halfStringLength;
     }
 
     std::string::const_iterator c;

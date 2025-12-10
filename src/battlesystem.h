@@ -1,14 +1,19 @@
 #ifndef BATTLESYSTEM_H
 #define BATTLESYSTEM_H
 
-#include <vector>
-
-#include "battlephase.h"
 #include "battleevent.h"
-#include "battleeventlistener.h"
-#include "audio.h"
+#include "inputeventlistener.h"
+#include "enemy.h"
 
-class BattleSystem
+enum class BattleMenuChoice
+{
+    Attack,
+    Skill,
+    Item,
+    Run
+};
+
+class BattleSystem : public InputEventListener
 {
 public:
 	void SetBattlePhase(BattlePhase);
@@ -16,13 +21,21 @@ public:
 	void AutoMoveFinished();
 	void DecreaseEnemyCounter();
 	void Tick(float delta);
-	Audio* Audio;
 	double PreambleStartTime;
 	double PreambleLength = 1; //TODO: set this using battle intro length
 	BattleEvent* BattleEvent;
+    Enemy* Enemy;
+
+    BattleMenuChoice BattleMenuCurrentChoice = BattleMenuChoice::Attack;
+    int BattleMenuChoiceIndex = 0;
+	std::vector<std::string> BattleMenuText = { "Attack", "Skill", "Item", "Run" };
+    int BattleMenuChoiceSize = (int)BattleMenuText.size();
+
 private:
 	BattlePhase CurrentBattlePhase = BattlePhase::End;
-	int EnemyCounter = 5;
+	int EnemyCounter = 1;
+
+    void OnMenuActionButtonPress(MenuAction button) override;
 };
 
 #endif

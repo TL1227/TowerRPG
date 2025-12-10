@@ -20,6 +20,8 @@ public:
     float Alpha = 0.0f;
     Shader Shader;
     glm::mat4 ModelMat;
+    float MaxHealth = 100;
+    float HealthPoints = 100;
 
     Enemy(::Shader&);
     void Tick(glm::mat4);

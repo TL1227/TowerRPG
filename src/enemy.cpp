@@ -1,7 +1,6 @@
 #include "enemy.h"
 
 #include "textures.h"
-#include <glad/glad.h>
 #include "cardinal.h"
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -98,6 +97,7 @@ void Enemy::OnBattlePhaseChange(BattlePhase b)
 	{
 		SwitchToCalmTex();
 		DrawMe = false;
+        HealthPoints = MaxHealth;
 	}
 	break;
 	}

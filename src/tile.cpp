@@ -3,6 +3,6 @@
 Tile::Tile(glm::vec3 position)
 	: Position{ position }
 {
-	X = Position.x;
-	Z = Position.z;
+	X = (int)Position.x;
+	Z = (int)Position.z;
 };

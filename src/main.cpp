@@ -121,6 +121,33 @@ bool SetUpGlad()
     return true;
 }
 
+void ImGuiSetup(GLFWwindow* window)
+{
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+    ImGui_ImplOpenGL3_Init();
+}
+
+void ImGuiStartLoop()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void ImGuiEndLoop()
+{
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 int main(int argc, char* argv[])
 {
     G_Args.Parse(argc, argv);
@@ -129,19 +156,21 @@ int main(int argc, char* argv[])
     if (window == NULL) return -1;
     if (!SetUpGlad()) return -1;
 
+    ImGuiSetup(window);
+
     cout << "Tower RPG" << endl;
     cout << "by T-Level Games" << endl;
     cout << "Version" << GameVersion << endl;
 
-	glClearColor(0.7f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.7f, 1.0f, 1.0f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE); //NOTE: This is off because the enemy sprite currently has the wrong winding order and gets culled
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	Map LevelMap;
-	Camera Camera;
+    Map LevelMap;
+    Camera Camera;
 
     //Load map
     if (G_Args.MapPath.empty()) 
@@ -156,20 +185,17 @@ int main(int argc, char* argv[])
     //build shaders
     Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
 
+    //TODO: move this into some global space everything can access?
     //perspective projection
-	mat4 projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
-	enemyShader.use();
-	enemyShader.setMat4("projection", projection);
-
-    //orthogonal projection
-    projection = ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
+    mat4 projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
+    enemyShader.use();
+    enemyShader.setMat4("projection", projection);
 
     Audio audio;
     BattleSystem BattleSystem;
-    BattleSystem.Audio = &audio;
     BattleSystem.PreambleLength = audio.PreBattleBgmLength * 0.8;
 
-    float preambleLength = audio.PreBattleBgmLength * 0.2f; 
+    float preambleLength = (float)audio.PreBattleBgmLength * 0.2f; 
     UI Ui { preambleLength, BattleSystem, SCREEN_HEIGHT, SCREEN_WIDTH };
     //TODO: ADD SCREENHEIGHT AND WIDTH TO THE DAMN UI 
 
@@ -177,10 +203,13 @@ int main(int argc, char* argv[])
     MovementSystem.Enemy = &Enemy;
     MovementSystem.BattleSystem = &BattleSystem;
 
+    BattleSystem.Enemy = &Enemy;
+
     //Input
     InputEvent Ie;
     Ie.AddListener(MovementSystem);
     Ie.AddListener(Ui);
+    Ie.AddListener(BattleSystem);
     Input Input{ window, &Ie, &BattleSystem };
 
     //subscribe to Battle events
@@ -196,17 +225,6 @@ int main(int argc, char* argv[])
     Me.AddListener(Enemy);
     MovementSystem.Event = &Me;
 
-
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
-    ImGui_ImplOpenGL3_Init();
 
     float menuTextx = 50;
     float menuTexty = 80;
@@ -227,21 +245,19 @@ int main(int argc, char* argv[])
         float currentFrame = static_cast<float>(glfwGetTime());
         DeltaTime = currentFrame - LastFrame;
 
-		if (currentFrame - LastTime >= 1.0)
-		{
-		    //cout << "FPS: " << frames << endl;
-		    //cout << "LastTime: " << LastTime << endl;
+        if (currentFrame - LastTime >= 1.0)
+        {
+            //cout << "FPS: " << frames << endl;
+            //cout << "LastTime: " << LastTime << endl;
             frames = 0;
             LastTime += 1.0;
-		}
+        }
 
         if (DeltaTime >= FPS)
         {
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
+            ImGuiStartLoop();
 
             //ImGui::Begin("Battle Menu");
             //ImGui::SliderFloat("y", &Ui.BattleMenu.y, 100, 1000);
@@ -252,42 +268,41 @@ int main(int argc, char* argv[])
 
             Input.Read();
 
-			MovementSystem.Tick(DeltaTime);
+            MovementSystem.Tick(DeltaTime);
 
             Camera.UpdateCameraRotation();
             mat4 view = Camera.GetView();
 
             LevelMap.Draw(view);
-			Enemy.Tick(view);
+            Enemy.Tick(view);
             Ui.Tick(DeltaTime);
             BattleSystem.Tick(DeltaTime);
 
-			//TODO: come back to this once we've cleaned up main
-			/*
-			if (MovementSystem.FrontTile)
-			{
-				if (!MovementSystem.FrontTile->InteractiveText.empty())
-				{
-					Text.DrawText(textShader, MovementSystem.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
-				}
-			}
-			*/
+            //TODO: come back to this once we've cleaned up main
+            /*
+            if (MovementSystem.FrontTile)
+            {
+                if (!MovementSystem.FrontTile->InteractiveText.empty())
+                {
+                    Text.DrawText(textShader, MovementSystem.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+                }
+            }
+            */
 
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-			glfwSwapBuffers(window);
+            ImGuiEndLoop();
+            
+            glfwSwapBuffers(window);
             LastFrame = currentFrame;
 
             //TODO: put this in some kind of ISystem vector so it only gets checked if we're in live edit mode
             if (G_Args.IsLiveEdit)
             {
-				if (LevelMap.HasChanged())
-					LevelMap.Load();
+                if (LevelMap.HasChanged())
+                    LevelMap.Load();
             }
         }
         else
-        {
+    {
             glfwWaitEventsTimeout(FPS - DeltaTime);
         }
 

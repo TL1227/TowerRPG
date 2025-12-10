@@ -2,8 +2,6 @@
 
 #include "inputaction.h"
 
-#include <iostream>
-
 Input::Input(GLFWwindow* window, InputEvent* event, ::BattleSystem* battleSystem)
 	: Window{ window }
 	, Event{ event }
@@ -38,7 +36,6 @@ void Input::Read()
 		}
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_W))
 		{
-            std::cout << "MoveForward" << std::endl;
 			Event->DispatchButtonPress(MoveAction::Forwards);
 		}
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_S))
@@ -46,7 +43,7 @@ void Input::Read()
 			Event->DispatchButtonPress(MoveAction::Backwards);
 		}
     }
-    else
+    else if (BattleSystem->GetPhase() == BattlePhase::Start)
 	{
 		if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_D))
 			RegisterActionPress(MenuAction::Right);
@@ -108,11 +105,6 @@ void Input::RegisterActionKeyUp(MoveAction action)
 
 void Input::RegisterActionPress(MenuAction action)
 {
-	if (action == MenuAction::Confirm)
-	{
-		std::cout << "Confirm Pressed" << std::endl;
-	}
-
 	if (!MenuActionState[(int)action])
 	{
 		Event->DispatchButtonPress(action);
@@ -124,11 +116,6 @@ void Input::RegisterActionKeyUp(MenuAction action)
 {
 	if (MenuActionState[(int)action])
 	{
-		if (action == MenuAction::Confirm)
-		{
-			std::cout << "Confirm Released" << std::endl;
-		}
-
 		MenuActionState[(int)action] = false;
 	}
 }

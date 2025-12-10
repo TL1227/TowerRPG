@@ -40,12 +40,10 @@ private:
 
 	Quad BattleMenu;
     BattleSystem &BattleSystem;
-    int BattleMenuChoice = 0;
     Text Text;
 
-	std::vector<std::string> bmenu = { "Attack", "Skill", "Item", "Run" };
-
     void OnBattlePhaseChange(BattlePhase) override;
+    void OnEnemyDamage(float dmgPercent) override;
     void OnMenuActionButtonPress(MenuAction button) override;
 };
 

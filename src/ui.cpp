@@ -10,6 +10,8 @@
 static float TopMarg = 58;
 static float LeftMarg = 20;
 static float multi = 0.2f;
+static float EnemyHealthStartWidth = 0.0f;
+static float EnemyHealthStartX = 0.0f;
 
 UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, int screenWidth)
     : BattleSystem{ battleSystem }
@@ -59,6 +61,10 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     EnemyHealthBar.width = (float)ScreenWidth * 0.65f;
     EnemyHealthBar.height = (float)ScreenHeight * 0.03f;
 
+    //set the enemyHealthstarting pos
+    EnemyHealthStartWidth = EnemyHealthBar.width;
+    EnemyHealthStartX = EnemyHealthBar.x;
+
     EnemyHealthBarSlider.duration = preambleDuration;
 	EnemyHealthBarSlider.start = EnemyHealthBar.y;
     EnemyHealthBarSlider.end = EnemyHealthBarOnScreenY;
@@ -103,13 +109,13 @@ void UI::Tick(float deltaTime)
         ImGui::InputFloat("Left", &left, 0, 600);
         ImGui::End();
 
-		for (size_t i = 0; i < bmenu.size(); i++)
+		for (size_t i = 0; i < BattleSystem.BattleMenuChoiceSize; i++)
 		{
-            glm::vec3 tColour = (i == BattleMenuChoice) ? glm::vec3{ 1.0, 1.0, 1.0 } : glm::vec3{ 0.5, 0.5, 0.5 };
+            glm::vec3 tColour = (i == BattleSystem.BattleMenuChoiceIndex) ? glm::vec3{ 1.0, 1.0, 1.0 } : glm::vec3{ 0.5, 0.5, 0.5 };
             float textX = BattleMenu.Left() + (LeftMarg * TextScale);
             float textY = BattleMenu.Top() - (TopMarg * TextScale * (i + 1));
 
-            Text.Draw(bmenu[i], textX, textY, TextScale, tColour);
+            Text.Draw(BattleSystem.BattleMenuText[i], textX, textY, TextScale, tColour);
 		}
     }
 }
@@ -137,38 +143,23 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
     if (bp == BattlePhase::End)
     {
         ResetSliders();
+
         BattleMenu.y = BattleMenuOnScreenY - OffScreenDistance;
+
         EnemyHealthBar.y = EnemyHealthBarOnScreenY + OffScreenDistance; //set it up for sliding on to screen
+        EnemyHealthBar.x = EnemyHealthStartX;
+        EnemyHealthBar.width = EnemyHealthStartWidth;
     }
 }
 
 void UI::OnMenuActionButtonPress(MenuAction button)
 {
-    switch (button)
-    {
-	case MenuAction::Confirm:
-		if (BattleMenuChoice == 3) //TODO: This needs to be an enum or something
-			BattleSystem.SetBattlePhase(BattlePhase::End);
+    //TODO: maybe get rid of this?
+}
 
-            std::cout << BattleMenuChoice << std::endl;
-		break;
-	case MenuAction::Cancel:
-		break;
-	case MenuAction::Up:
-        if (--BattleMenuChoice < 0)
-			BattleMenuChoice = (int)bmenu.size() - 1;
-
-            std::cout << BattleMenuChoice << std::endl;
-		break;
-	case MenuAction::Down:
-        if (++BattleMenuChoice >= bmenu.size())
-			BattleMenuChoice = 0;
-
-            std::cout << BattleMenuChoice << std::endl;
-		break;
-	case MenuAction::Right:
-		break;
-	case MenuAction::Left:
-		break;
-    }
+void UI::OnEnemyDamage(float damagePercent)
+{
+    float damageDone = EnemyHealthStartWidth * (damagePercent / 100);
+    EnemyHealthBar.width -= damageDone;
+    EnemyHealthBar.x -= (damageDone / 2);
 }

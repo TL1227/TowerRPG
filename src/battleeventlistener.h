@@ -6,7 +6,8 @@
 class BattleEventListener
 {
 public:
-    virtual void OnBattlePhaseChange(BattlePhase bp) = 0;
+    virtual void OnBattlePhaseChange(BattlePhase bp) {};
+    virtual void OnEnemyDamage(float dmgPercent){};
     virtual ~BattleEventListener() = default;
 };
 
