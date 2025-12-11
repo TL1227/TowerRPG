@@ -85,7 +85,6 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
         if (BattleMenuCurrentChoice == BattleMenuChoice::Attack) 
         {
             float damagePoints = 5;
-
             float onepercent = Enemy->MaxHealth / 100;
             float percentDamage = onepercent * damagePoints;
 
@@ -100,7 +99,6 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
         else if (BattleMenuCurrentChoice == BattleMenuChoice::Skill) 
         {
             float damagePoints = 18;
-
             float onepercent = Enemy->MaxHealth / 100;
             float percentDamage = onepercent * damagePoints;
 

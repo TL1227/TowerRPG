@@ -24,7 +24,7 @@ public:
     float HealthPoints = 100;
 
     Enemy(::Shader&);
-    void Tick(glm::mat4);
+    void Tick(float delta, glm::mat4);
     void SwitchToAttackTex();
     void SwitchToCalmTex();
 private:
@@ -33,7 +33,11 @@ private:
     void OnMoveDistanceChange(float) override;
 
     void OnBattlePhaseChange(BattlePhase) override;
+    void OnEnemyDamage(float dmgPercent) override;
+    void Shake(float delta);
     bool DrawMe = false;
+    bool DamageMe = false;
+    glm::vec3 BattlePosition;
 };
 
 #endif

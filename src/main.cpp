@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
             mat4 view = Camera.GetView();
 
             LevelMap.Draw(view);
-            Enemy.Tick(view);
+            Enemy.Tick(DeltaTime, view);
             Ui.Tick(DeltaTime);
             BattleSystem.Tick(DeltaTime);
 

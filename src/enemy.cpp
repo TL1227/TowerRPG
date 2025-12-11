@@ -49,8 +49,13 @@ Enemy::Enemy(::Shader& shader)
     PlayerDirection = (float)Cardinal::East;
 }
 
-void Enemy::Tick(glm::mat4 view)
+void Enemy::Tick(float delta, glm::mat4 view)
 {
+    if (DamageMe)
+    {
+        Shake(delta);
+    }
+
     if (DrawMe)
     {
 		Shader.use();
@@ -66,6 +71,7 @@ void Enemy::Tick(glm::mat4 view)
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
     }
+
 }
 
 void Enemy::OnMoveActionChange(MoveAction m)
@@ -92,7 +98,12 @@ void Enemy::OnBattlePhaseChange(BattlePhase b)
 		DrawMe = true;
 	}
 	break;
-	case BattlePhase::Start: SwitchToAttackTex(); break;
+    case BattlePhase::Start:
+    {
+        SwitchToAttackTex(); 
+        BattlePosition = Position;
+    }
+    break;
 	case BattlePhase::End:
 	{
 		SwitchToCalmTex();
@@ -101,6 +112,39 @@ void Enemy::OnBattlePhaseChange(BattlePhase b)
 	}
 	break;
 	}
+}
+
+void Enemy::Shake(float delta)
+{
+    static float timePerFrame = 0.025;
+    static float shakeAmount = 0.01f;
+	static float shakeFrames[] = { shakeAmount, -shakeAmount, shakeAmount, -shakeAmount };
+	static int shakeFramesSize = 4;
+	static int shakeFrameIndex = 0;
+    static float elapsed = timePerFrame;
+
+    elapsed += delta;
+	std::cout << elapsed << std::endl;
+
+    if (shakeFrameIndex >= shakeFramesSize)
+    {
+        DamageMe = false;
+        shakeFrameIndex = 0;
+        return;
+    }
+
+    if (elapsed > timePerFrame)
+    {
+		Position.y += shakeFrames[shakeFrameIndex++];
+        elapsed = 0.0;
+    }
+
+	std::cout << Position.y << std::endl;
+}
+
+void Enemy::OnEnemyDamage(float dmgPercent)
+{
+    DamageMe = true;
 }
 
 void Enemy::OnMoveDistanceChange(float distance)
