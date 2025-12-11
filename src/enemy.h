@@ -35,8 +35,10 @@ private:
     void OnBattlePhaseChange(BattlePhase) override;
     void OnEnemyDamage(float dmgPercent) override;
     void Shake(float delta);
+    void Fade(float delta);
     bool DrawMe = false;
     bool DamageMe = false;
+    bool FadeOut = false;
     glm::vec3 BattlePosition;
 };
 

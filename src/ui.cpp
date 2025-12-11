@@ -100,15 +100,6 @@ void UI::Tick(float deltaTime)
         float bottom = BattleMenu.Bottom();
         float left = BattleMenu.Left();
 
-        ImGui::Begin("Battle Menu");
-        ImGui::InputFloat("BattleMenu Y", &BattleMenu.y, 0, 600);
-        ImGui::InputFloat("BattleMenu On Screen Y", &BattleMenuOnScreenY, 0, 600);
-        ImGui::InputFloat("Top", &top, 0, 600);
-        ImGui::InputFloat("Right", &right, 0, 600);
-        ImGui::InputFloat("Bottom", &bottom, 0, 600);
-        ImGui::InputFloat("Left", &left, 0, 600);
-        ImGui::End();
-
 		for (size_t i = 0; i < BattleSystem.BattleMenuChoiceSize; i++)
 		{
             glm::vec3 tColour = (i == BattleSystem.BattleMenuChoiceIndex) ? glm::vec3{ 1.0, 1.0, 1.0 } : glm::vec3{ 0.5, 0.5, 0.5 };

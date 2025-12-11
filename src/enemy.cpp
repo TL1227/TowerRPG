@@ -39,8 +39,10 @@ Enemy::Enemy(::Shader& shader)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    AttackTexture= LoadTexture("textures\\goblinattack.jpg");
-    CalmTexture = LoadTexture("textures\\goblincalm.jpg");
+    //AttackTexture= LoadTexture("textures\\goblinattack.jpg");
+    //CalmTexture = LoadTexture("textures\\goblincalm.jpg");
+    CalmTexture = LoadTexture("textures\\goblincalm.png");
+    AttackTexture= LoadTexture("textures\\goblinattack.png");
     ActiveTexture = CalmTexture;
 
     glBindVertexArray(0);
@@ -55,7 +57,6 @@ void Enemy::Tick(float delta, glm::mat4 view)
     {
         Shake(delta);
     }
-
     if (DrawMe)
     {
 		Shader.use();
@@ -71,7 +72,10 @@ void Enemy::Tick(float delta, glm::mat4 view)
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
     }
-
+    if(FadeOut)
+    {
+        Fade(delta);
+    }
 }
 
 void Enemy::OnMoveActionChange(MoveAction m)
@@ -106,37 +110,55 @@ void Enemy::OnBattlePhaseChange(BattlePhase b)
     break;
 	case BattlePhase::End:
 	{
-		SwitchToCalmTex();
-		DrawMe = false;
+        DamageMe = false;
+        FadeOut = true;
         HealthPoints = MaxHealth;
 	}
 	break;
 	}
 }
 
-void Enemy::Shake(float delta)
+void Enemy::Fade(float delta)
 {
-    static float timePerFrame = 0.025;
-    static float shakeAmount = 0.01f;
-	static float shakeFrames[] = { shakeAmount, -shakeAmount, shakeAmount, -shakeAmount };
-	static int shakeFramesSize = 4;
-	static int shakeFrameIndex = 0;
-    static float elapsed = timePerFrame;
+    static float timePerFrame = 0.05;
+    static float elapsed = 0.0f;
 
     elapsed += delta;
-	std::cout << elapsed << std::endl;
-
-    if (shakeFrameIndex >= shakeFramesSize)
-    {
-        DamageMe = false;
-        shakeFrameIndex = 0;
-        return;
-    }
 
     if (elapsed > timePerFrame)
     {
-		Position.y += shakeFrames[shakeFrameIndex++];
+		Alpha -= 0.1;
         elapsed = 0.0;
+    }
+    if (Alpha <= 0)
+    {
+        FadeOut = false;
+        DrawMe = false;
+		SwitchToCalmTex();
+    }
+}
+
+void Enemy::Shake(float delta)
+{
+    static float timePerFrame = 0.02;
+    static float shakeAmount = 0.005f;
+    static int shakeCount = 0;
+    static float elapsed = timePerFrame;
+
+    elapsed += delta;
+
+    if (shakeCount > 5)
+    {
+        DamageMe = false;
+        shakeCount = 0;
+        return;
+    }
+    if (elapsed > timePerFrame)
+    {
+		Position.y += shakeAmount;
+        shakeAmount = -shakeAmount;
+        elapsed = 0.0;
+        shakeCount++;
     }
 
 	std::cout << Position.y << std::endl;
