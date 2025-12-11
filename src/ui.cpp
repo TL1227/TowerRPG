@@ -43,12 +43,10 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     BattleMenu.height = (float)ScreenHeight * 0.25f;
     BattleMenu.x = (float)ScreenWidth / 2.0f;
     BattleMenuOnScreenY = BattleMenu.height / 2.0f; //snap to bottom of screen
+    BattleMenu.y = BattleMenuOnScreenY - OffScreenDistance;
     BattleMenuSlider.duration = preambleDuration;
 	BattleMenuSlider.start = BattleMenu.y;
     BattleMenuSlider.end = BattleMenuOnScreenY;
-
-    //Set the menu to be "off screen"
-    BattleMenu.y = BattleMenuOnScreenY - OffScreenDistance;
 
     Shader enemyHpShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     enemyHpShader.use();
@@ -83,6 +81,8 @@ void UI::Tick(float deltaTime)
 
         bool slide2complete = Slide(deltaTime, BattleMenu.y, BattleMenuSlider);
         BattleMenu.Draw();
+
+        std::cout << BattleMenu.y << std::endl;
 
         if (slide1complete && slide2complete)
         {
