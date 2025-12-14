@@ -43,6 +43,7 @@ Enemy::Enemy(::Shader& shader)
     //CalmTexture = LoadTexture("textures\\goblincalm.jpg");
     CalmTexture = LoadTexture("textures\\goblincalm.png");
     AttackTexture= LoadTexture("textures\\goblinattack.png");
+    DamageTexture= LoadTexture("textures\\goblindamage.png");
     ActiveTexture = CalmTexture;
 
     glBindVertexArray(0);
@@ -91,6 +92,7 @@ void Enemy::OnDirectionChange(Cardinal c)
 //TODO: if these never get called anywhere else just inline it
 void Enemy::SwitchToAttackTex() { ActiveTexture = AttackTexture; }
 void Enemy::SwitchToCalmTex() { ActiveTexture = CalmTexture; }
+void Enemy::SwitchToDamageTex() { ActiveTexture = DamageTexture; }
 
 void Enemy::OnBattlePhaseChange(BattlePhase b)
 {
@@ -149,6 +151,7 @@ void Enemy::Shake(float delta)
 
     if (shakeCount > 5)
     {
+        SwitchToAttackTex();
         DamageMe = false;
         shakeCount = 0;
         return;
@@ -166,6 +169,7 @@ void Enemy::Shake(float delta)
 
 void Enemy::OnEnemyDamage(float dmgPercent)
 {
+    SwitchToDamageTex();
     DamageMe = true;
 }
 

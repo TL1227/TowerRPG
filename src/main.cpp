@@ -9,15 +9,12 @@
 #include "imgui_impl_opengl3.h"
 
 #include <iostream>
-#include <vector>
 
 #include "shader.h"
 #include "movementsystem.h"
 #include "camera.h"
 #include "map.h"
 #include "args.h"
-#include "model.h"
-#include "tile.h"
 #include "audio.h"
 #include "ui.h"
 #include "input.h"

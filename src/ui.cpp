@@ -25,6 +25,7 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(ScreenWidth), 0.0f, static_cast<float>(ScreenHeight));
     OffScreenDistance = (float)ScreenHeight * 0.5f;
+    OffScreenDistance = (float)ScreenWidth * 2.0f;
 
     Shader textShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
     textShader.use();
@@ -36,50 +37,56 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     battleMenuShader.use();
 	battleMenuShader.setMat4("projection", projection);
 
-    //BattleMenuOnScreenY = (float)ScreenHeight * 0.07f;
-
     BattleMenu = { "textures\\battlemenu.jpg", battleMenuShader};
     BattleMenu.width = (float)ScreenWidth * 0.65f;
     BattleMenu.height = (float)ScreenHeight * 0.25f;
-    BattleMenu.x = (float)ScreenWidth / 2.0f;
     BattleMenuOnScreenY = BattleMenu.height / 2.0f; //snap to bottom of screen
-    BattleMenu.y = BattleMenuOnScreenY - OffScreenDistance;
+    BattleMenuOnScreenX = (float)ScreenWidth / 2.0f; 
+    //BattleMenu.x = BattleMenuOnScreenX - OffScreenDistance;
+    BattleMenu.x = -BattleMenu.width;
+    BattleMenu.y = BattleMenuOnScreenY;
     BattleMenuSlider.duration = preambleDuration;
-	BattleMenuSlider.start = BattleMenu.y;
-    BattleMenuSlider.end = BattleMenuOnScreenY;
+	BattleMenuSlider.start = BattleMenu.x;
+    BattleMenuSlider.end = BattleMenuOnScreenX;
 
     Shader enemyHpShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     enemyHpShader.use();
 	enemyHpShader.setMat4("projection", projection);
 
-    EnemyHealthBarOnScreenY = (float)ScreenHeight * 0.93f;
     EnemyHealthBar = { "textures\\enemyhealthinner.jpg", enemyHpShader };
-    EnemyHealthBar.x = ScreenWidth / 2.0f;
-    EnemyHealthBar.y = EnemyHealthBarOnScreenY + OffScreenDistance;
+    EnemyHealthBarOnScreenX = ScreenWidth / 2.0f;
+    EnemyHealthBarOnScreenY = (float)ScreenHeight * 0.93f;
+    EnemyHealthBar.y = EnemyHealthBarOnScreenY;
     EnemyHealthBar.width = (float)ScreenWidth * 0.65f;
     EnemyHealthBar.height = (float)ScreenHeight * 0.03f;
+    EnemyHealthBar.x = screenWidth + EnemyHealthBar.width;
 
     //set the enemyHealthstarting pos
     EnemyHealthStartWidth = EnemyHealthBar.width;
     EnemyHealthStartX = EnemyHealthBar.x;
 
     EnemyHealthBarSlider.duration = preambleDuration;
-	EnemyHealthBarSlider.start = EnemyHealthBar.y;
-    EnemyHealthBarSlider.end = EnemyHealthBarOnScreenY;
+	EnemyHealthBarSlider.start = EnemyHealthBar.x;
+    EnemyHealthBarSlider.end = EnemyHealthBarOnScreenX;
 }
 
 void UI::Tick(float deltaTime)
 {
+    ImGui::Begin("Battle Menu");
+    ImGui::SliderFloat("menu", &BattleMenu.x, 0, 2000);
+    ImGui::SliderFloat("bar", &EnemyHealthBar.x, 100, 2000);
+    ImGui::End();
+
     if (BattleSystem.GetPhase() == BattlePhase::Preamble)
     {
         Text.Draw("Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
     }
     else if (BattleSystem.GetPhase() == BattlePhase::Slide)
     {
-        bool slide1complete = Slide(deltaTime, EnemyHealthBar.y, EnemyHealthBarSlider);
+        bool slide1complete = Slide(deltaTime, EnemyHealthBar.x, EnemyHealthBarSlider);
         EnemyHealthBar.Draw();
 
-        bool slide2complete = Slide(deltaTime, BattleMenu.y, BattleMenuSlider);
+        bool slide2complete = Slide(deltaTime, BattleMenu.x, BattleMenuSlider);
         BattleMenu.Draw();
 
         std::cout << BattleMenu.y << std::endl;
@@ -99,6 +106,7 @@ void UI::Tick(float deltaTime)
         float right = BattleMenu.Right();
         float bottom = BattleMenu.Bottom();
         float left = BattleMenu.Left();
+
 
 		for (size_t i = 0; i < BattleSystem.BattleMenuChoiceSize; i++)
 		{
@@ -135,10 +143,9 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
     {
         ResetSliders();
 
-        BattleMenu.y = BattleMenuOnScreenY - OffScreenDistance;
+        BattleMenu.x = BattleMenuOnScreenX - OffScreenDistance;
 
-        EnemyHealthBar.y = EnemyHealthBarOnScreenY + OffScreenDistance; //set it up for sliding on to screen
-        EnemyHealthBar.x = EnemyHealthStartX;
+        EnemyHealthBar.x = EnemyHealthBarOnScreenX + OffScreenDistance; //set it up for sliding on to screen
         EnemyHealthBar.width = EnemyHealthStartWidth;
     }
 }

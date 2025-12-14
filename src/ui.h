@@ -18,7 +18,6 @@ class UI : public BattleEventListener, public InputEventListener
 {
 public:
 	UI(float, BattleSystem&, int screenHeight, int screenWidth);
-    void ResetSliders();
     void Tick(float delta);
 
 private:
@@ -30,11 +29,14 @@ private:
 
     //TODO: make a ui element struct?
     float BattleMenuOnScreenY;
+    float BattleMenuOnScreenX;
 	Slider BattleMenuSlider;
 
 	Quad EnemyHealthBar;
     float EnemyHealthBarOnScreenY;
+    float EnemyHealthBarOnScreenX;
 	Slider EnemyHealthBarSlider;
+    void ResetSliders();
 
     bool Slide(float, float&, Slider&);
 

@@ -16,6 +16,7 @@ public:
     int PreAttackTexture;
     int AttackTexture;
     int ActiveTexture;
+    int DamageTexture;
     float PlayerDirection;
     float Alpha = 0.0f;
     Shader Shader;
@@ -27,6 +28,7 @@ public:
     void Tick(float delta, glm::mat4);
     void SwitchToAttackTex();
     void SwitchToCalmTex();
+    void SwitchToDamageTex();
 private:
     void OnMoveActionChange(MoveAction) override;
     void OnDirectionChange(Cardinal) override;
