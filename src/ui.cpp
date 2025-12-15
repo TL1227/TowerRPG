@@ -10,8 +10,12 @@
 static float TopMarg = 58;
 static float LeftMarg = 20;
 static float multi = 0.2f;
+
 static float EnemyHealthStartWidth = 0.0f;
 static float EnemyHealthStartX = 0.0f;
+
+static float PartyHealthStartWidth = 0.0f;
+static float PartyHealthStartX = 0.0f;
 
 UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, int screenWidth)
     : BattleSystem{ battleSystem }
@@ -19,7 +23,6 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     , ScreenWidth{ screenWidth }
 {
     //This is so our text can scale with our screensize
-    //I've picked 540 because it's the screen size I'm usually using when developing (half of 1080)
     ScreenScale = (float)ScreenWidth / 960;
     TextScale = ScreenScale * 0.5f;
 
@@ -42,13 +45,13 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     BattleMenu.height = (float)ScreenHeight * 0.25f;
     BattleMenuOnScreenY = BattleMenu.height / 2.0f; //snap to bottom of screen
     BattleMenuOnScreenX = (float)ScreenWidth / 2.0f; 
-    //BattleMenu.x = BattleMenuOnScreenX - OffScreenDistance;
     BattleMenu.x = -BattleMenu.width;
     BattleMenu.y = BattleMenuOnScreenY;
     BattleMenuSlider.duration = preambleDuration;
 	BattleMenuSlider.start = BattleMenu.x;
     BattleMenuSlider.end = BattleMenuOnScreenX;
 
+    //EnemyHP
     Shader enemyHpShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     enemyHpShader.use();
 	enemyHpShader.setMat4("projection", projection);
@@ -61,13 +64,28 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     EnemyHealthBar.height = (float)ScreenHeight * 0.03f;
     EnemyHealthBar.x = screenWidth + EnemyHealthBar.width;
 
-    //set the enemyHealthstarting pos
     EnemyHealthStartWidth = EnemyHealthBar.width;
     EnemyHealthStartX = EnemyHealthBar.x;
 
     EnemyHealthBarSlider.duration = preambleDuration;
 	EnemyHealthBarSlider.start = EnemyHealthBar.x;
     EnemyHealthBarSlider.end = EnemyHealthBarOnScreenX;
+
+    //PartyHP
+    PartyHealthBar = { "textures\\enemyhealthinner.jpg", enemyHpShader };
+    PartyHealthBarOnScreenX = ScreenWidth / 2.0f;
+    //PartyHealthBarOnScreenY = (float)ScreenHeight * 0.93f;
+    PartyHealthBar.y = BattleMenu.Top() + (PartyHealthBar.height * 8);
+    PartyHealthBar.width = (float)ScreenWidth * 0.65f;
+    PartyHealthBar.height = (float)ScreenHeight * 0.03f;
+    PartyHealthBar.x = -PartyHealthBar.width;
+
+    PartyHealthStartWidth = PartyHealthBar.width;
+    PartyHealthStartX = PartyHealthBar.x;
+
+    PartyHealthBarSlider.duration = preambleDuration;
+	PartyHealthBarSlider.start = PartyHealthBar.x;
+    PartyHealthBarSlider.end = PartyHealthBarOnScreenX;
 }
 
 void UI::Tick(float deltaTime)
@@ -89,9 +107,10 @@ void UI::Tick(float deltaTime)
         bool slide2complete = Slide(deltaTime, BattleMenu.x, BattleMenuSlider);
         BattleMenu.Draw();
 
-        std::cout << BattleMenu.y << std::endl;
+        bool slide3complete = Slide(deltaTime, PartyHealthBar.x, PartyHealthBarSlider);
+        PartyHealthBar.Draw();
 
-        if (slide1complete && slide2complete)
+        if (slide1complete && slide2complete && slide3complete)
         {
             BattleSystem.SetBattlePhase(BattlePhase::Start);
             ResetSliders();
@@ -101,12 +120,13 @@ void UI::Tick(float deltaTime)
     {
         BattleMenu.Draw();
         EnemyHealthBar.Draw();
+        PartyHealthBar.Draw();
 
+        //TODO: don't calculate this on every tick
         float top = BattleMenu.Top();
         float right = BattleMenu.Right();
         float bottom = BattleMenu.Bottom();
         float left = BattleMenu.Left();
-
 
 		for (size_t i = 0; i < BattleSystem.BattleMenuChoiceSize; i++)
 		{
@@ -135,6 +155,7 @@ void UI::ResetSliders()
 {
     EnemyHealthBarSlider.elapsed = 0.0f;
     BattleMenuSlider.elapsed = 0.0f;
+    PartyHealthBarSlider.elapsed = 0.0f;
 }
 
 void UI::OnBattlePhaseChange(BattlePhase bp)
