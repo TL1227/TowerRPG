@@ -72,12 +72,12 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     EnemyHealthBarSlider.end = EnemyHealthBarOnScreenX;
 
     //PartyHP
-    PartyHealthBar = { "textures\\enemyhealthinner.jpg", enemyHpShader };
+    PartyHealthBar = { "textures\\partyhealthbar.jpg", enemyHpShader };
     PartyHealthBarOnScreenX = ScreenWidth / 2.0f;
     //PartyHealthBarOnScreenY = (float)ScreenHeight * 0.93f;
-    PartyHealthBar.y = BattleMenu.Top() + (PartyHealthBar.height * 8);
     PartyHealthBar.width = (float)ScreenWidth * 0.65f;
     PartyHealthBar.height = (float)ScreenHeight * 0.03f;
+    PartyHealthBar.y = BattleMenu.Top() + (PartyHealthBar.height / 2);
     PartyHealthBar.x = -PartyHealthBar.width;
 
     PartyHealthStartWidth = PartyHealthBar.width;
@@ -91,8 +91,7 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 void UI::Tick(float deltaTime)
 {
     ImGui::Begin("Battle Menu");
-    ImGui::SliderFloat("menu", &BattleMenu.x, 0, 2000);
-    ImGui::SliderFloat("bar", &EnemyHealthBar.x, 100, 2000);
+    ImGui::SliderFloat("y", &PartyHealthBar.y, 0, 1000);
     ImGui::End();
 
     if (BattleSystem.GetPhase() == BattlePhase::Preamble)
