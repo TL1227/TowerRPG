@@ -28,17 +28,17 @@ private:
     float OffScreenDistance;
 
     //TODO: make a ui element struct?
-	Quad BattleMenu;
+	Quad BattleMenuQuad;
     float BattleMenuOnScreenY;
     float BattleMenuOnScreenX;
 	Slider BattleMenuSlider;
 
-	Quad EnemyHealthBar;
+	Quad EnemyHealthBarQuad;
     float EnemyHealthBarOnScreenY;
     float EnemyHealthBarOnScreenX;
 	Slider EnemyHealthBarSlider;
 
-	Quad PartyHealthBar;
+	Quad PartyHealthBarQuad;
     float PartyHealthBarOnScreenY;
     float PartyHealthBarOnScreenX;
 	Slider PartyHealthBarSlider;
