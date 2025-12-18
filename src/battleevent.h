@@ -10,6 +10,7 @@ public:
 	void AddListener(BattleEventListener&);
 	void DispatchPhaseChange(BattlePhase);
 	void DispatchTurnAction(TurnAction&);
+	void DispatchCharacterTurnChange(std::string);
 
 private:
 	std::vector<BattleEventListener*> Listeners;

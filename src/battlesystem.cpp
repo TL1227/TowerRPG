@@ -84,10 +84,11 @@ void BattleSystem::ExecuteChoice(BattleMenuChoice choice)
 
         //TODO: maybe use ctor
         TurnAction ta;
+        ta.Name = "Attack";
         ta.DamagePercent = percentDamage;
         ta.DamagePoints = damagePoints;
         ta.TargetsEnemy = true;
-        ta.ActionTime = 0.5;
+        ta.ActionTime = 1;
 
         CurrentTurnAction = ta;
 
@@ -100,10 +101,11 @@ void BattleSystem::ExecuteChoice(BattleMenuChoice choice)
         float percentDamage = onepercent * damagePoints;
 
         TurnAction ta;
+        ta.Name = "Skill";
         ta.DamagePercent = percentDamage;
         ta.DamagePoints = damagePoints;
         ta.TargetsEnemy = true;
-        ta.ActionTime = 0.5;
+        ta.ActionTime = 1;
 
         CurrentTurnAction = ta;
 
@@ -135,6 +137,13 @@ void BattleSystem::DecreaseEnemyCounter()
 	}
 }
 
+void BattleSystem::ChangePartyMember(std::string member)
+{
+    CurrentPartyMember = member;
+    BattleEvent->DispatchCharacterTurnChange(member);
+}
+
+
 void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
 {
     if (ma == MenuAction::Up)
@@ -159,12 +168,17 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
     {
         BattleChoices.push_back(BattleMenuCurrentChoice);
 
-        //TODO: switch to next party member()
-
         if (BattleChoices.size() >= 4)
         {
             SetBattlePhase(BattlePhase::ExecuteTurn);
             ExecuteChoice(BattleChoices[CurrentChoiceIndex++]);
+
+            CurrentPartyListIndex = 0;
+            ChangePartyMember(PartyList[CurrentPartyListIndex]);
+        }
+        else
+        {
+            ChangePartyMember(PartyList[++CurrentPartyListIndex]);
         }
     }
 }

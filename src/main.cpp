@@ -205,8 +205,8 @@ int main(int argc, char* argv[])
     //Input
     InputEvent Ie;
     Ie.AddListener(MovementSystem);
-    Ie.AddListener(Ui);
     Ie.AddListener(BattleSystem);
+    Ie.AddListener(Ui);
     Input Input{ window, &Ie, &BattleSystem };
 
     //subscribe to Battle events

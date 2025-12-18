@@ -33,15 +33,21 @@ public:
 
     TurnAction CurrentTurnAction;
 
-    BattleMenuChoice BattleMenuCurrentChoice = BattleMenuChoice::Attack;
     int BattleMenuChoiceIndex = 0;
+    BattleMenuChoice BattleMenuCurrentChoice = BattleMenuChoice::Attack;
 	std::vector<std::string> BattleMenuText = { "Attack", "Skill", "Item", "Run" };
     int BattleMenuChoiceSize = (int)BattleMenuText.size();
+
+    int CurrentPartyListIndex = 0;
+	std::vector<std::string> PartyList = { "Warrior", "Wizard", "Cleric", "Theif" };
+    std::string CurrentPartyMember = PartyList[CurrentPartyListIndex];
+    int PartyMemberChoiceSize = (int)PartyList.size();
 
 private:
 	BattlePhase CurrentBattlePhase = BattlePhase::End;
 	int EnemyCounter = 1;
     void ExecuteChoice(BattleMenuChoice choice);
+    void ChangePartyMember(std::string member);
 
     void OnMenuActionButtonPress(MenuAction button) override;
 };

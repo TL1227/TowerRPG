@@ -16,3 +16,9 @@ void BattleEvent::DispatchTurnAction(TurnAction& ta)
 	for (auto* lisenter : Listeners)
 		lisenter->OnTurnAction(ta);
 }
+
+void BattleEvent::DispatchCharacterTurnChange(std::string ta)
+{
+	for (auto* lisenter : Listeners)
+		lisenter->OnCharacterTurnChange(ta);
+}

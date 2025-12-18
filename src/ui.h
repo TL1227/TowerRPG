@@ -32,6 +32,14 @@ private:
     float BattleMenuOnScreenY;
     float BattleMenuOnScreenX;
 	Slider BattleMenuSlider;
+    Text BattleMenuText;
+    std::string CurrentCharName;
+    Text CurrentCharNameText;
+    float CharNameX;
+    float CharNameY;
+    std::string CurrentTurnText;
+    glm::vec3 HighlightColour = glm::vec3{ 1.0, 1.0, 1.0 };
+    glm::vec3 NoHighlightColour = glm::vec3{ 0.5, 0.5, 0.5 };
 
 	Quad EnemyHealthBarQuad;
     float EnemyHealthBarOnScreenY;
@@ -46,12 +54,14 @@ private:
     void ResetSliders();
     bool Slide(float, float&, Slider&);
     BattleSystem &BattleSystem;
-    Text Text;
-    bool InBattle();
+
+    BattlePhase CurrentBP;
+
 
     void OnBattlePhaseChange(BattlePhase) override;
     void OnTurnAction(TurnAction&) override;
     void OnMenuActionButtonPress(MenuAction button) override;
+    void OnCharacterTurnChange(std::string charname) override;
 };
 
 #endif

@@ -6,9 +6,10 @@
 #include <iostream>
 
 #include "imgui.h"
+#include "text.h"
 
 static float TopMarg = 58;
-static float LeftMarg = 20;
+static float MenuTextLeftX;
 static float multi = 0.2f;
 
 static float EnemyHealthStartWidth = 0.0f;
@@ -32,7 +33,8 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     Shader textShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
     textShader.use();
 	textShader.setMat4("projection", projection);
-    Text = { ScreenWidth, ScreenHeight, textShader };
+    BattleMenuText = { ScreenWidth, ScreenHeight, textShader };
+    CurrentCharNameText = { ScreenWidth, ScreenHeight, textShader };
 
     //TODO: these should probably be in some kind of UI component class
     Shader battleMenuShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
@@ -49,6 +51,11 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     BattleMenuSlider.duration = preambleDuration;
 	BattleMenuSlider.start = BattleMenuQuad.x;
     BattleMenuSlider.end = BattleMenuOnScreenX;
+
+    //battle menu text
+    MenuTextLeftX = BattleMenuOnScreenX - (BattleMenuQuad.width / 4);
+    CharNameY = BattleMenuOnScreenY;
+    CharNameX = BattleMenuOnScreenX - ((BattleMenuQuad.width / 8) * 3.5);
 
     //EnemyHP
     Shader enemyHpShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
@@ -89,15 +96,19 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 
 void UI::Tick(float deltaTime)
 {
+    /*
     ImGui::Begin("Battle Menu");
-    ImGui::SliderFloat("y", &PartyHealthBarQuad.y, 0, 1000);
+    ImGui::SliderFloat("TextChoicex", &MenuTextLeftX, 0, 1000);
+    ImGui::SliderFloat("BattleMenux", &BattleMenuQuad.x, 0, 1000);
     ImGui::End();
+    */
+    CurrentBP = BattleSystem.GetPhase();
 
-    if (BattleSystem.GetPhase() == BattlePhase::Preamble)
+    if (CurrentBP == BattlePhase::Preamble)
     {
-        Text.Draw("Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+        BattleMenuText.Draw("Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
     }
-    else if (BattleSystem.GetPhase() == BattlePhase::Slide)
+    else if (CurrentBP == BattlePhase::Slide)
     {
         bool slide1complete = Slide(deltaTime, EnemyHealthBarQuad.x, EnemyHealthBarSlider);
         EnemyHealthBarQuad.Draw();
@@ -114,28 +125,33 @@ void UI::Tick(float deltaTime)
             ResetSliders();
         }
     }
-    else if (InBattle())
+    else if (CurrentBP == BattlePhase::Start || BattleSystem.GetPhase() == BattlePhase::StartTurn)
     {
         BattleMenuQuad.Draw();
         EnemyHealthBarQuad.Draw();
         PartyHealthBarQuad.Draw();
 
+        //TODO: can this just be BattleMenuTexttoo?
+        BattleMenuText.Draw(CurrentCharName, CharNameX, CharNameY, TextScale, HighlightColour);
+
+        //TODO: stop calculating text pos on every frame
 		for (size_t i = 0; i < BattleSystem.BattleMenuChoiceSize; i++)
 		{
-            glm::vec3 tColour = (i == BattleSystem.BattleMenuChoiceIndex) ? glm::vec3{ 1.0, 1.0, 1.0 } : glm::vec3{ 0.5, 0.5, 0.5 };
-            float textX = BattleMenuQuad.Left() + (LeftMarg * TextScale);
+            glm::vec3 tColour = (i == BattleSystem.BattleMenuChoiceIndex) ? HighlightColour : NoHighlightColour;
             float textY = BattleMenuQuad.Top() - (TopMarg * TextScale * (i + 1));
 
-            Text.Draw(BattleSystem.BattleMenuText[i], textX, textY, TextScale, tColour);
+            BattleMenuText.Draw(BattleSystem.BattleMenuText[i], MenuTextLeftX, textY, TextScale, tColour);
 		}
     }
-}
+    else if (CurrentBP == BattlePhase::ExecuteTurn)
+    {
+        BattleMenuQuad.Draw();
+        EnemyHealthBarQuad.Draw();
+        PartyHealthBarQuad.Draw();
 
-bool UI::InBattle()
-{
-    return BattleSystem.GetPhase() == BattlePhase::Start ||
-    BattleSystem.GetPhase() == BattlePhase::ExecuteTurn ||
-    BattleSystem.GetPhase() == BattlePhase::StartTurn;
+        //TODO: Why isn't this centering properly (>_<)
+        BattleMenuText.Draw(CurrentTurnText, 0, BattleMenuOnScreenY, TextScale, HighlightColour, TextAlign::Center);
+    }
 }
 
 bool UI::Slide(float deltaTime, float& var, Slider& s)
@@ -159,7 +175,11 @@ void UI::ResetSliders()
 
 void UI::OnBattlePhaseChange(BattlePhase bp)
 {
-    if (bp == BattlePhase::End)
+    if (bp == BattlePhase::Start)
+    {
+        CurrentCharName = BattleSystem.CurrentPartyMember;
+    }
+    else if (bp == BattlePhase::End)
     {
         ResetSliders();
 
@@ -172,7 +192,7 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
 
 void UI::OnMenuActionButtonPress(MenuAction button)
 {
-    //TODO: maybe get rid of this?
+
 }
 
 void UI::OnTurnAction(TurnAction& ta)
@@ -180,4 +200,10 @@ void UI::OnTurnAction(TurnAction& ta)
     float damageDone = EnemyHealthStartWidth * (ta.DamagePercent / 100);
     EnemyHealthBarQuad.width -= damageDone;
     EnemyHealthBarQuad.x -= (damageDone / 2);
+    CurrentTurnText = ta.Name + '!';
+}
+
+void UI::OnCharacterTurnChange(std::string charname)
+{
+    CurrentCharName = charname;
 }
