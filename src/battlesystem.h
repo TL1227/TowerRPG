@@ -4,6 +4,7 @@
 #include "battleevent.h"
 #include "inputeventlistener.h"
 #include "enemy.h"
+#include "turnaction.h"
 
 enum class BattleMenuChoice
 {
@@ -25,6 +26,12 @@ public:
 	double PreambleLength = 1; //TODO: set this using battle intro length
 	BattleEvent* BattleEvent;
     Enemy* Enemy;
+    std::vector<BattleMenuChoice> BattleChoices;
+    int CurrentChoiceIndex = 0;
+    bool ExecutingChoice = false;
+    int TurnStartTime = 0;
+
+    TurnAction CurrentTurnAction;
 
     BattleMenuChoice BattleMenuCurrentChoice = BattleMenuChoice::Attack;
     int BattleMenuChoiceIndex = 0;
@@ -34,6 +41,7 @@ public:
 private:
 	BattlePhase CurrentBattlePhase = BattlePhase::End;
 	int EnemyCounter = 1;
+    void ExecuteChoice(BattleMenuChoice choice);
 
     void OnMenuActionButtonPress(MenuAction button) override;
 };

@@ -2,12 +2,13 @@
 #define BATTLEEVENT_LISTENER_H
 
 #include "battlephase.h"
+#include "turnaction.h"
 
 class BattleEventListener
 {
 public:
     virtual void OnBattlePhaseChange(BattlePhase bp) {};
-    virtual void OnEnemyDamage(float dmgPercent){};
+    virtual void OnTurnAction(TurnAction& turnAction){};
     virtual ~BattleEventListener() = default;
 };
 

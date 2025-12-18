@@ -35,7 +35,7 @@ private:
     void OnMoveDistanceChange(float) override;
 
     void OnBattlePhaseChange(BattlePhase) override;
-    void OnEnemyDamage(float dmgPercent) override;
+    void OnTurnAction(TurnAction&) override;
     void Shake(float delta);
     void Fade(float delta);
     bool DrawMe = false;

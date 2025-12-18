@@ -11,8 +11,8 @@ void BattleEvent::DispatchPhaseChange(BattlePhase bp)
 		lisenter->OnBattlePhaseChange(bp);
 }
 
-void BattleEvent::DispatchEnemyDamage(float dmgPercent)
+void BattleEvent::DispatchTurnAction(TurnAction& ta)
 {
 	for (auto* lisenter : Listeners)
-		lisenter->OnEnemyDamage(dmgPercent);
+		lisenter->OnTurnAction(ta);
 }

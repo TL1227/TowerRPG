@@ -9,7 +9,7 @@ class BattleEvent
 public:
 	void AddListener(BattleEventListener&);
 	void DispatchPhaseChange(BattlePhase);
-	void DispatchEnemyDamage(float dmgPercent);
+	void DispatchTurnAction(TurnAction&);
 
 private:
 	std::vector<BattleEventListener*> Listeners;

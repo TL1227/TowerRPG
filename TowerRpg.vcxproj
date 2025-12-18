@@ -46,6 +46,7 @@
     <ClCompile Include="src\tile.cpp" />
     <ClCompile Include="src\text.cpp" />
     <ClCompile Include="src\ui.cpp" />
+    <ClCompile Include="src\turnaction.cpp" />
     <ClCompile Include="src\win32.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +97,7 @@
     <ClInclude Include="src\tile.h" />
     <ClInclude Include="src\text.h" />
     <ClInclude Include="src\ui.h" />
+    <ClInclude Include="src\turnaction.h" />
     <ClInclude Include="thirdparty_src\stb_image.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

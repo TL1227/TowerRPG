@@ -1,4 +1,5 @@
 #include "battlesystem.h"
+#include "battlephase.h"
 #include "menuaction.h"
 
 #include <glad/glad.h>
@@ -16,6 +17,24 @@ void BattleSystem::Tick(float delta)
 			SetBattlePhase(BattlePhase::Slide);
 		}
 	}
+	else if (CurrentBattlePhase == BattlePhase::ExecuteTurn)
+    {
+        if (CurrentTurnAction.IsFinished())
+        {
+            if (CurrentChoiceIndex >= BattleChoices.size())
+            {
+                SetBattlePhase(BattlePhase::StartTurn);
+            }
+            else
+            {
+                ExecuteChoice(BattleChoices[CurrentChoiceIndex++]);
+            }
+        }
+        else
+        {
+            CurrentTurnAction.Elapsed += delta;
+        }
+    }
 }
 
 void BattleSystem::SetBattlePhase(BattlePhase phase)
@@ -26,8 +45,16 @@ void BattleSystem::SetBattlePhase(BattlePhase phase)
 	{
 		PreambleStartTime = glfwGetTime();
 	}
-
-    std::cout << (int)CurrentBattlePhase << std::endl;
+    else if (CurrentBattlePhase == BattlePhase::StartTurn)
+    {
+		CurrentChoiceIndex = 0;
+		BattleChoices.clear();
+    }
+    else if (CurrentBattlePhase == BattlePhase::End)
+    {
+		CurrentChoiceIndex = 0;
+		BattleChoices.clear();
+    }
 
 	BattleEvent->DispatchPhaseChange(phase);
 
@@ -45,6 +72,56 @@ void BattleSystem::AutoMoveFinished()
 	{
 		SetBattlePhase(BattlePhase::Preamble);
 	}
+}
+
+void BattleSystem::ExecuteChoice(BattleMenuChoice choice)
+{
+    if (choice == BattleMenuChoice::Attack) 
+    {
+        float damagePoints = 5;
+        float onepercent = Enemy->MaxHealth / 100;
+        float percentDamage = onepercent * damagePoints;
+
+        //TODO: maybe use ctor
+        TurnAction ta;
+        ta.DamagePercent = percentDamage;
+        ta.DamagePoints = damagePoints;
+        ta.TargetsEnemy = true;
+        ta.ActionTime = 0.5;
+
+        CurrentTurnAction = ta;
+
+        BattleEvent->DispatchTurnAction(CurrentTurnAction);
+    }
+    else if (choice == BattleMenuChoice::Skill) 
+    {
+        float damagePoints = 18;
+        float onepercent = Enemy->MaxHealth / 100;
+        float percentDamage = onepercent * damagePoints;
+
+        TurnAction ta;
+        ta.DamagePercent = percentDamage;
+        ta.DamagePoints = damagePoints;
+        ta.TargetsEnemy = true;
+        ta.ActionTime = 0.5;
+
+        CurrentTurnAction = ta;
+
+        BattleEvent->DispatchTurnAction(CurrentTurnAction);
+    }
+    else if (choice == BattleMenuChoice::Item) 
+    {
+
+    }
+    else if (choice == BattleMenuChoice::Run) 
+    {
+        SetBattlePhase(BattlePhase::End);
+    }
+
+    if (Enemy->HealthPoints <= 0)
+    {
+        SetBattlePhase(BattlePhase::End);
+    }
 }
 
 void BattleSystem::DecreaseEnemyCounter()
@@ -68,7 +145,6 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
         }
 
         BattleMenuCurrentChoice = (BattleMenuChoice)BattleMenuChoiceIndex;
-        std::cout << BattleMenuText[BattleMenuChoiceIndex] << std::endl;
     }
     else if (ma == MenuAction::Down)
     {
@@ -78,45 +154,17 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
         }
 
         BattleMenuCurrentChoice = (BattleMenuChoice)BattleMenuChoiceIndex;
-        std::cout << BattleMenuText[BattleMenuChoiceIndex] << std::endl;
     }
     else if (ma == MenuAction::Confirm)
     {
-        if (BattleMenuCurrentChoice == BattleMenuChoice::Attack) 
+        BattleChoices.push_back(BattleMenuCurrentChoice);
+
+        //TODO: switch to next party member()
+
+        if (BattleChoices.size() >= 4)
         {
-            float damagePoints = 5;
-            float onepercent = Enemy->MaxHealth / 100;
-            float percentDamage = onepercent * damagePoints;
-
-            Enemy->HealthPoints -= damagePoints;
-            BattleEvent->DispatchEnemyDamage(percentDamage);
-
-            if (Enemy->HealthPoints <= 0)
-            {
-                SetBattlePhase(BattlePhase::End);
-            }
-        }
-        else if (BattleMenuCurrentChoice == BattleMenuChoice::Skill) 
-        {
-            float damagePoints = 18;
-            float onepercent = Enemy->MaxHealth / 100;
-            float percentDamage = onepercent * damagePoints;
-
-            Enemy->HealthPoints -= damagePoints;
-            BattleEvent->DispatchEnemyDamage(percentDamage);
-
-            if (Enemy->HealthPoints <= 0)
-            {
-                SetBattlePhase(BattlePhase::End);
-            }
-        }
-        else if (BattleMenuCurrentChoice == BattleMenuChoice::Item) 
-        {
-
-        }
-        else if (BattleMenuCurrentChoice == BattleMenuChoice::Run) 
-        {
-            SetBattlePhase(BattlePhase::End);
+            SetBattlePhase(BattlePhase::ExecuteTurn);
+            ExecuteChoice(BattleChoices[CurrentChoiceIndex++]);
         }
     }
 }

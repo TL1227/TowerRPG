@@ -47,9 +47,10 @@ private:
     bool Slide(float, float&, Slider&);
     BattleSystem &BattleSystem;
     Text Text;
+    bool InBattle();
 
     void OnBattlePhaseChange(BattlePhase) override;
-    void OnEnemyDamage(float dmgPercent) override;
+    void OnTurnAction(TurnAction&) override;
     void OnMenuActionButtonPress(MenuAction button) override;
 };
 

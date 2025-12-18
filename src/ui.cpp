@@ -24,10 +24,9 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 {
     //This is so our text can scale with our screensize
     ScreenScale = (float)ScreenWidth / 960;
-    TextScale = ScreenScale * 0.5f;
+    TextScale = ScreenScale * 0.43f;
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(ScreenWidth), 0.0f, static_cast<float>(ScreenHeight));
-    OffScreenDistance = (float)ScreenHeight * 0.5f;
     OffScreenDistance = (float)ScreenWidth * 2.0f;
 
     Shader textShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
@@ -42,11 +41,11 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 
     BattleMenuQuad = { "textures\\battlemenu.jpg", battleMenuShader};
     BattleMenuQuad.width = (float)ScreenWidth * 0.65f;
-    BattleMenuQuad.height = (float)ScreenHeight * 0.25f;
-    BattleMenuOnScreenY = BattleMenuQuad.height / 2.0f; //snap to bottom of screen
-    BattleMenuOnScreenX = (float)ScreenWidth / 2.0f; 
+    BattleMenuQuad.height = (float)ScreenHeight * 0.20f;
     BattleMenuQuad.x = -BattleMenuQuad.width;
+    BattleMenuOnScreenY = BattleMenuQuad.height / 2.0f; //snap to bottom of screen
     BattleMenuQuad.y = BattleMenuOnScreenY;
+    BattleMenuOnScreenX = (float)ScreenWidth / 2.0f; 
     BattleMenuSlider.duration = preambleDuration;
 	BattleMenuSlider.start = BattleMenuQuad.x;
     BattleMenuSlider.end = BattleMenuOnScreenX;
@@ -72,26 +71,26 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     EnemyHealthBarSlider.end = EnemyHealthBarOnScreenX;
 
     //PartyHP
-    PartyHealthBar = { "textures\\partyhealthbar.jpg", enemyHpShader };
+    PartyHealthBarQuad = { "textures\\partyhealthbar.jpg", enemyHpShader };
     PartyHealthBarOnScreenX = ScreenWidth / 2.0f;
     //PartyHealthBarOnScreenY = (float)ScreenHeight * 0.93f;
-    PartyHealthBar.width = (float)ScreenWidth * 0.65f;
-    PartyHealthBar.height = (float)ScreenHeight * 0.03f;
-    PartyHealthBar.y = BattleMenuQuad.Top() + (PartyHealthBar.height / 2);
-    PartyHealthBar.x = -PartyHealthBar.width;
+    PartyHealthBarQuad.width = (float)ScreenWidth * 0.65f;
+    PartyHealthBarQuad.height = (float)ScreenHeight * 0.03f;
+    PartyHealthBarQuad.y = BattleMenuQuad.Top() + (PartyHealthBarQuad.height / 2);
+    PartyHealthBarQuad.x = -PartyHealthBarQuad.width;
 
-    PartyHealthStartWidth = PartyHealthBar.width;
-    PartyHealthStartX = PartyHealthBar.x;
+    PartyHealthStartWidth = PartyHealthBarQuad.width;
+    PartyHealthStartX = PartyHealthBarQuad.x;
 
     PartyHealthBarSlider.duration = preambleDuration;
-	PartyHealthBarSlider.start = PartyHealthBar.x;
+	PartyHealthBarSlider.start = PartyHealthBarQuad.x;
     PartyHealthBarSlider.end = PartyHealthBarOnScreenX;
 }
 
 void UI::Tick(float deltaTime)
 {
     ImGui::Begin("Battle Menu");
-    ImGui::SliderFloat("y", &PartyHealthBar.y, 0, 1000);
+    ImGui::SliderFloat("y", &PartyHealthBarQuad.y, 0, 1000);
     ImGui::End();
 
     if (BattleSystem.GetPhase() == BattlePhase::Preamble)
@@ -106,8 +105,8 @@ void UI::Tick(float deltaTime)
         bool slide2complete = Slide(deltaTime, BattleMenuQuad.x, BattleMenuSlider);
         BattleMenuQuad.Draw();
 
-        bool slide3complete = Slide(deltaTime, PartyHealthBar.x, PartyHealthBarSlider);
-        PartyHealthBar.Draw();
+        bool slide3complete = Slide(deltaTime, PartyHealthBarQuad.x, PartyHealthBarSlider);
+        PartyHealthBarQuad.Draw();
 
         if (slide1complete && slide2complete && slide3complete)
         {
@@ -115,11 +114,11 @@ void UI::Tick(float deltaTime)
             ResetSliders();
         }
     }
-    else if (BattleSystem.GetPhase() == BattlePhase::Start)
+    else if (InBattle())
     {
         BattleMenuQuad.Draw();
         EnemyHealthBarQuad.Draw();
-        PartyHealthBar.Draw();
+        PartyHealthBarQuad.Draw();
 
 		for (size_t i = 0; i < BattleSystem.BattleMenuChoiceSize; i++)
 		{
@@ -130,6 +129,13 @@ void UI::Tick(float deltaTime)
             Text.Draw(BattleSystem.BattleMenuText[i], textX, textY, TextScale, tColour);
 		}
     }
+}
+
+bool UI::InBattle()
+{
+    return BattleSystem.GetPhase() == BattlePhase::Start ||
+    BattleSystem.GetPhase() == BattlePhase::ExecuteTurn ||
+    BattleSystem.GetPhase() == BattlePhase::StartTurn;
 }
 
 bool UI::Slide(float deltaTime, float& var, Slider& s)
@@ -157,7 +163,7 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
     {
         ResetSliders();
 
-        BattleMenu.x = BattleMenuOnScreenX - OffScreenDistance;
+        BattleMenuQuad.x = BattleMenuOnScreenX - OffScreenDistance;
 
         EnemyHealthBarQuad.x = EnemyHealthBarOnScreenX + OffScreenDistance; //set it up for sliding on to screen
         EnemyHealthBarQuad.width = EnemyHealthStartWidth;
@@ -169,9 +175,9 @@ void UI::OnMenuActionButtonPress(MenuAction button)
     //TODO: maybe get rid of this?
 }
 
-void UI::OnEnemyDamage(float damagePercent)
+void UI::OnTurnAction(TurnAction& ta)
 {
-    float damageDone = EnemyHealthStartWidth * (damagePercent / 100);
+    float damageDone = EnemyHealthStartWidth * (ta.DamagePercent / 100);
     EnemyHealthBarQuad.width -= damageDone;
     EnemyHealthBarQuad.x -= (damageDone / 2);
 }

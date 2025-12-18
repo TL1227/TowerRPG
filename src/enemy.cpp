@@ -1,5 +1,6 @@
 #include "enemy.h"
 
+#include "battlesystem.h"
 #include "textures.h"
 #include "cardinal.h"
 #include <glm/gtc/matrix_transform.hpp>
@@ -167,10 +168,14 @@ void Enemy::Shake(float delta)
 	std::cout << Position.y << std::endl;
 }
 
-void Enemy::OnEnemyDamage(float dmgPercent)
+void Enemy::OnTurnAction(TurnAction& ta)
 {
-    SwitchToDamageTex();
-    DamageMe = true;
+    if(ta.TargetsEnemy && ta.DamagePercent > 0)
+    {
+        SwitchToDamageTex();
+        DamageMe = true;
+        HealthPoints -= ta.DamagePoints;
+    }
 }
 
 void Enemy::OnMoveDistanceChange(float distance)

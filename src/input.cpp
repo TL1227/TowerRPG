@@ -43,7 +43,8 @@ void Input::Read()
 			Event->DispatchButtonPress(MoveAction::Backwards);
 		}
     }
-    else if (BattleSystem->GetPhase() == BattlePhase::Start)
+    else if (BattleSystem->GetPhase() == BattlePhase::Start ||
+    BattleSystem->GetPhase() == BattlePhase::StartTurn)
 	{
 		if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_D))
 			RegisterActionPress(MenuAction::Right);

@@ -1,8 +1,6 @@
 #ifndef BATTLEPHASE_H
 #define BATTLEPHASE_H
 
-#include <string>
-
 enum class BattlePhase
 {
 	Sighting,
@@ -10,6 +8,8 @@ enum class BattlePhase
 	Slide,
 	Snap,
 	Start,
+    StartTurn,
+    ExecuteTurn,
 	End
 };
 
