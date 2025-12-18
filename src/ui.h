@@ -26,6 +26,7 @@ private:
     float ScreenScale;
     float TextScale;
     float OffScreenDistance;
+    bool DamageMe = false;
 
     //TODO: make a ui element struct?
 	Quad BattleMenuQuad;
@@ -40,6 +41,7 @@ private:
     std::string CurrentTurnText;
     glm::vec3 HighlightColour = glm::vec3{ 1.0, 1.0, 1.0 };
     glm::vec3 NoHighlightColour = glm::vec3{ 0.5, 0.5, 0.5 };
+    glm::vec3 RedColour = glm::vec3{ 1.0, 0.5, 0.5 };
 
 	Quad EnemyHealthBarQuad;
     float EnemyHealthBarOnScreenY;
@@ -53,6 +55,7 @@ private:
 
     void ResetSliders();
     bool Slide(float, float&, Slider&);
+    void Shake(float delta);
     BattleSystem &BattleSystem;
 
     BattlePhase CurrentBP;

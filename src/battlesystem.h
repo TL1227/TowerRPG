@@ -5,6 +5,9 @@
 #include "inputeventlistener.h"
 #include "enemy.h"
 #include "turnaction.h"
+#include "vectorstringlist.h"
+
+//TODO: this absolutely doesn't belong here!
 
 enum class BattleMenuChoice
 {
@@ -26,7 +29,6 @@ public:
 	double PreambleLength = 1; //TODO: set this using battle intro length
 	BattleEvent* BattleEvent;
     Enemy* Enemy;
-    std::vector<BattleMenuChoice> BattleChoices;
     int CurrentChoiceIndex = 0;
     bool ExecutingChoice = false;
     int TurnStartTime = 0;
@@ -35,6 +37,7 @@ public:
 
     int BattleMenuChoiceIndex = 0;
     BattleMenuChoice BattleMenuCurrentChoice = BattleMenuChoice::Attack;
+    std::vector<TurnAction> BattleChoices;
 	std::vector<std::string> BattleMenuText = { "Attack", "Skill", "Item", "Run" };
     int BattleMenuChoiceSize = (int)BattleMenuText.size();
 
@@ -46,8 +49,11 @@ public:
 private:
 	BattlePhase CurrentBattlePhase = BattlePhase::End;
 	int EnemyCounter = 1;
-    void ExecuteChoice(BattleMenuChoice choice);
+    void ExecuteTurnAction(TurnAction choice);
     void ChangePartyMember(std::string member);
+    void SetChoiceOrder();
+    void AddEnemyChoice();
+    void PrintBattlePhase(BattlePhase);
 
     void OnMenuActionButtonPress(MenuAction button) override;
 };

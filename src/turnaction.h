@@ -12,7 +12,7 @@ public:
     float DamagePercent = 0;
     float DamagePoints = 0;
     bool TargetsEnemy = false;
-    float ActionTime = 0;
+    float ActionTime = 1;
     float Elapsed = 0;
 };
 

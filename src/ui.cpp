@@ -18,6 +18,8 @@ static float EnemyHealthStartX = 0.0f;
 static float PartyHealthStartWidth = 0.0f;
 static float PartyHealthStartX = 0.0f;
 
+static bool PlayerTurn = true;
+
 UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, int screenWidth)
     : BattleSystem{ battleSystem }
     , ScreenHeight{ screenHeight }
@@ -106,7 +108,7 @@ void UI::Tick(float deltaTime)
 
     if (CurrentBP == BattlePhase::Preamble)
     {
-        BattleMenuText.Draw("Grrrrr... I'm a Goblin!", 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
+        BattleMenuText.Draw("Grrrrr... I'm a Goblin!", 0, 200, 1, RedColour, TextAlign::Center);
     }
     else if (CurrentBP == BattlePhase::Slide)
     {
@@ -145,12 +147,20 @@ void UI::Tick(float deltaTime)
     }
     else if (CurrentBP == BattlePhase::ExecuteTurn)
     {
+        if (DamageMe)
+        {
+            Shake(deltaTime);
+        }
+
         BattleMenuQuad.Draw();
         EnemyHealthBarQuad.Draw();
         PartyHealthBarQuad.Draw();
 
         //TODO: Why isn't this centering properly (>_<)
-        BattleMenuText.Draw(CurrentTurnText, 0, BattleMenuOnScreenY, TextScale, HighlightColour, TextAlign::Center);
+        if (PlayerTurn)
+			BattleMenuText.Draw(CurrentTurnText, 0, BattleMenuOnScreenY, TextScale, HighlightColour, TextAlign::Center);
+        else
+			BattleMenuText.Draw(CurrentTurnText, 0, 200, 1, RedColour, TextAlign::Center);
     }
 }
 
@@ -164,6 +174,31 @@ bool UI::Slide(float deltaTime, float& var, Slider& s)
     var = s.start + (s.end - s.start) * t;
 
     return t >= 1.0f;
+}
+
+void UI::Shake(float delta)
+{
+    static float timePerFrame = 0.02;
+    static float shakeAmount = 4.0f;
+    static int shakeCount = 0;
+    static float elapsed = timePerFrame;
+
+    elapsed += delta;
+
+    if (shakeCount > 5)
+    {
+        DamageMe = false;
+        shakeCount = 0;
+        return;
+    }
+    if (elapsed > timePerFrame)
+    {
+		BattleMenuQuad.x += shakeAmount;
+		PartyHealthBarQuad.x += shakeAmount;
+        shakeAmount = -shakeAmount;
+        elapsed = 0.0;
+        shakeCount++;
+    }
 }
 
 void UI::ResetSliders()
@@ -187,6 +222,9 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
 
         EnemyHealthBarQuad.x = EnemyHealthBarOnScreenX + OffScreenDistance; //set it up for sliding on to screen
         EnemyHealthBarQuad.width = EnemyHealthStartWidth;
+
+        //remember where health is for next battle
+        PartyHealthBarSlider.end = PartyHealthBarQuad.x;
     }
 }
 
@@ -197,10 +235,23 @@ void UI::OnMenuActionButtonPress(MenuAction button)
 
 void UI::OnTurnAction(TurnAction& ta)
 {
-    float damageDone = EnemyHealthStartWidth * (ta.DamagePercent / 100);
-    EnemyHealthBarQuad.width -= damageDone;
-    EnemyHealthBarQuad.x -= (damageDone / 2);
-    CurrentTurnText = ta.Name + '!';
+    if (ta.TargetsEnemy)
+    {
+        PlayerTurn = true;
+		float damageDone = EnemyHealthStartWidth * (ta.DamagePercent / 100);
+		EnemyHealthBarQuad.width -= damageDone;
+		EnemyHealthBarQuad.x -= (damageDone / 2);
+		CurrentTurnText = ta.Name + '!';
+    }
+    else
+    {
+        DamageMe = true;
+        PlayerTurn = false;
+		float damageDone = PartyHealthStartWidth * (ta.DamagePercent / 100);
+		PartyHealthBarQuad.width -= damageDone;
+		PartyHealthBarQuad.x -= (damageDone / 2);
+		CurrentTurnText = ta.Name + '!';
+    }
 }
 
 void UI::OnCharacterTurnChange(std::string charname)

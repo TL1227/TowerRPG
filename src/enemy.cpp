@@ -164,8 +164,6 @@ void Enemy::Shake(float delta)
         elapsed = 0.0;
         shakeCount++;
     }
-
-	std::cout << Position.y << std::endl;
 }
 
 void Enemy::OnTurnAction(TurnAction& ta)
