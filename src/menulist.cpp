@@ -1,27 +1,27 @@
-#include "vectorstringlist.h"
+#include "menulist.h"
 
-VectorStringList::VectorStringList(std::vector<std::string> list)
+MenuList::MenuList(std::vector<std::string> list)
 : List { list }
 {
 
 }
 
-size_t VectorStringList::GetCurrentIndex()
+size_t MenuList::GetCurrentIndex()
 {
     return Index;
 }
-std::string VectorStringList::GetCurrentString()
+std::string MenuList::GetCurrentString()
 {
     return List[Index];
 }
 
-bool VectorStringList::AtEndOfList()
+bool MenuList::AtEndOfList()
 {
     return Index = Length;
 }
 
 //returns false if already at end of list
-bool VectorStringList::Increment()
+bool MenuList::Increment()
 {
     if (AtEndOfList())
     {

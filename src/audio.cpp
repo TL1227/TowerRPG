@@ -40,7 +40,11 @@ void Audio::StopPreBattleBgm()
 
 void Audio::PlayBattleBgm()
 {
-    System->playSound(BattleBgm, 0, false, &BattleBgmCh);
+    bool isPlaying;
+    BattleBgmCh->isPlaying(&isPlaying);
+
+    if(!isPlaying)
+        System->playSound(BattleBgm, 0, false, &BattleBgmCh);
 }
 
 void Audio::StopBattleBgm()

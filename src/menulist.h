@@ -1,10 +1,10 @@
-#ifndef VECTORSTRINGLIST_H
-#define VECTORSTRINGLIST_H
+#ifndef MENULIST_H
+#define MENULIST_H
 
 #include <string>
 #include <vector>
 
-class VectorStringList
+class MenuList
 {
 public:
     std::string GetCurrentString();
@@ -12,7 +12,7 @@ public:
     bool Increment();
     bool AtEndOfList();
 private:
-    VectorStringList(std::vector<std::string> list);
+    MenuList(std::vector<std::string> list);
     int Index = 0;
 	std::vector<std::string> List;
     size_t Length = List.size() - 1;

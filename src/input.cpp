@@ -44,7 +44,9 @@ void Input::Read()
 		}
     }
     else if (BattleSystem->GetPhase() == BattlePhase::Start ||
-    BattleSystem->GetPhase() == BattlePhase::StartTurn)
+        BattleSystem->GetPhase() == BattlePhase::StartTurn ||
+        BattleSystem->GetPhase() == BattlePhase::ChoosingSkill
+    )
 	{
 		if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_D))
 			RegisterActionPress(MenuAction::Right);

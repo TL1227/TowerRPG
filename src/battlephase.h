@@ -8,6 +8,7 @@ enum class BattlePhase
 	Slide,
 	Snap,
 	Start,
+	ChoosingSkill,
     StartTurn,
     ExecuteTurn,
 	End

@@ -6,8 +6,18 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "imgui.h"
+
 void BattleSystem::Tick(float delta)
 {
+    ImGui::Begin("BattleSystem");
+    ImGui::Text("Phase: %s", GetBattlePhaseText(CurrentBattlePhase).c_str());
+    ImGui::Text("BattleChoices Size: %zi", TurnActions.size());
+    ImGui::Text("CurrentPartyListIndex : %i", PartyListIndex);
+    ImGui::Text("SkillListIndex : %i", SkillListIndex);
+    ImGui::Text("SkillListSize : %i", SkillListSize);
+    ImGui::End();
+
 	if (CurrentBattlePhase == BattlePhase::Preamble)
 	{
 		double timepassed = glfwGetTime() - PreambleStartTime;
@@ -19,63 +29,60 @@ void BattleSystem::Tick(float delta)
 	}
 	else if (CurrentBattlePhase == BattlePhase::ExecuteTurn)
     {
-		if (BattleChoices[CurrentChoiceIndex].IsFinished())
+		if (TurnActions[CurrentChoiceIndex].IsFinished())
 		{
             CurrentChoiceIndex++;
 
-			if (CurrentChoiceIndex >= BattleChoices.size())
+			if (CurrentChoiceIndex >= TurnActions.size())
 			{
 				std::cout << "Setting StartTurn" << std::endl;
 				SetBattlePhase(BattlePhase::StartTurn);
 			}
 			else
 			{
-				ExecuteTurnAction(BattleChoices[CurrentChoiceIndex]);
+				ExecuteTurnAction(TurnActions[CurrentChoiceIndex]);
 			}
 		}
 		else
 		{
-			BattleChoices[CurrentChoiceIndex].Elapsed += delta;
+			TurnActions[CurrentChoiceIndex].Elapsed += delta;
 		}
     }
 }
 
-void BattleSystem::PrintBattlePhase(BattlePhase phase)
+std::string BattleSystem::GetBattlePhaseText(BattlePhase phase)
 {
     switch(phase)
     {
-        case BattlePhase::Sighting:
-            std::cout << "Sighting" << std::endl;
-            break;
-        case BattlePhase::Preamble:
-            std::cout << "Preamble" << std::endl;
-            break;
-        case BattlePhase::Slide:
-            std::cout << "Slide" << std::endl;
-            break;
-        case BattlePhase::Snap:
-            std::cout << "Snap" << std::endl;
-            break;
-        case BattlePhase::Start:
-            std::cout << "Start" << std::endl;
-            break;
-        case BattlePhase::StartTurn:
-            std::cout << "StartTurn" << std::endl;
-            break;
-        case BattlePhase::ExecuteTurn:
-            std::cout << "ExecuteTurn" << std::endl;
-            break;
-        case BattlePhase::End:
-            std::cout << "End" << std::endl;
-            break;
-        }
+        case BattlePhase::Sighting: return "Sighting";
+        case BattlePhase::Preamble: return "Preamble";
+        case BattlePhase::Slide: return "Slide";
+        case BattlePhase::Snap: return "Snap";
+        case BattlePhase::Start: return "Start";
+        case BattlePhase::ChoosingSkill: return "ChoosingSkill";
+        case BattlePhase::StartTurn: return "StartTurn";
+        case BattlePhase::ExecuteTurn: return "ExecuteTurn";
+        case BattlePhase::End: return "End";
+    }
+}
+
+std::string BattleSystem::GetBattleMenuText(BattleMenuChoice choice)
+{
+    switch(choice)
+    {
+        case BattleMenuChoice::Attack: return "Attack";
+        case BattleMenuChoice::Skill: return "Skill";
+        case BattleMenuChoice::Item: return "Item";
+        case BattleMenuChoice::Run: return "Run";
+        case BattleMenuChoice::LENGTH: return "LENGTH";
+    }
 }
 
 void BattleSystem::SetBattlePhase(BattlePhase phase)
 {
 	CurrentBattlePhase = phase;
 
-    PrintBattlePhase(CurrentBattlePhase);
+    std::cout << GetBattlePhaseText(CurrentBattlePhase) << std::endl;
 
     if (CurrentBattlePhase == BattlePhase::Preamble)
     {
@@ -84,14 +91,17 @@ void BattleSystem::SetBattlePhase(BattlePhase phase)
     else if (CurrentBattlePhase == BattlePhase::StartTurn)
     {
         CurrentChoiceIndex = 0;
-        BattleChoices.clear();
+        TurnActions.clear();
     }
     else if (CurrentBattlePhase == BattlePhase::End)
     {
+		PartyListIndex = 0;
+
         CurrentChoiceIndex = 0;
-        BattleChoices.clear();
-		CurrentPartyListIndex = 0;
-		ChangePartyMember(PartyList[CurrentPartyListIndex]);
+        BattleMenuIndex = 0;
+        TurnActions.clear();
+
+		ChangePartyMember(PartyList[PartyListIndex]);
     }
 
 	BattleEvent->DispatchPhaseChange(phase);
@@ -137,7 +147,6 @@ void BattleSystem::DecreaseEnemyCounter()
 
 void BattleSystem::ChangePartyMember(std::string member)
 {
-    CurrentPartyMember = member;
     BattleEvent->DispatchCharacterTurnChange(member);
 }
 
@@ -149,13 +158,13 @@ void BattleSystem::AddEnemyChoice()
 	float percentDamage = onepercent * damagePoints;
 
 	TurnAction ta;
-	ta.Name = "Goblin Deez Nuts";
+	ta.Name = "Goblin Slash!";
 	ta.DamagePercent = percentDamage;
 	ta.DamagePoints = damagePoints;
     ta.TargetsEnemy = false;
     ta.ActionTime = 1.5;
 
-	BattleChoices.push_back(ta);
+	TurnActions.push_back(ta);
 }
 
 void BattleSystem::SetChoiceOrder()
@@ -163,80 +172,133 @@ void BattleSystem::SetChoiceOrder()
     //figure out speed and such
 }
 
+void BattleSystem::MenuUp(int &index, int size)
+{
+    if (--index < 0) { index = size - 1; }
+}
+
+void BattleSystem::MenuDown(int &index, int size)
+{
+    if (++index >= size) { index = 0; }
+}
+
 void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
 {
     if (ma == MenuAction::Up)
     {
-        if (--BattleMenuChoiceIndex < 0)
-        {
-            BattleMenuChoiceIndex = BattleMenuText.size() - 1;
-        }
-
-        BattleMenuCurrentChoice = (BattleMenuChoice)BattleMenuChoiceIndex;
+        if (CurrentBattlePhase == BattlePhase::ChoosingSkill) 
+            MenuUp(SkillListIndex, SkillListSize);
+        else 
+            MenuUp(BattleMenuIndex, BattleMenuSize);
     }
     else if (ma == MenuAction::Down)
     {
-        if (++BattleMenuChoiceIndex >= BattleMenuText.size())
-        {
-            BattleMenuChoiceIndex = 0;
-        }
-
-        BattleMenuCurrentChoice = (BattleMenuChoice)BattleMenuChoiceIndex;
+        if (CurrentBattlePhase == BattlePhase::ChoosingSkill)
+            MenuDown(SkillListIndex, SkillListSize);
+        else
+            MenuDown(BattleMenuIndex, BattleMenuSize);
     }
     else if (ma == MenuAction::Confirm)
     {
-        std::cout << "confirm" << std::endl;
-        if (BattleMenuCurrentChoice == BattleMenuChoice::Attack) 
-        {
-            float damagePoints = 5;
-            float onepercent = Enemy->MaxHealth / 100;
-            float percentDamage = onepercent * damagePoints;
-
-            //TODO: maybe use ctor
-            TurnAction ta;
-            ta.Name = "Attack";
-            ta.DamagePercent = percentDamage;
-            ta.DamagePoints = damagePoints;
-            ta.TargetsEnemy = true;
-
-            BattleChoices.push_back(ta);
-
-        }
-        else if (BattleMenuCurrentChoice == BattleMenuChoice::Skill) 
+        if (CurrentBattlePhase == BattlePhase::ChoosingSkill)
         {
             float damagePoints = 18;
             float onepercent = Enemy->MaxHealth / 100;
             float percentDamage = onepercent * damagePoints;
 
             TurnAction ta;
-            ta.Name = "Skill";
+            ta.Name = SkillList[SkillListIndex];
             ta.DamagePercent = percentDamage;
             ta.DamagePoints = damagePoints;
             ta.TargetsEnemy = true;
 
-            BattleChoices.push_back(ta);
+            TurnActions.push_back(ta);
+
+            SkillListIndex = 0;
+
+            SetBattlePhase(BattlePhase::Start);
         }
-        else if (BattleMenuCurrentChoice == BattleMenuChoice::Item) 
+        else if (CurrentBattlePhase == BattlePhase::Start || CurrentBattlePhase == BattlePhase::StartTurn)
         {
-        }
-        else if (BattleMenuCurrentChoice == BattleMenuChoice::Run) 
-        {
-            SetBattlePhase(BattlePhase::End);
+            if ((BattleMenuChoice)BattleMenuIndex == BattleMenuChoice::Attack) 
+            {
+                float damagePoints = 5;
+                float onepercent = Enemy->MaxHealth / 100;
+                float percentDamage = onepercent * damagePoints;
+
+                //TODO: maybe use constructor?
+                TurnAction ta;
+                ta.Name = "Attack";
+                ta.DamagePercent = percentDamage;
+                ta.DamagePoints = damagePoints;
+                ta.TargetsEnemy = true;
+
+                TurnActions.push_back(ta);
+            }
+            else if ((BattleMenuChoice)BattleMenuIndex == BattleMenuChoice::Skill) 
+            {
+                //open skill menu
+                SetBattlePhase(BattlePhase::ChoosingSkill);
+
+                SkillList.clear();
+
+                auto CurrentPartyMember = PartyList[PartyListIndex];
+
+                if (CurrentPartyMember == "Warrior")
+                {
+                    SkillList.push_back("Cleave");
+                    SkillList.push_back("Heavy Cleave");
+                }
+                if (CurrentPartyMember == "Witch")
+                {
+                    SkillList.push_back("Fire");
+                    SkillList.push_back("Lightning");
+                }
+                if (CurrentPartyMember == "Cleric")
+                {
+                    SkillList.push_back("Holy");
+                    SkillList.push_back("Pray");
+                }
+                if (CurrentPartyMember == "Thief")
+                {
+                    SkillList.push_back("Stab");
+                    SkillList.push_back("Steal");
+                }
+
+                SkillListSize = SkillList.size();
+
+                return;
+            }
+            else if ((BattleMenuChoice)BattleMenuIndex == BattleMenuChoice::Item) 
+            {
+                TurnAction ta;
+                ta.Name = "Item";
+                ta.DamagePercent = 0;
+                ta.DamagePoints = 0;
+                ta.TargetsEnemy = true;
+
+                TurnActions.push_back(ta);
+            }
+            else if ((BattleMenuChoice)BattleMenuIndex == BattleMenuChoice::Run) 
+            {
+                SetBattlePhase(BattlePhase::End);
+                return;
+            }
         }
 
-        if (BattleChoices.size() >= 4)
+        if (TurnActions.size() >= 4)
         {
             AddEnemyChoice();
             SetChoiceOrder();
             SetBattlePhase(BattlePhase::ExecuteTurn);
-            ExecuteTurnAction(BattleChoices[CurrentChoiceIndex]);
+            ExecuteTurnAction(TurnActions[CurrentChoiceIndex]);
 
-            CurrentPartyListIndex = 0;
-            ChangePartyMember(PartyList[CurrentPartyListIndex]);
+            PartyListIndex = 0;
+            ChangePartyMember(PartyList[PartyListIndex]);
         }
         else
-    {
-            ChangePartyMember(PartyList[++CurrentPartyListIndex]);
+        {
+            ChangePartyMember(PartyList[++PartyListIndex]);
         }
     }
 }

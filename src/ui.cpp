@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "imgui.h"
+#include "menuaction.h"
 #include "text.h"
 
 static float TopMarg = 58;
@@ -38,7 +39,6 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     BattleMenuText = { ScreenWidth, ScreenHeight, textShader };
     CurrentCharNameText = { ScreenWidth, ScreenHeight, textShader };
 
-    //TODO: these should probably be in some kind of UI component class
     Shader battleMenuShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     battleMenuShader.use();
 	battleMenuShader.setMat4("projection", projection);
@@ -98,12 +98,13 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 
 void UI::Tick(float deltaTime)
 {
-    /*
-    ImGui::Begin("Battle Menu");
+    ImGui::Begin("UI");
     ImGui::SliderFloat("TextChoicex", &MenuTextLeftX, 0, 1000);
     ImGui::SliderFloat("BattleMenux", &BattleMenuQuad.x, 0, 1000);
+    ImGui::InputFloat("ScreenScale", &ScreenScale, 0, 1000);
+    ImGui::InputFloat("TextScale", &TextScale, 0, 1000);
     ImGui::End();
-    */
+
     CurrentBP = BattleSystem.GetPhase();
 
     if (CurrentBP == BattlePhase::Preamble)
@@ -133,28 +134,44 @@ void UI::Tick(float deltaTime)
         EnemyHealthBarQuad.Draw();
         PartyHealthBarQuad.Draw();
 
-        //TODO: can this just be BattleMenuTexttoo?
         BattleMenuText.Draw(CurrentCharName, CharNameX, CharNameY, TextScale, HighlightColour);
 
         //TODO: stop calculating text pos on every frame
-		for (size_t i = 0; i < BattleSystem.BattleMenuChoiceSize; i++)
+		for (size_t i = 0; i < BattleSystem.BattleMenuSize; i++)
 		{
-            glm::vec3 tColour = (i == BattleSystem.BattleMenuChoiceIndex) ? HighlightColour : NoHighlightColour;
+            glm::vec3 tColour = (i == BattleSystem.BattleMenuIndex) ? HighlightColour : NoHighlightColour;
             float textY = BattleMenuQuad.Top() - (TopMarg * TextScale * (i + 1));
 
-            BattleMenuText.Draw(BattleSystem.BattleMenuText[i], MenuTextLeftX, textY, TextScale, tColour);
+            BattleMenuText.Draw(BattleSystem.BattleMenuList[i], MenuTextLeftX, textY, TextScale, tColour);
 		}
+    }
+    else if (CurrentBP == BattlePhase::ChoosingSkill)
+    {
+        BattleMenuQuad.Draw();
+        EnemyHealthBarQuad.Draw();
+        PartyHealthBarQuad.Draw();
+
+        BattleMenuText.Draw(CurrentCharName, CharNameX, CharNameY, TextScale, HighlightColour);
+
+		for (size_t i = 0; i < BattleSystem.SkillListSize; i++)
+		{
+            glm::vec3 tColour = (i == BattleSystem.SkillListIndex) ? HighlightColour : NoHighlightColour;
+            float textY = BattleMenuQuad.Top() - (TopMarg * TextScale * (i + 1));
+
+            BattleMenuText.Draw(BattleSystem.SkillList[i], MenuTextLeftX, textY, TextScale, tColour);
+		}
+
     }
     else if (CurrentBP == BattlePhase::ExecuteTurn)
     {
+        BattleMenuQuad.Draw();
+        EnemyHealthBarQuad.Draw();
+        PartyHealthBarQuad.Draw();
+
         if (DamageMe)
         {
             Shake(deltaTime);
         }
-
-        BattleMenuQuad.Draw();
-        EnemyHealthBarQuad.Draw();
-        PartyHealthBarQuad.Draw();
 
         //TODO: Why isn't this centering properly (>_<)
         if (PlayerTurn)
@@ -212,7 +229,7 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
 {
     if (bp == BattlePhase::Start)
     {
-        CurrentCharName = BattleSystem.CurrentPartyMember;
+        CurrentCharName = BattleSystem.PartyList[BattleSystem.PartyListIndex];
     }
     else if (bp == BattlePhase::End)
     {

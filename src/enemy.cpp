@@ -1,6 +1,5 @@
 #include "enemy.h"
 
-#include "battlesystem.h"
 #include "textures.h"
 #include "cardinal.h"
 #include <glm/gtc/matrix_transform.hpp>
@@ -40,11 +39,11 @@ Enemy::Enemy(::Shader& shader)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    //AttackTexture= LoadTexture("textures\\goblinattack.jpg");
-    //CalmTexture = LoadTexture("textures\\goblincalm.jpg");
     CalmTexture = LoadTexture("textures\\goblincalm.png");
+    PreTexture = LoadTexture("textures\\goblinpre.png");
     AttackTexture= LoadTexture("textures\\goblinattack.png");
     DamageTexture= LoadTexture("textures\\goblindamage.png");
+
     ActiveTexture = CalmTexture;
 
     glBindVertexArray(0);
@@ -67,7 +66,7 @@ void Enemy::Tick(float delta, glm::mat4 view)
 		ModelMat = glm::scale(ModelMat, glm::vec3(0.8f, 0.8f, 0.0f));
 		Shader.setMat4("model", ModelMat);
 		Shader.setMat4("view", view);
-		Shader.setFloat("alpha", Alpha); //TODO: animate this fade without using CharMove.DistanceMoved
+		Shader.setFloat("alpha", Alpha);
 
 		glBindVertexArray(VAO);
 		glBindTexture(GL_TEXTURE_2D, ActiveTexture);
@@ -92,6 +91,7 @@ void Enemy::OnDirectionChange(Cardinal c)
 
 //TODO: if these never get called anywhere else just inline it
 void Enemy::SwitchToAttackTex() { ActiveTexture = AttackTexture; }
+void Enemy::SwitchToPreTex() { ActiveTexture = PreTexture; }
 void Enemy::SwitchToCalmTex() { ActiveTexture = CalmTexture; }
 void Enemy::SwitchToDamageTex() { ActiveTexture = DamageTexture; }
 
@@ -102,6 +102,12 @@ void Enemy::OnBattlePhaseChange(BattlePhase b)
 	case BattlePhase::Sighting:
 	{
 		SwitchToCalmTex();
+		DrawMe = true;
+	} 
+    break;
+	case BattlePhase::Slide:
+	{
+		SwitchToPreTex();
 		DrawMe = true;
 	}
 	break;

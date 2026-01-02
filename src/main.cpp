@@ -124,7 +124,7 @@ void ImGuiSetup(GLFWwindow* window)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Platform/Renderer backends
@@ -194,7 +194,6 @@ int main(int argc, char* argv[])
 
     float preambleLength = (float)audio.PreBattleBgmLength * 0.2f; 
     UI Ui { preambleLength, BattleSystem, SCREEN_HEIGHT, SCREEN_WIDTH };
-    //TODO: ADD SCREENHEIGHT AND WIDTH TO THE DAMN UI 
 
     Enemy Enemy{enemyShader};
     MovementSystem.Enemy = &Enemy;
@@ -256,15 +255,7 @@ int main(int argc, char* argv[])
 
             ImGuiStartLoop();
 
-            //ImGui::Begin("Battle Menu");
-            //ImGui::SliderFloat("y", &Ui.BattleMenu.y, 100, 1000);
-            //ImGui::SliderFloat("x", &Ui.BattleMenu.x, 100, 1000);
-            //ImGui::SliderFloat("scale x", &Ui.BattleMenu.scalex, 100, 1000);
-            //ImGui::SliderFloat("scale y", &Ui.BattleMenu.scaley, 100, 1000);
-            //ImGui::End();
-
             Input.Read();
-
             MovementSystem.Tick(DeltaTime);
 
             Camera.UpdateCameraRotation();

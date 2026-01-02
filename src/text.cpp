@@ -105,11 +105,8 @@ void Text::Draw(std::string text, float x, float y, float scale, glm::vec3 color
 
     if (ta == TextAlign::Center)
     {
-		int stringLength = GetStringPixelLength(text);
-		int halfStringLength = stringLength / 2;
-		int halfScreenwidth = ScreenWidth / 2;
-
-		x = (float)halfScreenwidth - (float)halfStringLength;
+		float stringLength = GetStringPixelLength(text) * scale;
+        x = (ScreenWidth - stringLength) * 0.5f;
     }
 
     std::string::const_iterator c;

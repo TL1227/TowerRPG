@@ -15,6 +15,7 @@ public:
     int CalmTexture;
     int PreAttackTexture;
     int AttackTexture;
+    int PreTexture;
     int ActiveTexture;
     int DamageTexture;
     float PlayerDirection;
@@ -27,6 +28,7 @@ public:
     Enemy(::Shader&);
     void Tick(float delta, glm::mat4);
     void SwitchToAttackTex();
+    void SwitchToPreTex();
     void SwitchToCalmTex();
     void SwitchToDamageTex();
 private:
