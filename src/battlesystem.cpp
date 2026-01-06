@@ -14,8 +14,10 @@ void BattleSystem::Tick(float delta)
     ImGui::Text("Phase: %s", GetBattlePhaseText(CurrentBattlePhase).c_str());
     ImGui::Text("BattleChoices Size: %zi", TurnActions.size());
     ImGui::Text("CurrentPartyListIndex : %i", PartyListIndex);
-    ImGui::Text("SkillListIndex : %i", SkillListIndex);
-    ImGui::Text("SkillListSize : %i", SkillListSize);
+    ImGui::Text("EnemyHP : %i", EnemyCurrentHealth);
+    ImGui::Text("EnemyHP%% : %f", EnemyCurrentHealthPercent);
+    ImGui::Text("PartyHP : %i", PartyCurrentHealth);
+    ImGui::Text("PartyHP%% : %f", PartyCurrentHealthPercent);
     ImGui::End();
 
 	if (CurrentBattlePhase == BattlePhase::Preamble)
@@ -50,6 +52,34 @@ void BattleSystem::Tick(float delta)
     }
 }
 
+void BattleSystem::ExecuteTurnAction(TurnAction ta)
+{
+    std::cout << ta.Name << std::endl;
+
+    if (ta.Target == Side::Enemy)
+    {
+        EnemyCurrentHealth = EnemyCurrentHealth -= ta.DamagePoints;
+        EnemyCurrentHealthPercent = ((float)EnemyCurrentHealth / (float)EnemyMaxHealth) * 100.0f;
+    }
+    else if (ta.Target == Side::Party)
+    {
+        PartyCurrentHealth = PartyCurrentHealth -= ta.DamagePoints;
+        PartyCurrentHealthPercent = ((float)PartyCurrentHealth / (float)PartyMaxHealth) * 100.0f;
+    }
+
+    BattleEvent->DispatchTurnAction(ta);
+
+    if (EnemyCurrentHealth <= 0)
+    {
+        SetBattlePhase(BattlePhase::End);
+    }
+    if (EnemyCurrentHealth <= 0)
+    {
+        //TODO: player returns to start of map?
+        SetBattlePhase(BattlePhase::End);
+    }
+}
+
 std::string BattleSystem::GetBattlePhaseText(BattlePhase phase)
 {
     switch(phase)
@@ -74,7 +104,6 @@ std::string BattleSystem::GetBattleMenuText(BattleMenuChoice choice)
         case BattleMenuChoice::Skill: return "Skill";
         case BattleMenuChoice::Item: return "Item";
         case BattleMenuChoice::Run: return "Run";
-        case BattleMenuChoice::LENGTH: return "LENGTH";
     }
 }
 
@@ -87,6 +116,12 @@ void BattleSystem::SetBattlePhase(BattlePhase phase)
     if (CurrentBattlePhase == BattlePhase::Preamble)
     {
         PreambleStartTime = glfwGetTime();
+
+        EnemyMaxHealth = Enemy->MaxHealth;
+        EnemyCurrentHealth = Enemy->MaxHealth;
+    }
+    if (CurrentBattlePhase == BattlePhase::Start)
+    {
     }
     else if (CurrentBattlePhase == BattlePhase::StartTurn)
     {
@@ -122,18 +157,6 @@ void BattleSystem::AutoMoveFinished()
 	}
 }
 
-void BattleSystem::ExecuteTurnAction(TurnAction choice)
-{
-    std::cout << choice.Name << std::endl;
-
-    BattleEvent->DispatchTurnAction(choice);
-
-    if (Enemy->HealthPoints <= 0)
-    {
-        SetBattlePhase(BattlePhase::End);
-    }
-}
-
 void BattleSystem::DecreaseEnemyCounter()
 {
 	EnemyCounter--;
@@ -152,16 +175,8 @@ void BattleSystem::ChangePartyMember(std::string member)
 
 void BattleSystem::AddEnemyChoice()
 {
-	float damagePoints = 20;
-    //TODO: maybe get this from party max health
-	float onepercent = Enemy->MaxHealth / 100;
-	float percentDamage = onepercent * damagePoints;
-
-	TurnAction ta;
-	ta.Name = "Goblin Slash!";
-	ta.DamagePercent = percentDamage;
-	ta.DamagePoints = damagePoints;
-    ta.TargetsEnemy = false;
+	TurnAction ta = {"Goblin Slash", 30, Side::Party };
+    ta.User = Side::Enemy;
     ta.ActionTime = 1.5;
 
 	TurnActions.push_back(ta);
@@ -179,7 +194,7 @@ void BattleSystem::MenuUp(int &index, int size)
 
 void BattleSystem::MenuDown(int &index, int size)
 {
-    if (++index >= size) { index = 0; }
+	if (++index >= size) { index = 0; }
 }
 
 void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
@@ -202,16 +217,8 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
     {
         if (CurrentBattlePhase == BattlePhase::ChoosingSkill)
         {
-            float damagePoints = 18;
-            float onepercent = Enemy->MaxHealth / 100;
-            float percentDamage = onepercent * damagePoints;
-
-            TurnAction ta;
-            ta.Name = SkillList[SkillListIndex];
-            ta.DamagePercent = percentDamage;
-            ta.DamagePoints = damagePoints;
-            ta.TargetsEnemy = true;
-
+            TurnAction ta = SkillList[SkillListIndex];
+            ta.User = Side::Party;
             TurnActions.push_back(ta);
 
             SkillListIndex = 0;
@@ -222,22 +229,13 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
         {
             if ((BattleMenuChoice)BattleMenuIndex == BattleMenuChoice::Attack) 
             {
-                float damagePoints = 5;
-                float onepercent = Enemy->MaxHealth / 100;
-                float percentDamage = onepercent * damagePoints;
-
-                //TODO: maybe use constructor?
-                TurnAction ta;
-                ta.Name = "Attack";
-                ta.DamagePercent = percentDamage;
-                ta.DamagePoints = damagePoints;
-                ta.TargetsEnemy = true;
+                TurnAction ta = {"Attack", 5, Side::Enemy};
+                ta.User = Side::Party;
 
                 TurnActions.push_back(ta);
             }
             else if ((BattleMenuChoice)BattleMenuIndex == BattleMenuChoice::Skill) 
             {
-                //open skill menu
                 SetBattlePhase(BattlePhase::ChoosingSkill);
 
                 SkillList.clear();
@@ -246,23 +244,23 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
 
                 if (CurrentPartyMember == "Warrior")
                 {
-                    SkillList.push_back("Cleave");
-                    SkillList.push_back("Heavy Cleave");
+                    SkillList.push_back({"Cleave", 10, Side::Enemy });
+                    SkillList.push_back({"Heavy Cleave", 18, Side::Enemy });
                 }
                 if (CurrentPartyMember == "Witch")
                 {
-                    SkillList.push_back("Fire");
-                    SkillList.push_back("Lightning");
+                    SkillList.push_back({"Fire", 10, Side::Enemy });
+                    SkillList.push_back({"Lightning", 18, Side::Enemy });
                 }
                 if (CurrentPartyMember == "Cleric")
                 {
-                    SkillList.push_back("Holy");
-                    SkillList.push_back("Pray");
+                    SkillList.push_back({"Pray", 10, Side::Enemy });
+                    SkillList.push_back({"Heal", -20, Side::Party });
                 }
                 if (CurrentPartyMember == "Thief")
                 {
-                    SkillList.push_back("Stab");
-                    SkillList.push_back("Steal");
+                    SkillList.push_back({"Stab", 10, Side::Enemy });
+                    SkillList.push_back({"Steal", 0, Side::Enemy });
                 }
 
                 SkillListSize = SkillList.size();
@@ -275,7 +273,7 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
                 ta.Name = "Item";
                 ta.DamagePercent = 0;
                 ta.DamagePoints = 0;
-                ta.TargetsEnemy = true;
+                ta.Target = Side::Enemy;
 
                 TurnActions.push_back(ta);
             }

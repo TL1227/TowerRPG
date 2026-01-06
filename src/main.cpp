@@ -83,8 +83,8 @@ GLFWwindow* SetUpGlfw()
     }
     else
     {
-		SCREEN_WIDTH = 960;
-		SCREEN_HEIGHT = 540;
+		SCREEN_WIDTH = 480;
+		SCREEN_HEIGHT = 270;
 		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Tower RPG", NULL, NULL);
     }
 

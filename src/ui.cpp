@@ -11,13 +11,6 @@
 
 static float TopMarg = 58;
 static float MenuTextLeftX;
-static float multi = 0.2f;
-
-static float EnemyHealthStartWidth = 0.0f;
-static float EnemyHealthStartX = 0.0f;
-
-static float PartyHealthStartWidth = 0.0f;
-static float PartyHealthStartX = 0.0f;
 
 static bool PlayerTurn = true;
 
@@ -109,7 +102,7 @@ void UI::Tick(float deltaTime)
 
     if (CurrentBP == BattlePhase::Preamble)
     {
-        BattleMenuText.Draw("Grrrrr... I'm a Goblin!", 0, 200, 1, RedColour, TextAlign::Center);
+        BattleMenuText.Draw("Grrrrr... I'm a Goblin!", 0, 200, TextScale, RedColour, TextAlign::Center);
     }
     else if (CurrentBP == BattlePhase::Slide)
     {
@@ -136,6 +129,7 @@ void UI::Tick(float deltaTime)
 
         BattleMenuText.Draw(CurrentCharName, CharNameX, CharNameY, TextScale, HighlightColour);
 
+
         //TODO: stop calculating text pos on every frame
 		for (size_t i = 0; i < BattleSystem.BattleMenuSize; i++)
 		{
@@ -153,12 +147,13 @@ void UI::Tick(float deltaTime)
 
         BattleMenuText.Draw(CurrentCharName, CharNameX, CharNameY, TextScale, HighlightColour);
 
+
 		for (size_t i = 0; i < BattleSystem.SkillListSize; i++)
 		{
             glm::vec3 tColour = (i == BattleSystem.SkillListIndex) ? HighlightColour : NoHighlightColour;
             float textY = BattleMenuQuad.Top() - (TopMarg * TextScale * (i + 1));
 
-            BattleMenuText.Draw(BattleSystem.SkillList[i], MenuTextLeftX, textY, TextScale, tColour);
+            BattleMenuText.Draw(BattleSystem.SkillList[i].Name, MenuTextLeftX, textY, TextScale, tColour);
 		}
 
     }
@@ -177,7 +172,7 @@ void UI::Tick(float deltaTime)
         if (PlayerTurn)
 			BattleMenuText.Draw(CurrentTurnText, 0, BattleMenuOnScreenY, TextScale, HighlightColour, TextAlign::Center);
         else
-			BattleMenuText.Draw(CurrentTurnText, 0, 200, 1, RedColour, TextAlign::Center);
+			BattleMenuText.Draw(CurrentTurnText, 0, 200, TextScale, RedColour, TextAlign::Center);
     }
 }
 
@@ -195,7 +190,7 @@ bool UI::Slide(float deltaTime, float& var, Slider& s)
 
 void UI::Shake(float delta)
 {
-    static float timePerFrame = 0.02;
+    static float timePerFrame = 0.02f;
     static float shakeAmount = 4.0f;
     static int shakeCount = 0;
     static float elapsed = timePerFrame;
@@ -252,22 +247,44 @@ void UI::OnMenuActionButtonPress(MenuAction button)
 
 void UI::OnTurnAction(TurnAction& ta)
 {
-    if (ta.TargetsEnemy)
+    if (ta.User == Side::Party)
     {
-        PlayerTurn = true;
-		float damageDone = EnemyHealthStartWidth * (ta.DamagePercent / 100);
-		EnemyHealthBarQuad.width -= damageDone;
-		EnemyHealthBarQuad.x -= (damageDone / 2);
-		CurrentTurnText = ta.Name + '!';
+        if (ta.Target == Side::Enemy)
+        {
+            PlayerTurn = true;
+            CurrentTurnText = ta.Name + '!';
+        }
+        else if (ta.Target == Side::Party)
+        {
+            PlayerTurn = true;
+            CurrentTurnText = ta.Name + '!';
+        }
     }
-    else
+    else if (ta.User == Side::Enemy)
     {
-        DamageMe = true;
-        PlayerTurn = false;
-		float damageDone = PartyHealthStartWidth * (ta.DamagePercent / 100);
-		PartyHealthBarQuad.width -= damageDone;
-		PartyHealthBarQuad.x -= (damageDone / 2);
-		CurrentTurnText = ta.Name + '!';
+        if (ta.Target == Side::Enemy)
+        {
+            //Enemy heals/buffs
+        }
+        else if (ta.Target == Side::Party)
+        {
+            DamageMe = true;
+            PlayerTurn = false;
+            CurrentTurnText = ta.Name + '!';
+        }
+    }
+
+    //Set the healthbar length and positions
+    if (BattleSystem.EnemyCurrentHealthPercent != 100)
+    {
+        EnemyHealthBarQuad.width = EnemyHealthStartWidth * (BattleSystem.EnemyCurrentHealthPercent / 100);
+        EnemyHealthBarQuad.x = EnemyHealthBarOnScreenX - (EnemyHealthStartWidth - EnemyHealthBarQuad.width) / 2;
+    }
+
+    if (BattleSystem.PartyCurrentHealthPercent != 100)
+    {
+        PartyHealthBarQuad.width = PartyHealthStartWidth * (BattleSystem.PartyCurrentHealthPercent / 100);
+        PartyHealthBarQuad.x = PartyHealthBarOnScreenX - (PartyHealthStartWidth - PartyHealthBarQuad.width) / 2;
     }
 }
 

@@ -3,17 +3,29 @@
 
 #include <string>
 
+enum class Side
+{
+    Party,
+    Enemy
+};
+
 class TurnAction
 {
 public:
     TurnAction() = default;
+    TurnAction(std::string name, float damagePoints, Side target);
     bool IsFinished();
+
+    //inlcuded in datafile
     std::string Name;
-    float DamagePercent = 0;
     float DamagePoints = 0;
-    bool TargetsEnemy = false;
+    Side Target = Side::Enemy;
+
+    //worked out after somehow. Possibly shouldn't be part of the class
+    Side User = Side::Party;
     float ActionTime = 1;
     float Elapsed = 0;
+    float DamagePercent = 0;
 };
 
 #endif

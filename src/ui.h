@@ -14,6 +14,14 @@ struct Slider {
     float duration = 2.6f;   // seconds
 };
 
+struct HealthBar
+{
+	Quad Quad;
+	float OnScreenY;
+	float OnScreenX;
+	Slider Slider;
+};
+
 class UI : public BattleEventListener, public InputEventListener
 {
 public:
@@ -46,11 +54,15 @@ private:
 	Quad EnemyHealthBarQuad;
     float EnemyHealthBarOnScreenY;
     float EnemyHealthBarOnScreenX;
+    float EnemyHealthStartWidth;
+    float EnemyHealthStartX;
 	Slider EnemyHealthBarSlider;
 
 	Quad PartyHealthBarQuad;
     float PartyHealthBarOnScreenY;
     float PartyHealthBarOnScreenX;
+    float PartyHealthStartWidth;
+    float PartyHealthStartX;
 	Slider PartyHealthBarSlider;
 
     void ResetSliders();
@@ -59,7 +71,6 @@ private:
     BattleSystem &BattleSystem;
 
     BattlePhase CurrentBP;
-
 
     void OnBattlePhaseChange(BattlePhase) override;
     void OnTurnAction(TurnAction&) override;

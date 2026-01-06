@@ -129,15 +129,15 @@ void Enemy::OnBattlePhaseChange(BattlePhase b)
 
 void Enemy::Fade(float delta)
 {
-    static float timePerFrame = 0.05;
+    static float timePerFrame = 0.05f;
     static float elapsed = 0.0f;
 
     elapsed += delta;
 
     if (elapsed > timePerFrame)
     {
-		Alpha -= 0.1;
-        elapsed = 0.0;
+		Alpha -= 0.1f;
+        elapsed = 0.0f;
     }
     if (Alpha <= 0)
     {
@@ -149,7 +149,7 @@ void Enemy::Fade(float delta)
 
 void Enemy::Shake(float delta)
 {
-    static float timePerFrame = 0.02;
+    static float timePerFrame = 0.02f;
     static float shakeAmount = 0.005f;
     static int shakeCount = 0;
     static float elapsed = timePerFrame;
@@ -174,7 +174,7 @@ void Enemy::Shake(float delta)
 
 void Enemy::OnTurnAction(TurnAction& ta)
 {
-    if(ta.TargetsEnemy && ta.DamagePercent > 0)
+    if(ta.Target == Side::Enemy && ta.DamagePercent > 0)
     {
         SwitchToDamageTex();
         DamageMe = true;

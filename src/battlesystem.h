@@ -14,8 +14,7 @@ enum class BattleMenuChoice
     Attack,
     Skill,
     Item,
-    Run,
-    LENGTH
+    Run
 };
 
 class BattleSystem : public InputEventListener
@@ -28,6 +27,15 @@ public:
 	void Tick(float delta);
 	double PreambleStartTime;
 	double PreambleLength = 1; //TODO: set this using battle intro length
+    
+    int PartyMaxHealth = 100;
+    int PartyCurrentHealth = 100;
+    float PartyCurrentHealthPercent;
+
+    int EnemyMaxHealth;
+    int EnemyCurrentHealth;
+    float EnemyCurrentHealthPercent;
+
 	BattleEvent* BattleEvent;
     Enemy* Enemy;
 
@@ -46,7 +54,7 @@ public:
     int PartyListSize = (int)PartyList.size();
 
     int SkillListIndex = 0;
-    std::vector<std::string> SkillList;
+    std::vector<TurnAction> SkillList;
     int SkillListSize = 0;
 
 private:
