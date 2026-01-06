@@ -274,18 +274,11 @@ void UI::OnTurnAction(TurnAction& ta)
         }
     }
 
-    //Set the healthbar length and positions
-    if (BattleSystem.EnemyCurrentHealthPercent != 100)
-    {
-        EnemyHealthBarQuad.width = EnemyHealthStartWidth * (BattleSystem.EnemyCurrentHealthPercent / 100);
-        EnemyHealthBarQuad.x = EnemyHealthBarOnScreenX - (EnemyHealthStartWidth - EnemyHealthBarQuad.width) / 2;
-    }
+    EnemyHealthBarQuad.width = EnemyHealthStartWidth * (BattleSystem.EnemyCurrentHealthPercent / 100);
+    EnemyHealthBarQuad.x = EnemyHealthBarOnScreenX - (EnemyHealthStartWidth - EnemyHealthBarQuad.width) / 2;
 
-    if (BattleSystem.PartyCurrentHealthPercent != 100)
-    {
-        PartyHealthBarQuad.width = PartyHealthStartWidth * (BattleSystem.PartyCurrentHealthPercent / 100);
-        PartyHealthBarQuad.x = PartyHealthBarOnScreenX - (PartyHealthStartWidth - PartyHealthBarQuad.width) / 2;
-    }
+    PartyHealthBarQuad.width = PartyHealthStartWidth * (BattleSystem.PartyCurrentHealthPercent / 100);
+    PartyHealthBarQuad.x = PartyHealthBarOnScreenX - (PartyHealthStartWidth - PartyHealthBarQuad.width) / 2;
 }
 
 void UI::OnCharacterTurnChange(std::string charname)

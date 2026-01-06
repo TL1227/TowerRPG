@@ -30,11 +30,11 @@ public:
     
     int PartyMaxHealth = 100;
     int PartyCurrentHealth = 100;
-    float PartyCurrentHealthPercent;
+    float PartyCurrentHealthPercent = 100;
 
     int EnemyMaxHealth;
     int EnemyCurrentHealth;
-    float EnemyCurrentHealthPercent;
+    float EnemyCurrentHealthPercent = 100;
 
 	BattleEvent* BattleEvent;
     Enemy* Enemy;

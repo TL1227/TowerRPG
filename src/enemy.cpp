@@ -121,7 +121,6 @@ void Enemy::OnBattlePhaseChange(BattlePhase b)
 	{
         DamageMe = false;
         FadeOut = true;
-        HealthPoints = MaxHealth;
 	}
 	break;
 	}
@@ -174,11 +173,10 @@ void Enemy::Shake(float delta)
 
 void Enemy::OnTurnAction(TurnAction& ta)
 {
-    if(ta.Target == Side::Enemy && ta.DamagePercent > 0)
+    if(ta.Target == Side::Enemy)
     {
         SwitchToDamageTex();
         DamageMe = true;
-        HealthPoints -= ta.DamagePoints;
     }
 }
 

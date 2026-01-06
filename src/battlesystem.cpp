@@ -80,6 +80,44 @@ void BattleSystem::ExecuteTurnAction(TurnAction ta)
     }
 }
 
+void BattleSystem::SetBattlePhase(BattlePhase phase)
+{
+	CurrentBattlePhase = phase;
+
+    std::cout << GetBattlePhaseText(CurrentBattlePhase) << std::endl;
+
+    if (CurrentBattlePhase == BattlePhase::Preamble)
+    {
+        PreambleStartTime = glfwGetTime();
+
+        EnemyMaxHealth = Enemy->MaxHealth;
+        EnemyCurrentHealth = Enemy->MaxHealth;
+    }
+    if (CurrentBattlePhase == BattlePhase::Start)
+    {
+        EnemyCurrentHealthPercent = 100;
+    }
+    else if (CurrentBattlePhase == BattlePhase::StartTurn)
+    {
+        CurrentChoiceIndex = 0;
+        TurnActions.clear();
+    }
+    else if (CurrentBattlePhase == BattlePhase::End)
+    {
+		PartyListIndex = 0;
+
+        CurrentChoiceIndex = 0;
+        BattleMenuIndex = 0;
+        TurnActions.clear();
+
+		ChangePartyMember(PartyList[PartyListIndex]);
+    }
+
+	BattleEvent->DispatchPhaseChange(phase);
+
+    return;
+}
+
 std::string BattleSystem::GetBattlePhaseText(BattlePhase phase)
 {
     switch(phase)
@@ -105,43 +143,6 @@ std::string BattleSystem::GetBattleMenuText(BattleMenuChoice choice)
         case BattleMenuChoice::Item: return "Item";
         case BattleMenuChoice::Run: return "Run";
     }
-}
-
-void BattleSystem::SetBattlePhase(BattlePhase phase)
-{
-	CurrentBattlePhase = phase;
-
-    std::cout << GetBattlePhaseText(CurrentBattlePhase) << std::endl;
-
-    if (CurrentBattlePhase == BattlePhase::Preamble)
-    {
-        PreambleStartTime = glfwGetTime();
-
-        EnemyMaxHealth = Enemy->MaxHealth;
-        EnemyCurrentHealth = Enemy->MaxHealth;
-    }
-    if (CurrentBattlePhase == BattlePhase::Start)
-    {
-    }
-    else if (CurrentBattlePhase == BattlePhase::StartTurn)
-    {
-        CurrentChoiceIndex = 0;
-        TurnActions.clear();
-    }
-    else if (CurrentBattlePhase == BattlePhase::End)
-    {
-		PartyListIndex = 0;
-
-        CurrentChoiceIndex = 0;
-        BattleMenuIndex = 0;
-        TurnActions.clear();
-
-		ChangePartyMember(PartyList[PartyListIndex]);
-    }
-
-	BattleEvent->DispatchPhaseChange(phase);
-
-    return;
 }
 
 BattlePhase BattleSystem::GetPhase()
