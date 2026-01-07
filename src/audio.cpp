@@ -1,4 +1,5 @@
 #include "audio.h"
+#include "battlesystem.h"
 
 #include <fmod/fmod_errors.h>
 #include <stdio.h>
@@ -23,12 +24,11 @@ Audio::Audio()
 
     System->createSound("audio\\battlepre.wav", 0, 0, &PreBattleBgm);
     System->createSound("audio\\battlestart.wav", 0, 0, &BattleBgm);
+    System->createSound("audio\\menutick.wav", FMOD_LOOP_OFF, 0, &MenuTick);
 
     unsigned int length;
     PreBattleBgm->getLength(&length, FMOD_TIMEUNIT_MS);
     PreBattleBgmLength= length / 1000.0;
-
-    std::cout << PreBattleBgmLength << std::endl;
 }
 
 //TODO: don't get the mLength like this, set it during the init phase or something
@@ -49,6 +49,21 @@ void Audio::PlayBattleBgm()
 
     if(!isPlaying)
         System->playSound(BattleBgm, 0, false, &BattleBgmCh);
+}
+
+void Audio::PlayMenuTick()
+{
+    bool isPlaying;
+    MenuTickCh->isPlaying(&isPlaying);
+    if (isPlaying)
+        MenuTickCh->stop();
+    
+    System->playSound(MenuTick, 0, false, &MenuTickCh);
+}
+
+void Audio::StopMenuTick()
+{
+    MenuTickCh->stop();
 }
 
 void Audio::StopBattleBgm()
@@ -80,5 +95,20 @@ void Audio::OnBattlePhaseChange(BattlePhase bp)
         break;
     default:
         break;
+    }
+}
+
+void Audio::OnMenuActionButtonPress(MenuAction button)
+{
+    if (button == MenuAction::Up || button == MenuAction::Down)
+    {
+        BattlePhase bp = BattleSystem->GetPhase();
+
+        if (bp == BattlePhase::Start ||
+            bp == BattlePhase::ChoosingSkill)
+        {
+            PlayMenuTick();
+        }
+
     }
 }

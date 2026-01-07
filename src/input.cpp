@@ -58,6 +58,8 @@ void Input::Read()
 			RegisterActionPress(MenuAction::Down);
 		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_ENTER))
 			RegisterActionPress(MenuAction::Confirm);
+		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_BACKSPACE))
+			RegisterActionPress(MenuAction::Cancel);
 
 		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_S))
 			RegisterActionKeyUp(MenuAction::Down);
@@ -69,6 +71,8 @@ void Input::Read()
 			RegisterActionKeyUp(MenuAction::Up);
 		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_ENTER))
 			RegisterActionKeyUp(MenuAction::Confirm);
+		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_BACKSPACE))
+			RegisterActionKeyUp(MenuAction::Cancel);
 	}
 }
 

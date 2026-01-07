@@ -249,29 +249,17 @@ void UI::OnTurnAction(TurnAction& ta)
 {
     if (ta.User == Side::Party)
     {
-        if (ta.Target == Side::Enemy)
-        {
-            PlayerTurn = true;
-            CurrentTurnText = ta.Name + '!';
-        }
-        else if (ta.Target == Side::Party)
-        {
-            PlayerTurn = true;
-            CurrentTurnText = ta.Name + '!';
-        }
+        PlayerTurn = true;
+        CurrentTurnText = ta.Name + '!';
     }
     else if (ta.User == Side::Enemy)
     {
-        if (ta.Target == Side::Enemy)
-        {
-            //Enemy heals/buffs
-        }
-        else if (ta.Target == Side::Party)
-        {
+        std::cout << "Damage: " << ta.DamagePoints << std::endl;
+        if (ta.DamagePoints > 0)
             DamageMe = true;
-            PlayerTurn = false;
-            CurrentTurnText = ta.Name + '!';
-        }
+
+        PlayerTurn = false;
+        CurrentTurnText = ta.Name + '!';
     }
 
     EnemyHealthBarQuad.width = EnemyHealthStartWidth * (BattleSystem.EnemyCurrentHealthPercent / 100);

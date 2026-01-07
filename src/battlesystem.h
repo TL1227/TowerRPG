@@ -21,7 +21,7 @@ class BattleSystem : public InputEventListener
 {
 public:
 	void SetBattlePhase(BattlePhase);
-	BattlePhase GetPhase();
+	BattlePhase GetPhase() const;
 	void AutoMoveFinished();
 	void DecreaseEnemyCounter();
 	void Tick(float delta);
@@ -61,12 +61,12 @@ private:
 	BattlePhase CurrentBattlePhase = BattlePhase::End;
 	int EnemyCounter = 1;
     void ExecuteTurnAction(TurnAction choice);
-    void ChangePartyMember(std::string member);
+    void ChangePartyMember(std::string member) const;
     void SetChoiceOrder();
     void AddEnemyChoice();
 
-    void MenuUp(int &index, int size);
-    void MenuDown(int &index, int size);
+    void MenuUp(int& index, int size) const;
+    void MenuDown(int &index, int size) const;
 
     std::string GetBattlePhaseText(BattlePhase);
     std::string GetBattleMenuText(BattleMenuChoice);

@@ -146,7 +146,7 @@ std::string BattleSystem::GetBattleMenuText(BattleMenuChoice choice)
     }
 }
 
-BattlePhase BattleSystem::GetPhase()
+BattlePhase BattleSystem::GetPhase() const
 {
     return CurrentBattlePhase;
 }
@@ -170,7 +170,7 @@ void BattleSystem::DecreaseEnemyCounter()
 	}
 }
 
-void BattleSystem::ChangePartyMember(std::string member)
+void BattleSystem::ChangePartyMember(std::string member) const
 {
     BattleEvent->DispatchCharacterTurnChange(member);
 }
@@ -189,12 +189,12 @@ void BattleSystem::SetChoiceOrder()
     //figure out speed and such
 }
 
-void BattleSystem::MenuUp(int &index, int size)
+void BattleSystem::MenuUp(int &index, int size) const 
 {
     if (--index < 0) { index = size - 1; }
 }
 
-void BattleSystem::MenuDown(int &index, int size)
+void BattleSystem::MenuDown(int &index, int size) const
 {
 	if (++index >= size) { index = 0; }
 }
@@ -214,6 +214,13 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
             MenuDown(SkillListIndex, SkillListSize);
         else
             MenuDown(BattleMenuIndex, BattleMenuSize);
+    }
+    else if (ma == MenuAction::Cancel)
+    {
+        if (CurrentBattlePhase == BattlePhase::ChoosingSkill)
+        {
+            SetBattlePhase(BattlePhase::Start);
+        }
     }
     else if (ma == MenuAction::Confirm)
     {

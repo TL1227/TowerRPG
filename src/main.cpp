@@ -191,6 +191,7 @@ int main(int argc, char* argv[])
     Audio audio;
     BattleSystem BattleSystem;
     BattleSystem.PreambleLength = audio.PreBattleBgmLength * 0.875f;
+    audio.BattleSystem = &BattleSystem;
 
     float preambleLength = (float)audio.PreBattleBgmLength * 0.125f; 
     UI Ui { preambleLength, BattleSystem, SCREEN_HEIGHT, SCREEN_WIDTH };
@@ -206,6 +207,7 @@ int main(int argc, char* argv[])
     Ie.AddListener(MovementSystem);
     Ie.AddListener(BattleSystem);
     Ie.AddListener(Ui);
+    Ie.AddListener(audio);
     Input Input{ window, &Ie, &BattleSystem };
 
     //subscribe to Battle events
