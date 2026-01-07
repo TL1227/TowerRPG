@@ -3,6 +3,8 @@
 #include <fmod/fmod_errors.h>
 #include <stdio.h>
 
+#include <iostream>
+
 Audio::Audio()
 {
     FMOD_RESULT result;
@@ -25,6 +27,8 @@ Audio::Audio()
     unsigned int length;
     PreBattleBgm->getLength(&length, FMOD_TIMEUNIT_MS);
     PreBattleBgmLength= length / 1000.0;
+
+    std::cout << PreBattleBgmLength << std::endl;
 }
 
 //TODO: don't get the mLength like this, set it during the init phase or something

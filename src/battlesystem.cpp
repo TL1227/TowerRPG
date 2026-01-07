@@ -24,6 +24,7 @@ void BattleSystem::Tick(float delta)
 	{
 		double timepassed = glfwGetTime() - PreambleStartTime;
 
+        std::cout << "passed: " << timepassed << "Length: " << PreambleLength << std::endl;
 		if (timepassed >= PreambleLength)
 		{
 			SetBattlePhase(BattlePhase::Slide);
@@ -73,7 +74,7 @@ void BattleSystem::ExecuteTurnAction(TurnAction ta)
     {
         SetBattlePhase(BattlePhase::End);
     }
-    if (EnemyCurrentHealth <= 0)
+    if (PartyCurrentHealth <= 0)
     {
         //TODO: player returns to start of map?
         SetBattlePhase(BattlePhase::End);

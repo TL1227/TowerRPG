@@ -26,7 +26,7 @@ public:
 	void DecreaseEnemyCounter();
 	void Tick(float delta);
 	double PreambleStartTime;
-	double PreambleLength = 1; //TODO: set this using battle intro length
+	double PreambleLength = 2.4; //TODO: set this using battle intro length
     
     int PartyMaxHealth = 100;
     int PartyCurrentHealth = 100;

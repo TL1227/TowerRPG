@@ -190,9 +190,9 @@ int main(int argc, char* argv[])
 
     Audio audio;
     BattleSystem BattleSystem;
-    BattleSystem.PreambleLength = audio.PreBattleBgmLength * 0.8;
+    BattleSystem.PreambleLength = audio.PreBattleBgmLength * 0.875f;
 
-    float preambleLength = (float)audio.PreBattleBgmLength * 0.2f; 
+    float preambleLength = (float)audio.PreBattleBgmLength * 0.125f; 
     UI Ui { preambleLength, BattleSystem, SCREEN_HEIGHT, SCREEN_WIDTH };
 
     Enemy Enemy{enemyShader};
