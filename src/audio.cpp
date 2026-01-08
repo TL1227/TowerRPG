@@ -24,6 +24,7 @@ Audio::Audio()
 
     System->createSound("audio\\battlepre.wav", 0, 0, &PreBattleBgm);
     System->createSound("audio\\battlestart.wav", 0, 0, &BattleBgm);
+
     System->createSound("audio\\menutick.wav", FMOD_LOOP_OFF, 0, &MenuTick);
 
     unsigned int length;
@@ -61,6 +62,7 @@ void Audio::PlayMenuTick()
         MenuTickCh->stop();
     
     System->playSound(MenuTick, 0, false, &MenuTickCh);
+    MenuTickCh->setVolume(SfxVolume);
 }
 
 void Audio::StopMenuTick()

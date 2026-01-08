@@ -18,6 +18,8 @@ public:
     void StopMenuTick();
 	double PreBattleBgmLength;
 
+    float SfxVolume = 0.1f;
+
     BattleSystem* BattleSystem;
 
 private:

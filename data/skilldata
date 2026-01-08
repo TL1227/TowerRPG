@@ -1,8 +1,11 @@
-Cleave,10,1,0
+Cleave,50,1,0
 Heavy Cleave,10,1,0
+Burning Axe,40,1,0
 Fire,10,1,1
-Lightning,18,1,1
+Ice,20,1,1
+Lightning,30,1,1
 Pray,10,1,2
 Heal,-20,0,2
+Glass Him,30,1,2
 Stab,10,1,3
 Steal,0,1,3
