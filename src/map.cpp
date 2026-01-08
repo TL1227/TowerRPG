@@ -63,25 +63,22 @@ void Map::Load()
                 continue;
 
 			Tile tile{ glm::vec3{ j, 0.0f, i } };
-
-            if (Data[i][j] == '#')
+            switch (Data[i][j])
             {
-                tile.TileType = TileType::Wall;
+                case '#': //wall
                 tile.Model = &WallModel;
-           }
-            if (Data[i][j] == 'c')
-            {
-                tile.TileType = TileType::Chest;
+                break;
+
+                case 'c': //chest
                 tile.Model = &ChestModel;
                 tile.InteractiveText = "[E] Open"; //TODO: get this dynamically
-            }
-            else if (Data[i][j] == 's')
-			{
-                tile.TileType = TileType::Start;
-                tile.IsWalkable = true;
+                break;
 
+                case 's': //start position
+                tile.IsWalkable = true;
                 PlayerStartPos = glm::vec3{ j, 0.0f, i };
-			}
+                break;
+            }
 
 			Tiles.push_back(tile);
         }

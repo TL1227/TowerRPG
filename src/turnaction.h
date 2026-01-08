@@ -9,6 +9,14 @@ enum class Side
     Enemy
 };
 
+enum class PartyMember
+{
+    Warrior,
+    Witch,
+    Cleric,
+    Thief
+};
+
 class TurnAction
 {
 public:
@@ -20,6 +28,7 @@ public:
     std::string Name;
     float DamagePoints = 0;
     Side Target = Side::Enemy;
+    PartyMember Member;
 
     //worked out after somehow. Possibly shouldn't be part of the class
     Side User = Side::Party;

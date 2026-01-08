@@ -23,7 +23,6 @@ class Tile
         glm::vec3 Position;
         int X;
         int Z;
-        TileType TileType{};
         bool IsWalkable{};
         std::string InteractiveText{};
 };

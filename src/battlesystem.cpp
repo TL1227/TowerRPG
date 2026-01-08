@@ -249,29 +249,8 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
 
                 SkillList.clear();
 
-                auto CurrentPartyMember = PartyList[PartyListIndex];
-
-                if (CurrentPartyMember == "Warrior")
-                {
-                    SkillList.push_back({"Cleave", 10, Side::Enemy });
-                    SkillList.push_back({"Heavy Cleave", 18, Side::Enemy });
-                }
-                if (CurrentPartyMember == "Witch")
-                {
-                    SkillList.push_back({"Fire", 10, Side::Enemy });
-                    SkillList.push_back({"Lightning", 18, Side::Enemy });
-                }
-                if (CurrentPartyMember == "Cleric")
-                {
-                    SkillList.push_back({"Pray", 10, Side::Enemy });
-                    SkillList.push_back({"Heal", -20, Side::Party });
-                }
-                if (CurrentPartyMember == "Thief")
-                {
-                    SkillList.push_back({"Stab", 10, Side::Enemy });
-                    SkillList.push_back({"Steal", 0, Side::Enemy });
-                }
-
+                //TODO: skill list could be a ref and make current party member an enum
+				SkillList = SkillParser.GetSkills(PartyListIndex);
                 SkillListSize = SkillList.size();
 
                 return;

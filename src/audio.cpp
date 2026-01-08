@@ -53,6 +53,8 @@ void Audio::PlayBattleBgm()
 
 void Audio::PlayMenuTick()
 {
+    //TODO if I don't do this, the audio stops working after the menu ticks enough times
+    //read into why this is happening
     bool isPlaying;
     MenuTickCh->isPlaying(&isPlaying);
     if (isPlaying)

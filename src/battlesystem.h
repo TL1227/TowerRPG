@@ -6,6 +6,7 @@
 #include "inputeventlistener.h"
 #include "enemy.h"
 #include "turnaction.h"
+#include "skillparse.h"
 
 //TODO: this absolutely doesn't belong here!
 
@@ -64,6 +65,8 @@ private:
     void ChangePartyMember(std::string member) const;
     void SetChoiceOrder();
     void AddEnemyChoice();
+
+    SkillParse SkillParser;
 
     void MenuUp(int& index, int size) const;
     void MenuDown(int &index, int size) const;
