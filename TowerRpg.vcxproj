@@ -36,6 +36,7 @@
     <ClCompile Include="src\imgui_widgets.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\inputevent.cpp" />
+    <ClCompile Include="src\lightsource.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\map.cpp" />
     <ClCompile Include="src\movementevent.cpp" />
@@ -56,6 +57,8 @@
     <None Include="shaders\enemyfrag.shader" />
     <None Include="shaders\enemyvert.shader" />
     <None Include="shaders\frag.shader" />
+    <None Include="shaders\lightsourcefrag.shader" />
+    <None Include="shaders\lightsourcevert.shader" />
     <None Include="shaders\uifrag.shader" />
     <None Include="shaders\uivert.shader" />
     <None Include="shaders\vert.shader" />
@@ -83,6 +86,7 @@
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\inputevent.h" />
     <ClInclude Include="src\inputeventlistener.h" />
+    <ClInclude Include="src\lightsource.h" />
     <ClInclude Include="src\map.h" />
     <ClInclude Include="src\menuaction.h" />
     <ClInclude Include="src\mesh.h" />

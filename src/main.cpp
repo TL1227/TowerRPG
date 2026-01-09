@@ -18,6 +18,7 @@
 #include "audio.h"
 #include "ui.h"
 #include "input.h"
+#include "lightsource.h"
 
 using namespace std;
 using namespace glm;
@@ -34,6 +35,7 @@ string MapPath = "maps";
 
 bool fullscreen = false;
 //bool fullscreen = true;
+
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
@@ -182,11 +184,21 @@ int main(int argc, char* argv[])
     //build shaders
     Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
 
+    //Light Source 
+    //--------------------------
+    LightSource lightsource;
+	lightsource.Shader.use();
+    float lightx = 3.0f, lighty = 0.5f, lightz = 4.0f;
+    glm::vec3 lightPos = { lightx, lighty, lightz };
+    //--------------------------
+
     //TODO: move this into some global space everything can access?
     //perspective projection
     mat4 projection = perspective(radians(45.0f), 960.0f / 540.0f, 0.1f, 100.0f);
     enemyShader.use();
     enemyShader.setMat4("projection", projection);
+	lightsource.Shader.use();
+    lightsource.Shader.setMat4("projection", projection);
 
     Audio audio;
     BattleSystem BattleSystem;
@@ -263,21 +275,23 @@ int main(int argc, char* argv[])
             Camera.UpdateCameraRotation();
             mat4 view = Camera.GetView();
 
+
+			ImGui::Begin("Lighting");
+			ImGui::DragFloat3("Light Pos: ", (float*)&lightPos );
+			ImGui::DragFloat3("Camera Pos: ", (float*)&Camera.CameraPos );
+			ImGui::End();
+
+            lightsource.Shader.use();
+            lightsource.Shader.setMat4("view", view);
+			glm::mat4 lightModel = glm::translate(glm::mat4(1.0f), lightPos);
+			lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
+            lightsource.Shader.setMat4("model", lightModel);
+            lightsource.Model.Draw(lightsource.Shader);
+
             LevelMap.Draw(view);
             Enemy.Tick(DeltaTime, view);
             Ui.Tick(DeltaTime);
             BattleSystem.Tick(DeltaTime);
-
-            //TODO: come back to this once we've cleaned up main
-            /*
-            if (MovementSystem.FrontTile)
-            {
-                if (!MovementSystem.FrontTile->InteractiveText.empty())
-                {
-                    Text.DrawText(textShader, MovementSystem.FrontTile->InteractiveText, 0, 200, 1, glm::vec3(1.0, 0.5, 0.5), TextAlign::Center);
-                }
-            }
-            */
 
             ImGuiEndLoop();
             

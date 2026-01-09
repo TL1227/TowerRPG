@@ -45,6 +45,9 @@
     <ClCompile Include="src\text.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\inputevent.cpp" />
+    <ClCompile Include="src\turnaction.cpp" />
+    <ClCompile Include="src\skillparse.cpp" />
+    <ClCompile Include="src\lightsource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\uifrag.shader">
@@ -69,6 +72,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\battleuivert.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\lightsourcevert.shader">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\lightsourcefrag.shader">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
@@ -131,6 +140,9 @@
     <ClInclude Include="src\inputeventlistener.h" />
     <ClInclude Include="src\menuaction.h" />
     <ClInclude Include="src\moveaction.h" />
+    <ClInclude Include="src\turnaction.h" />
+    <ClInclude Include="src\skillparse.h" />
+    <ClInclude Include="src\lightsource.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
