@@ -31,10 +31,10 @@ public:
 	Model ChestModel;
 	Model WallModel;
 
+    Shader Shader{ "shaders\\vert.shader", "shaders\\frag.shader" };
 private:
 	std::filesystem::file_time_type _lastChecked;
 	std::string _filePath;
-    Shader Shader{ "shaders\\vert.shader", "shaders\\frag.shader" };
 };
 
 #endif

@@ -281,12 +281,21 @@ int main(int argc, char* argv[])
 			ImGui::DragFloat3("Camera Pos: ", (float*)&Camera.CameraPos );
 			ImGui::End();
 
+			//Lighting Experiment
             lightsource.Shader.use();
             lightsource.Shader.setMat4("view", view);
 			glm::mat4 lightModel = glm::translate(glm::mat4(1.0f), lightPos);
 			lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
             lightsource.Shader.setMat4("model", lightModel);
             lightsource.Model.Draw(lightsource.Shader);
+
+            //map shader lighting
+            LevelMap.Shader.use();
+			LevelMap.Shader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
+			LevelMap.Shader.setVec3("lightColor", 1.0f, 0.8f, 0.8f);
+			LevelMap.Shader.setVec3("lightPos", lightPos);
+
+			//--------------------------------
 
             LevelMap.Draw(view);
             Enemy.Tick(DeltaTime, view);
