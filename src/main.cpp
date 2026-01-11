@@ -248,6 +248,7 @@ int main(int argc, char* argv[])
     float FPS = 1.0f / 100.0f;
     float LastTime = (float)glfwGetTime();
 
+    glm::vec3 lightColor = {1.0f, 0.8f, 1.0f};
     while (!glfwWindowShouldClose(window))
     {
         frames++;
@@ -277,8 +278,9 @@ int main(int argc, char* argv[])
 
 
 			ImGui::Begin("Lighting");
-			ImGui::DragFloat3("Light Pos: ", (float*)&lightPos );
-			ImGui::DragFloat3("Camera Pos: ", (float*)&Camera.CameraPos );
+			ImGui::DragFloat3("Light Position", (float*)&lightPos );
+			ImGui::DragFloat3("Light Colour", (float*)&lightColor);
+			ImGui::DragFloat3("Camera Position", (float*)&Camera.CameraPos );
 			ImGui::End();
 
 			//Lighting Experiment
@@ -292,8 +294,11 @@ int main(int argc, char* argv[])
             //map shader lighting
             LevelMap.Shader.use();
 			LevelMap.Shader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-			LevelMap.Shader.setVec3("lightColor", 1.0f, 0.8f, 0.8f);
+			LevelMap.Shader.setVec3("lightColor", lightColor);
 			LevelMap.Shader.setVec3("lightPos", lightPos);
+
+            Enemy.Shader.use();
+			Enemy.Shader.setVec3("lightColor", lightColor);
 
 			//--------------------------------
 
