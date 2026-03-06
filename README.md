@@ -4,7 +4,7 @@
  _A first person dungeon crawler. Climb the Crimson Tower if you dare!_  
 
 ## Built from scratch
-This project is built using C++, OpenGL and GLFW.   
+This project is built using C++, OpenGL, GLFW, ImGui and FMOD.   
 Building a project without an engine has ironically taught me more about engines and why they work the way they do.  
 Engines are a solution to a problem, but now I'm getting to experience the problem for myself.
 
