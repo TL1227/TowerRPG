@@ -45,3 +45,11 @@ s               #
       ###########
 
 ```
+
+## Building
+The easiest way is probably to just open the solution in Visual Studio and run it.   
+It does require Desktop development with C++ workload installed.  
+
+If you have visual studio installed, you can also run it from the command line.  
+In your search bar type "Developer PowerShell". You should see either 2019 or 2022.  
+You can then run the build.bat and run.bat from the project's root.
