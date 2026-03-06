@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
     cout << "by T-Level Games" << endl;
     cout << "Version" << GameVersion << endl;
 
-    glClearColor(0.7f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.3f, 0.3f, 0.5f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE); //NOTE: This is off because the enemy sprite currently has the wrong winding order and gets culled
