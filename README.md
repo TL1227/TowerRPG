@@ -1,5 +1,5 @@
 # TowerRPG
- <img src="readme/towerrpg.png" alt="Tower RPG" width="500">  
+ <img src="readme/towerrpg2.png" alt="Tower RPG" width="500">  
  
  _A first person dungeon crawler. Climb the Crimson Tower if you dare!_  
 
