@@ -19,6 +19,7 @@
 #include "ui.h"
 #include "input.h"
 #include "lightsource.h"
+#include "battleevent.h"
 
 using namespace std;
 using namespace glm;

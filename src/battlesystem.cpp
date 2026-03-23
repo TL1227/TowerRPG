@@ -1,12 +1,21 @@
+
+#include "battleevent.h"
 #include "battlesystem.h"
 #include "battlephase.h"
 #include "menuaction.h"
+#include "enemy.h"
+#include "skillparse.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
 #include "imgui.h"
+
+BattleSystem::BattleSystem()
+{
+	BattlePhase CurrentBattlePhase = BattlePhase::End;
+}
 
 void BattleSystem::Tick(float delta)
 {

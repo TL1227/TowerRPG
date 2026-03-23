@@ -1,14 +1,16 @@
 #ifndef BATTLESYSTEM_H
 #define BATTLESYSTEM_H
 
-#include "battleevent.h"
-#include "battlephase.h"
+#include <vector>
+#include <string>
+
 #include "inputeventlistener.h"
-#include "enemy.h"
-#include "turnaction.h"
 #include "skillparse.h"
 
-//TODO: this absolutely doesn't belong here!
+class TurnAction;
+class Enemy;
+class BattleEvent;
+enum class BattlePhase;
 
 enum class BattleMenuChoice
 {
@@ -21,6 +23,7 @@ enum class BattleMenuChoice
 class BattleSystem : public InputEventListener
 {
 public:
+    BattleSystem();
 	void SetBattlePhase(BattlePhase);
 	BattlePhase GetPhase() const;
 	void AutoMoveFinished();
@@ -59,7 +62,7 @@ public:
     int SkillListSize = 0;
 
 private:
-	BattlePhase CurrentBattlePhase = BattlePhase::End;
+	BattlePhase CurrentBattlePhase;
 	int EnemyCounter = 1;
     void ExecuteTurnAction(TurnAction choice);
     void ChangePartyMember(std::string member) const;
