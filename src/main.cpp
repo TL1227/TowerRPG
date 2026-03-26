@@ -152,6 +152,8 @@ int main(int argc, char* argv[])
 {
     G_Args.Parse(argc, argv);
 
+    G_Args.BattleOff = true;
+
     GLFWwindow* window = SetUpGlfw();
     if (window == NULL) return -1;
     if (!SetUpGlad()) return -1;

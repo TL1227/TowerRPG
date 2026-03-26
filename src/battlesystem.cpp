@@ -1,4 +1,5 @@
 
+#include "args.h"
 #include "battleevent.h"
 #include "battlesystem.h"
 #include "battlephase.h"
@@ -14,7 +15,7 @@
 
 BattleSystem::BattleSystem()
 {
-	BattlePhase CurrentBattlePhase = BattlePhase::End;
+	CurrentBattlePhase = BattlePhase::End;
 }
 
 void BattleSystem::Tick(float delta)
@@ -68,12 +69,12 @@ void BattleSystem::ExecuteTurnAction(TurnAction ta)
 
     if (ta.Target == Side::Enemy)
     {
-        EnemyCurrentHealth = EnemyCurrentHealth -= ta.DamagePoints;
+        EnemyCurrentHealth -= ta.DamagePoints;
         EnemyCurrentHealthPercent = ((float)EnemyCurrentHealth / (float)EnemyMaxHealth) * 100.0f;
     }
     else if (ta.Target == Side::Party)
     {
-        PartyCurrentHealth = PartyCurrentHealth -= ta.DamagePoints;
+        PartyCurrentHealth -= ta.DamagePoints;
         PartyCurrentHealthPercent = ((float)PartyCurrentHealth / (float)PartyMaxHealth) * 100.0f;
     }
 
@@ -172,7 +173,7 @@ void BattleSystem::DecreaseEnemyCounter()
 {
 	EnemyCounter--;
 
-	if (EnemyCounter <= 0)
+	if (EnemyCounter <= 0 && !G_Args.BattleOff)
 	{
 		SetBattlePhase(BattlePhase::Sighting);
 		EnemyCounter = 5;
