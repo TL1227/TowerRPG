@@ -19,11 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="battlemenu.cpp" />
-    <ClCompile Include="menu.cpp" />
     <ClCompile Include="src\args.cpp" />
     <ClCompile Include="src\audio.cpp" />
     <ClCompile Include="src\battleevent.cpp" />
+    <ClCompile Include="src\battlemenu.cpp" />
     <ClCompile Include="src\battlesystem.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\enemy.cpp" />
@@ -41,6 +40,7 @@
     <ClCompile Include="src\lightsource.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\map.cpp" />
+    <ClCompile Include="src\menu.cpp" />
     <ClCompile Include="src\movementevent.cpp" />
     <ClCompile Include="src\movementsystem.cpp" />
     <ClCompile Include="src\model.cpp" />
@@ -66,13 +66,11 @@
     <None Include="shaders\vert.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="battlemenu.h" />
-    <ClInclude Include="InputReciever.h" />
-    <ClInclude Include="menu.h" />
     <ClInclude Include="src\args.h" />
     <ClInclude Include="src\audio.h" />
     <ClInclude Include="src\battleevent.h" />
     <ClInclude Include="src\battleeventlistener.h" />
+    <ClInclude Include="src\battlemenu.h" />
     <ClInclude Include="src\battlephase.h" />
     <ClInclude Include="src\battlesystem.h" />
     <ClInclude Include="src\camera.h" />
@@ -91,8 +89,10 @@
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\inputevent.h" />
     <ClInclude Include="src\inputeventlistener.h" />
+    <ClInclude Include="src\InputReciever.h" />
     <ClInclude Include="src\lightsource.h" />
     <ClInclude Include="src\map.h" />
+    <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\menuaction.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\model.h" />

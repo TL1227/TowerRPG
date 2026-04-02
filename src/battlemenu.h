@@ -3,7 +3,7 @@
 
 #include "menu.h"
 
-class BattleMenu : Menu
+class BattleMenu : public Menu
 {
 	virtual void RecieveInput(InputAction) override;
 };
