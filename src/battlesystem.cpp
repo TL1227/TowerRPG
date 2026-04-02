@@ -12,9 +12,8 @@
 
 #include "imgui.h"
 
-BattleSystem::BattleSystem()
+BattleSystem::BattleSystem() : CurrentBattlePhase{BattlePhase::End}
 {
-	BattlePhase CurrentBattlePhase = BattlePhase::End;
 }
 
 void BattleSystem::Tick(float delta)
@@ -68,7 +67,7 @@ void BattleSystem::ExecuteTurnAction(TurnAction ta)
 
     if (ta.Target == Side::Enemy)
     {
-        EnemyCurrentHealth = EnemyCurrentHealth -= ta.DamagePoints;
+        EnemyCurrentHealth -= ta.DamagePoints;
         EnemyCurrentHealthPercent = ((float)EnemyCurrentHealth / (float)EnemyMaxHealth) * 100.0f;
     }
     else if (ta.Target == Side::Party)
@@ -85,7 +84,6 @@ void BattleSystem::ExecuteTurnAction(TurnAction ta)
     }
     if (PartyCurrentHealth <= 0)
     {
-        //TODO: player returns to start of map?
         SetBattlePhase(BattlePhase::End);
     }
 }
@@ -172,8 +170,11 @@ void BattleSystem::DecreaseEnemyCounter()
 {
 	EnemyCounter--;
 
+    std::cout << EnemyCounter << std::endl;
+
 	if (EnemyCounter <= 0)
 	{
+        std::cout << "SettingBattlePhase" << std::endl;
 		SetBattlePhase(BattlePhase::Sighting);
 		EnemyCounter = 5;
 	}

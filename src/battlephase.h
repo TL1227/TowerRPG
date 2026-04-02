@@ -11,7 +11,7 @@ enum class BattlePhase
 	ChoosingSkill,
     StartTurn,
     ExecuteTurn,
-	End
+	End,
 };
 
 #endif

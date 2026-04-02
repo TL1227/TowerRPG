@@ -63,7 +63,7 @@ public:
 
 private:
 	BattlePhase CurrentBattlePhase;
-	int EnemyCounter = 1;
+	int EnemyCounter = 5;
     void ExecuteTurnAction(TurnAction choice);
     void ChangePartyMember(std::string member) const;
     void SetChoiceOrder();

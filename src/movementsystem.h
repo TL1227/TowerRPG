@@ -54,7 +54,6 @@ private:
 	void EndMovement();
 	void EndTurnMovement();
 	bool IsAutoMove(MoveAction);
-	BattlePhase CurrentBattlePhase;
 	void SetCurrentMoveAction(MoveAction);
 	void SetCurrentDirection(Cardinal);
 	void SetMoveDistance(float);
