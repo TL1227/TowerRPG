@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="battlemenu.cpp" />
+    <ClCompile Include="menu.cpp" />
     <ClCompile Include="src\args.cpp" />
     <ClCompile Include="src\audio.cpp" />
     <ClCompile Include="src\battleevent.cpp" />
@@ -64,6 +66,9 @@
     <None Include="shaders\vert.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="battlemenu.h" />
+    <ClInclude Include="InputReciever.h" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="src\args.h" />
     <ClInclude Include="src\audio.h" />
     <ClInclude Include="src\battleevent.h" />

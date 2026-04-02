@@ -48,6 +48,8 @@
     <ClCompile Include="src\turnaction.cpp" />
     <ClCompile Include="src\skillparse.cpp" />
     <ClCompile Include="src\lightsource.cpp" />
+    <ClCompile Include="menu.cpp" />
+    <ClCompile Include="battlemenu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\uifrag.shader">
@@ -143,6 +145,9 @@
     <ClInclude Include="src\turnaction.h" />
     <ClInclude Include="src\skillparse.h" />
     <ClInclude Include="src\lightsource.h" />
+    <ClInclude Include="menu.h" />
+    <ClInclude Include="InputReciever.h" />
+    <ClInclude Include="battlemenu.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
