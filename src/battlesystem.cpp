@@ -15,10 +15,6 @@
 
 BattleSystem::BattleSystem() : CurrentBattlePhase{BattlePhase::End}
 {
-<<<<<<< HEAD
-=======
-	CurrentBattlePhase = BattlePhase::End;
->>>>>>> a02a7af493d8ce2f1acdaba3910f368024cba932
 }
 
 void BattleSystem::Tick(float delta)
@@ -175,15 +171,8 @@ void BattleSystem::DecreaseEnemyCounter()
 {
 	EnemyCounter--;
 
-<<<<<<< HEAD
-    std::cout << EnemyCounter << std::endl;
-
-	if (EnemyCounter <= 0)
-=======
 	if (EnemyCounter <= 0 && !G_Args.BattleOff)
->>>>>>> a02a7af493d8ce2f1acdaba3910f368024cba932
 	{
-        std::cout << "SettingBattlePhase" << std::endl;
 		SetBattlePhase(BattlePhase::Sighting);
 		EnemyCounter = 5;
 	}
