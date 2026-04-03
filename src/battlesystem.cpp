@@ -1,4 +1,3 @@
-
 #include "args.h"
 #include "battleevent.h"
 #include "battlesystem.h"

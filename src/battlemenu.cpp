@@ -6,23 +6,41 @@ void BattleMenu::RecieveInput(InputAction IA)
 {
 	switch (IA)
 	{
-	case InputAction::None:
-		break;
 	case InputAction::Confirm:
-		break;
-	case InputAction::Cancel:
+            HandleSelection();
 		break;
 	case InputAction::Up:
-		SelectPreviousItem();
+            SelectPreviousItem();
 		break;
 	case InputAction::Down:
-		SelectNextItem();
+            SelectNextItem();
 		break;
+
+	case InputAction::Cancel:
+	case InputAction::None:
 	case InputAction::Left:
-		break;
 	case InputAction::Right:
-		break;
 	default:
 		break;
 	}
+}
+
+BattleMenu::BattleMenu()
+{
+    Items = { "Attack", "Skill", "Item", "Run" };
+}
+
+void BattleMenu::HandleSelection()
+{
+    switch (CurrentItemIndex)
+    {
+        case 0: //Attack
+            break;
+        case 1: //Skill
+            break;
+        case 2: //Item
+            break;
+        case 3: //Run
+            break;
+    }
 }

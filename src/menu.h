@@ -8,9 +8,11 @@
 
 class Menu : public InputReciever
 {
+    virtual void RecieveInput(InputAction) = 0;
+
+protected:
 	int CurrentItemIndex = 0;
 	std::vector<std::string> Items;
-	virtual void RecieveInput(InputAction) = 0;
 
 public:
 	void SelectNextItem();

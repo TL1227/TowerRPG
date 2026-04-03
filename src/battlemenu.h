@@ -6,6 +6,9 @@
 class BattleMenu : public Menu
 {
 	virtual void RecieveInput(InputAction) override;
+    void HandleSelection();
+public:
+    BattleMenu();
 };
 
 #endif
