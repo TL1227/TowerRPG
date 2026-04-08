@@ -25,22 +25,37 @@ void BattleMenu::RecieveInput(InputAction IA)
 	}
 }
 
+void BattleMenu::Attack()
+{
+
+}
+
+void BattleMenu::Skill()
+{
+
+}
+
+void BattleMenu::Item()
+{
+
+}
+
+void BattleMenu::Run()
+{
+
+}
+
 BattleMenu::BattleMenu()
 {
-    Items = { "Attack", "Skill", "Item", "Run" };
+    Items = { 
+        { "Attack", [this](){ Attack(); } },
+        { "Skill",  [this](){ Skill();  } },
+        { "Item",   [this](){ Item();   } },
+        { "Run",    [this](){ Run();    } }
+    };
 }
 
 void BattleMenu::HandleSelection()
 {
-    switch (CurrentItemIndex)
-    {
-        case 0: //Attack
-            break;
-        case 1: //Skill
-            break;
-        case 2: //Item
-            break;
-        case 3: //Run
-            break;
-    }
+    Items[CurrentItemIndex].Action();
 }

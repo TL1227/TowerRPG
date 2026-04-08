@@ -41,6 +41,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\map.cpp" />
     <ClCompile Include="src\menu.cpp" />
+    <ClCompile Include="src\menuitem.cpp" />
     <ClCompile Include="src\movementevent.cpp" />
     <ClCompile Include="src\movementsystem.cpp" />
     <ClCompile Include="src\model.cpp" />
@@ -94,6 +95,7 @@
     <ClInclude Include="src\map.h" />
     <ClInclude Include="src\menu.h" />
     <ClInclude Include="src\menuaction.h" />
+    <ClInclude Include="src\menuitem.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\model.h" />
     <ClInclude Include="src\inputaction.h" />

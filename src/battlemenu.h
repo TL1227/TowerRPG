@@ -5,10 +5,16 @@
 
 class BattleMenu : public Menu
 {
-	virtual void RecieveInput(InputAction) override;
-    void HandleSelection();
 public:
     BattleMenu();
+    void Attack();
+    void Skill();
+    void Item();
+    void Run();
+
+private:
+	virtual void RecieveInput(InputAction) override;
+    void HandleSelection();
 };
 
 #endif

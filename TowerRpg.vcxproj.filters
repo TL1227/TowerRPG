@@ -50,6 +50,7 @@
     <ClCompile Include="src\lightsource.cpp" />
     <ClCompile Include="src\battlemenu.cpp" />
     <ClCompile Include="src\menu.cpp" />
+    <ClCompile Include="src\menuitem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\uifrag.shader">
@@ -148,6 +149,7 @@
     <ClInclude Include="src\battlemenu.h" />
     <ClInclude Include="src\InputReciever.h" />
     <ClInclude Include="src\menu.h" />
+    <ClInclude Include="src\menuitem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

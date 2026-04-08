@@ -2,9 +2,11 @@
 #define MENU_H
 
 #include <vector>
-#include <string>
 
 #include "InputReciever.h"
+#include "menuitem.h"
+
+class MenuItem;
 
 class Menu : public InputReciever
 {
@@ -12,7 +14,7 @@ class Menu : public InputReciever
 
 protected:
 	int CurrentItemIndex = 0;
-	std::vector<std::string> Items;
+	std::vector<MenuItem> Items;
 
 public:
 	void SelectNextItem();
