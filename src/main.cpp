@@ -20,6 +20,7 @@
 #include "input.h"
 #include "lightsource.h"
 #include "battleevent.h"
+#include "menu.h"
 
 using namespace std;
 using namespace glm;
@@ -238,6 +239,14 @@ int main(int argc, char* argv[])
     Me.AddListener(Enemy);
     MovementSystem.Event = &Me;
 
+    //Menu System
+    std::vector<MenuItem> battleMenuItems = { 
+        { "Attack", [&BattleSystem]() { BattleSystem.SubmitAttack(); } },
+        //{ "Skill",  [](){ Skill();  } }, //TODO: open the skills menu
+        //{ "Item",   [](){ Item();   } }, //TODO: open the item menu
+        { "Run",    [&BattleSystem](){ BattleSystem.SetBattlePhase(BattlePhase::End); } }
+    };
+    Menu BattleMenu { battleMenuItems };
 
     float menuTextx = 50;
     float menuTexty = 80;

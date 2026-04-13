@@ -61,6 +61,8 @@ public:
     std::vector<TurnAction> SkillList;
     int SkillListSize = 0;
 
+    void SubmitAttack();
+
 private:
 	BattlePhase CurrentBattlePhase;
 	int EnemyCounter = 5;

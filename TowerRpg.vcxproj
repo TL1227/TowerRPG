@@ -22,7 +22,6 @@
     <ClCompile Include="src\args.cpp" />
     <ClCompile Include="src\audio.cpp" />
     <ClCompile Include="src\battleevent.cpp" />
-    <ClCompile Include="src\battlemenu.cpp" />
     <ClCompile Include="src\battlesystem.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\enemy.cpp" />
@@ -71,7 +70,6 @@
     <ClInclude Include="src\audio.h" />
     <ClInclude Include="src\battleevent.h" />
     <ClInclude Include="src\battleeventlistener.h" />
-    <ClInclude Include="src\battlemenu.h" />
     <ClInclude Include="src\battlephase.h" />
     <ClInclude Include="src\battlesystem.h" />
     <ClInclude Include="src\camera.h" />

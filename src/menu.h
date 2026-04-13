@@ -2,23 +2,23 @@
 #define MENU_H
 
 #include <vector>
-
-#include "InputReciever.h"
 #include "menuitem.h"
+#include "InputReciever.h"
 
 class MenuItem;
 
-class Menu : public InputReciever
+class Menu : InputReciever
 {
-    virtual void RecieveInput(InputAction) = 0;
-
-protected:
-	int CurrentItemIndex = 0;
-	std::vector<MenuItem> Items;
-
 public:
+	Menu(std::vector<MenuItem> Items);
 	void SelectNextItem();
 	void SelectPreviousItem();
+	MenuItem* GetCurrentSelection();
+
+private:
+	std::vector<MenuItem> Items;
+	int CurrentItemIndex = 0;
+	virtual void RecieveInput(InputAction) override;
 };
 
 #endif

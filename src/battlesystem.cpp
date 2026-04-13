@@ -245,10 +245,7 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
         {
             if ((BattleMenuChoice)BattleMenuIndex == BattleMenuChoice::Attack) 
             {
-                TurnAction ta = {"Attack", 5, Side::Enemy};
-                ta.User = Side::Party;
-
-                TurnActions.push_back(ta);
+                SubmitAttack();
             }
             else if ((BattleMenuChoice)BattleMenuIndex == BattleMenuChoice::Skill) 
             {
@@ -293,5 +290,14 @@ void BattleSystem::OnMenuActionButtonPress(MenuAction ma)
         {
             ChangePartyMember(PartyList[++PartyListIndex]);
         }
+
     }
+}
+
+void BattleSystem::SubmitAttack()
+{
+	TurnAction ta = { "Attack", 5, Side::Enemy };
+	ta.User = Side::Party;
+
+	TurnActions.push_back(ta);
 }
