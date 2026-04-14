@@ -16,17 +16,25 @@ BattleSystem::BattleSystem() : CurrentBattlePhase{BattlePhase::End}
 {
 }
 
+void BattleSystem::SubscribeToEvents(BattleEventListener& listener)
+{
+    Events.AddListener(listener);
+}
+
 void BattleSystem::Tick(float delta)
 {
-    ImGui::Begin("BattleSystem");
-    ImGui::Text("Phase: %s", GetBattlePhaseText(CurrentBattlePhase).c_str());
-    ImGui::Text("BattleChoices Size: %zi", TurnActions.size());
-    ImGui::Text("CurrentPartyListIndex : %i", PartyListIndex);
-    ImGui::Text("EnemyHP : %i", EnemyCurrentHealth);
-    ImGui::Text("EnemyHP%% : %f", EnemyCurrentHealthPercent);
-    ImGui::Text("PartyHP : %i", PartyCurrentHealth);
-    ImGui::Text("PartyHP%% : %f", PartyCurrentHealthPercent);
-    ImGui::End();
+    if (G_Args.GuiOn)
+    {
+		ImGui::Begin("BattleSystem");
+		ImGui::Text("Phase: %s", GetBattlePhaseText(CurrentBattlePhase).c_str());
+		ImGui::Text("BattleChoices Size: %zi", TurnActions.size());
+		ImGui::Text("CurrentPartyListIndex : %i", PartyListIndex);
+		ImGui::Text("EnemyHP : %i", EnemyCurrentHealth);
+		ImGui::Text("EnemyHP%% : %f", EnemyCurrentHealthPercent);
+		ImGui::Text("PartyHP : %i", PartyCurrentHealth);
+		ImGui::Text("PartyHP%% : %f", PartyCurrentHealthPercent);
+		ImGui::End();
+    }
 
 	if (CurrentBattlePhase == BattlePhase::Preamble)
 	{
@@ -76,7 +84,7 @@ void BattleSystem::ExecuteTurnAction(TurnAction ta)
         PartyCurrentHealthPercent = ((float)PartyCurrentHealth / (float)PartyMaxHealth) * 100.0f;
     }
 
-    BattleEvent->DispatchTurnAction(ta);
+    Events.DispatchTurnAction(ta);
 
     if (EnemyCurrentHealth <= 0)
     {
@@ -121,7 +129,7 @@ void BattleSystem::SetBattlePhase(BattlePhase phase)
 		ChangePartyMember(PartyList[PartyListIndex]);
     }
 
-	BattleEvent->DispatchPhaseChange(phase);
+	Events.DispatchPhaseChange(phase);
 
     return;
 }
@@ -177,9 +185,9 @@ void BattleSystem::DecreaseEnemyCounter()
 	}
 }
 
-void BattleSystem::ChangePartyMember(std::string member) const
+void BattleSystem::ChangePartyMember(std::string member)
 {
-    BattleEvent->DispatchCharacterTurnChange(member);
+    Events.DispatchCharacterTurnChange(member);
 }
 
 void BattleSystem::AddEnemyChoice()

@@ -4,12 +4,13 @@
 
 #include "movementsystem.h"
 #include "args.h"
-#include "menuaction.h"
 
 static MoveAction NextMove = MoveAction::None;
 
-MovementSystem::MovementSystem(::Map& map, ::Camera& camera)
-	: Map{ map }, Camera{ camera }
+MovementSystem::MovementSystem(::Map& map, ::Camera& camera, ::BattleSystem& battleSystem)
+	: Map{ map }
+	, Camera{ camera }
+	, BattleSystem{ battleSystem }
 {
 }
 
@@ -59,27 +60,22 @@ Cardinal MovementSystem::GetOppositeDir() const
 		return Cardinal::West;
 }
 
-bool BlockIsSolid(char ch)
-{
-	return (ch == '#' || ch == 'c');
-}
-
 void MovementSystem::SetCurrentMoveAction(MoveAction ma)
 {
 	CurrentMoveAction = ma;
-	Event->DispatchMoveActionChange(ma);
+	Events->DispatchMoveActionChange(ma);
 }
 
 void MovementSystem::SetCurrentDirection(Cardinal dr)
 {
 	CurrentDirection = dr;
-	Event->DispatchDirectionChange(dr);
+	Events->DispatchDirectionChange(dr);
 }
 
 void MovementSystem::SetMoveDistance(float d)
 {
 	DistanceMoved = d;
-	Event->DispatchMoveDistanceChange(d);
+	Events->DispatchMoveDistanceChange(d);
 }
 
 void MovementSystem::ProcessMoveAction(MoveAction action)
@@ -105,7 +101,7 @@ void MovementSystem::ProcessMoveAction(MoveAction action)
 			Tile* enemyTile = Map.GetTile(GetNextEnemyTile(action));
 			if (!enemyTile || enemyTile->IsWalkable)
 			{
-				if (BattleSystem->GetPhase() == BattlePhase::Sighting)
+				if (BattleSystem.GetPhase() == BattlePhase::Sighting)
 				{
 					MovementSpeed = PreBattleMovementSpeed;
 					Enemy->Position = GetNextEnemyTile(action);
@@ -292,7 +288,8 @@ void MovementSystem::EndTurnMovement()
 	if (IsAutoMove(CurrentMoveAction))
 	{
 		//TODO: movement finished event
-		BattleSystem->AutoMoveFinished();
+		BattleSystem.AutoMoveFinished();
+		MovementSpeed = NormalMovementSpeed;
 	}
 
 	SetCurrentMoveAction(MoveAction::None);
@@ -300,7 +297,7 @@ void MovementSystem::EndTurnMovement()
 
 void MovementSystem::EndMovement()
 {
-	if (BattleSystem->GetPhase() == BattlePhase::Sighting)
+	if (BattleSystem.GetPhase() == BattlePhase::Sighting)
 	{
 		if (NextMove != MoveAction::None)
 		{
@@ -315,13 +312,13 @@ void MovementSystem::EndMovement()
 			Tile* enemyTile = Map.GetTile(GetNextTile(CurrentMoveAction));
 			if (!enemyTile || enemyTile->IsWalkable)
 			{
-				BattleSystem->SetBattlePhase(BattlePhase::Preamble);
+				BattleSystem.SetBattlePhase(BattlePhase::Preamble);
 			}
 		}
 	}
 	else
 	{
-		BattleSystem->DecreaseEnemyCounter();
+		BattleSystem.DecreaseEnemyCounter();
 	}
 
 	SetCurrentMoveAction(MoveAction::None);
@@ -329,17 +326,20 @@ void MovementSystem::EndMovement()
 
 void MovementSystem::OnBattlePhaseChange(BattlePhase bp)
 {
+	//TODO: maybe we don't need this?
+	/*
 	switch (bp)
 	{
+	case BattlePhase::End: { MovementSpeed = NormalMovementSpeed; } break;
 	case BattlePhase::Sighting: break;
 	case BattlePhase::Preamble: break;
 	case BattlePhase::Slide: break;
 	case BattlePhase::Snap: break;
 	case BattlePhase::Start: break;
-	case BattlePhase::End: { MovementSpeed = NormalMovementSpeed; } break;
 	default:
 		break;
 	}
+	*/
 }
 
 void MovementSystem::OnMoveActionButtonPress(MoveAction action)

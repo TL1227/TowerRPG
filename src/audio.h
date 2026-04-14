@@ -3,13 +3,13 @@
 
 #include <fmod/fmod.hpp>
 #include "battleeventlistener.h"
-#include "inputeventlistener.h"
-#include "battlesystem.h"
 
-class Audio : public BattleEventListener, public InputEventListener
+class BattleSystem;
+
+class Audio : public BattleEventListener
 {
 public:
-	Audio();
+	Audio(BattleSystem& systems);
 	void PlayPreBattleBgm();
 	void StopPreBattleBgm();
 	void PlayBattleBgm();
@@ -20,23 +20,18 @@ public:
 
     float SfxVolume = 0.1f;
 
-    BattleSystem* BattleSystem;
-
 private:
 	FMOD::System* System;
 
 	FMOD::Sound* PreBattleBgm;
-	FMOD::Channel* PreBattleBgmCh;
+	FMOD::Channel* PreBattleBgmCh = nullptr;
 
 	FMOD::Sound* BattleBgm;
-	FMOD::Channel* BattleBgmCh;
+	FMOD::Channel* BattleBgmCh = nullptr;
 
 	FMOD::Sound* MenuTick;
-	FMOD::Channel* MenuTickCh;
-
 
 	void OnBattlePhaseChange(BattlePhase bp) override;
-    void OnMenuActionButtonPress(MenuAction button) override;
 };
 
 #endif

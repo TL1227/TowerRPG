@@ -7,6 +7,8 @@
 #include "battleeventlistener.h"
 #include "shader.h"
 
+class BattleSystem;
+
 class Enemy : public MovementEventListener, public BattleEventListener
 {
 public:
@@ -24,7 +26,7 @@ public:
     glm::mat4 ModelMat;
     float MaxHealth = 100;
 
-    Enemy(::Shader&);
+    Enemy(BattleSystem& systems, ::Shader&);
     void Tick(float delta, glm::mat4);
     void SwitchToAttackTex();
     void SwitchToPreTex();

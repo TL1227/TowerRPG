@@ -3,10 +3,9 @@
 
 #include <fmod/fmod_errors.h>
 #include <stdio.h>
-
 #include <iostream>
 
-Audio::Audio()
+Audio::Audio(BattleSystem& battleSystem)
 {
     FMOD_RESULT result;
 
@@ -30,6 +29,9 @@ Audio::Audio()
     unsigned int length;
     PreBattleBgm->getLength(&length, FMOD_TIMEUNIT_MS);
     PreBattleBgmLength= length / 1000.0;
+
+    //event subscription
+    battleSystem.SubscribeToEvents(*this);
 }
 
 //TODO: don't get the mLength like this, set it during the init phase or something
@@ -54,20 +56,9 @@ void Audio::PlayBattleBgm()
 
 void Audio::PlayMenuTick()
 {
-    //TODO if I don't do this, the audio stops working after the menu ticks enough times
-    //read into why this is happening
-    bool isPlaying;
-    MenuTickCh->isPlaying(&isPlaying);
-    if (isPlaying)
-        MenuTickCh->stop();
-    
-    System->playSound(MenuTick, 0, false, &MenuTickCh);
-    MenuTickCh->setVolume(SfxVolume);
-}
-
-void Audio::StopMenuTick()
-{
-    MenuTickCh->stop();
+    FMOD::Channel* ch;
+    System->playSound(MenuTick, 0, false, &ch);
+    ch->setVolume(SfxVolume);
 }
 
 void Audio::StopBattleBgm()
@@ -102,17 +93,4 @@ void Audio::OnBattlePhaseChange(BattlePhase bp)
     }
 }
 
-void Audio::OnMenuActionButtonPress(MenuAction button)
-{
-    if (button == MenuAction::Up || button == MenuAction::Down)
-    {
-        BattlePhase bp = BattleSystem->GetPhase();
-
-        if (bp == BattlePhase::Start ||
-            bp == BattlePhase::ChoosingSkill)
-        {
-            PlayMenuTick();
-        }
-
-    }
-}
+//TODO: ceate a function that the menu can call when it changes selecton that plays menu tick

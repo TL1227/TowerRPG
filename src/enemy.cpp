@@ -3,9 +3,9 @@
 #include "textures.h"
 #include "cardinal.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include "battlesystem.h"
 
-Enemy::Enemy(::Shader& shader)
-	: Shader{ shader }
+Enemy::Enemy(BattleSystem& battleSystem, ::Shader& shader) : Shader{ shader }
 {
     float vertices[] = {
         // positions          // colors           // texture coords
@@ -38,6 +38,7 @@ Enemy::Enemy(::Shader& shader)
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+	bool CanMove();
 
     CalmTexture = LoadTexture("textures\\goblincalm.png");
     PreTexture = LoadTexture("textures\\goblinpre.png");
@@ -50,6 +51,8 @@ Enemy::Enemy(::Shader& shader)
 
     //TODO: set the starting direction some other wa!
     PlayerDirection = (float)Cardinal::East;
+
+    battleSystem.SubscribeToEvents(*this);
 }
 
 void Enemy::Tick(float delta, glm::mat4 view)

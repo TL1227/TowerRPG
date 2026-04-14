@@ -6,10 +6,10 @@
 
 #include "inputeventlistener.h"
 #include "skillparse.h"
+#include "battleevent.h"
 
 class TurnAction;
 class Enemy;
-class BattleEvent;
 enum class BattlePhase;
 
 enum class BattleMenuChoice
@@ -29,6 +29,7 @@ public:
 	void AutoMoveFinished();
 	void DecreaseEnemyCounter();
 	void Tick(float delta);
+    void SubscribeToEvents(BattleEventListener&);
 	double PreambleStartTime;
 	double PreambleLength = 2.4; //TODO: set this using battle intro length
     
@@ -40,7 +41,7 @@ public:
     int EnemyCurrentHealth;
     float EnemyCurrentHealthPercent = 100;
 
-	BattleEvent* BattleEvent;
+    BattleEvent Events{};
     Enemy* Enemy;
 
     int CurrentChoiceIndex = 0;
@@ -67,7 +68,7 @@ private:
 	BattlePhase CurrentBattlePhase;
 	int EnemyCounter = 5;
     void ExecuteTurnAction(TurnAction choice);
-    void ChangePartyMember(std::string member) const;
+    void ChangePartyMember(std::string member);
     void SetChoiceOrder();
     void AddEnemyChoice();
 

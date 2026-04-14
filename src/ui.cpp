@@ -8,41 +8,41 @@
 #include "imgui.h"
 #include "menuaction.h"
 #include "text.h"
+#include "args.h"
 
 static float TopMarg = 58;
 static float MenuTextLeftX;
 
 static bool PlayerTurn = true;
 
-UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, int screenWidth)
-    : BattleSystem{ battleSystem }
-    , ScreenHeight{ screenHeight }
-    , ScreenWidth{ screenWidth }
+UI::UI(float preambleDuration, ::BattleSystem& systems, ::ScreenSize screenSize)
+    : BattleSystem{ systems}
+    , ScreenSize{ screenSize }
 {
     //This is so our text can scale with our screensize
-    ScreenScale = (float)ScreenWidth / 960;
+    ScreenScale = (float)ScreenSize.Width / 960;
     TextScale = ScreenScale * 0.43f;
 
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(ScreenWidth), 0.0f, static_cast<float>(ScreenHeight));
-    OffScreenDistance = (float)ScreenWidth * 2.0f;
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(ScreenSize.Width), 0.0f, static_cast<float>(ScreenSize.Height));
+    OffScreenDistance = (float)ScreenSize.Width * 2.0f;
 
     Shader textShader{ "shaders\\uivert.shader", "shaders\\uifrag.shader" };
     textShader.use();
 	textShader.setMat4("projection", projection);
-    BattleMenuText = { ScreenWidth, ScreenHeight, textShader };
-    CurrentCharNameText = { ScreenWidth, ScreenHeight, textShader };
+    BattleMenuText = { ScreenSize.Width, ScreenSize.Height, textShader };
+    CurrentCharNameText = { ScreenSize.Width, ScreenSize.Height, textShader };
 
     Shader battleMenuShader{ "shaders\\battleuivert.shader", "shaders\\battleuifrag.shader" };
     battleMenuShader.use();
 	battleMenuShader.setMat4("projection", projection);
 
     BattleMenuQuad = { "textures\\battlemenu.jpg", battleMenuShader};
-    BattleMenuQuad.width = (float)ScreenWidth * 0.65f;
-    BattleMenuQuad.height = (float)ScreenHeight * 0.20f;
+    BattleMenuQuad.width = (float)ScreenSize.Width * 0.65f;
+    BattleMenuQuad.height = (float)ScreenSize.Height * 0.20f;
     BattleMenuQuad.x = -BattleMenuQuad.width;
     BattleMenuOnScreenY = BattleMenuQuad.height / 2.0f; //snap to bottom of screen
     BattleMenuQuad.y = BattleMenuOnScreenY;
-    BattleMenuOnScreenX = (float)ScreenWidth / 2.0f; 
+    BattleMenuOnScreenX = (float)ScreenSize.Width / 2.0f; 
     BattleMenuSlider.duration = preambleDuration;
 	BattleMenuSlider.start = BattleMenuQuad.x;
     BattleMenuSlider.end = BattleMenuOnScreenX;
@@ -58,12 +58,12 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 	enemyHpShader.setMat4("projection", projection);
 
     EnemyHealthBarQuad = { "textures\\enemyhealthinner.jpg", enemyHpShader };
-    EnemyHealthBarOnScreenX = ScreenWidth / 2.0f;
-    EnemyHealthBarOnScreenY = (float)ScreenHeight * 0.93f;
+    EnemyHealthBarOnScreenX = ScreenSize.Width / 2.0f;
+    EnemyHealthBarOnScreenY = (float)ScreenSize.Height * 0.93f;
     EnemyHealthBarQuad.y = EnemyHealthBarOnScreenY;
-    EnemyHealthBarQuad.width = (float)ScreenWidth * 0.65f;
-    EnemyHealthBarQuad.height = (float)ScreenHeight * 0.03f;
-    EnemyHealthBarQuad.x = screenWidth + EnemyHealthBarQuad.width;
+    EnemyHealthBarQuad.width = (float)ScreenSize.Width * 0.65f;
+    EnemyHealthBarQuad.height = (float)ScreenSize.Height * 0.03f;
+    EnemyHealthBarQuad.x = ScreenSize.Width + EnemyHealthBarQuad.width;
 
     EnemyHealthStartWidth = EnemyHealthBarQuad.width;
     EnemyHealthStartX = EnemyHealthBarQuad.x;
@@ -74,10 +74,10 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
 
     //PartyHP
     PartyHealthBarQuad = { "textures\\partyhealthbar.jpg", enemyHpShader };
-    PartyHealthBarOnScreenX = ScreenWidth / 2.0f;
-    //PartyHealthBarOnScreenY = (float)ScreenHeight * 0.93f;
-    PartyHealthBarQuad.width = (float)ScreenWidth * 0.65f;
-    PartyHealthBarQuad.height = (float)ScreenHeight * 0.03f;
+    PartyHealthBarOnScreenX = ScreenSize.Width / 2.0f;
+    //PartyHealthBarOnScreenY = (float)ScreenSize.Height * 0.93f;
+    PartyHealthBarQuad.width = (float)ScreenSize.Width * 0.65f;
+    PartyHealthBarQuad.height = (float)ScreenSize.Height * 0.03f;
     PartyHealthBarQuad.y = BattleMenuQuad.Top() + (PartyHealthBarQuad.height / 2);
     PartyHealthBarQuad.x = -PartyHealthBarQuad.width;
 
@@ -87,18 +87,21 @@ UI::UI(float preambleDuration, ::BattleSystem& battleSystem, int screenHeight, i
     PartyHealthBarSlider.duration = preambleDuration;
 	PartyHealthBarSlider.start = PartyHealthBarQuad.x;
     PartyHealthBarSlider.end = PartyHealthBarOnScreenX;
+
+    CurrentBP = BattleSystem.GetPhase();
 }
 
 void UI::Tick(float deltaTime)
 {
-    ImGui::Begin("UI");
-    ImGui::SliderFloat("TextChoicex", &MenuTextLeftX, 0, 1000);
-    ImGui::SliderFloat("BattleMenux", &BattleMenuQuad.x, 0, 1000);
-    ImGui::InputFloat("ScreenScale", &ScreenScale, 0, 1000);
-    ImGui::InputFloat("TextScale", &TextScale, 0, 1000);
-    ImGui::End();
-
-    CurrentBP = BattleSystem.GetPhase();
+    if (G_Args.GuiOn)
+    {
+		ImGui::Begin("UI");
+		ImGui::SliderFloat("TextChoicex", &MenuTextLeftX, 0, 1000);
+		ImGui::SliderFloat("BattleMenux", &BattleMenuQuad.x, 0, 1000);
+		ImGui::InputFloat("ScreenScale", &ScreenScale, 0, 1000);
+		ImGui::InputFloat("TextScale", &TextScale, 0, 1000);
+		ImGui::End();
+    }
 
     if (CurrentBP == BattlePhase::Preamble)
     {
@@ -128,7 +131,6 @@ void UI::Tick(float deltaTime)
         PartyHealthBarQuad.Draw();
 
         BattleMenuText.Draw(CurrentCharName, CharNameX, CharNameY, TextScale, HighlightColour);
-
 
         //TODO: stop calculating text pos on every frame
 		for (size_t i = 0; i < BattleSystem.BattleMenuSize; i++)
@@ -238,11 +240,8 @@ void UI::OnBattlePhaseChange(BattlePhase bp)
         //remember where health is for next battle
         PartyHealthBarSlider.end = PartyHealthBarQuad.x;
     }
-}
 
-void UI::OnMenuActionButtonPress(MenuAction button)
-{
-
+    CurrentBP = bp;
 }
 
 void UI::OnTurnAction(TurnAction& ta)

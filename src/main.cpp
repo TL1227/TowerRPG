@@ -67,7 +67,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-//screen
 GLFWwindow* SetUpGlfw()
 {
     glfwInit();
@@ -154,6 +153,7 @@ int main(int argc, char* argv[])
     G_Args.Parse(argc, argv);
 
     G_Args.BattleOff = true;
+    G_Args.GuiOn = false;
 
     GLFWwindow* window = SetUpGlfw();
     if (window == NULL) return -1;
@@ -183,7 +183,6 @@ int main(int argc, char* argv[])
 
     Camera.CameraPos = LevelMap.PlayerStartPos;
 
-    MovementSystem MovementSystem{ LevelMap, Camera };
 
     //build shaders
     Shader enemyShader{ "shaders\\enemyvert.shader", "shaders\\enemyfrag.shader" };
@@ -204,47 +203,40 @@ int main(int argc, char* argv[])
 	lightsource.Shader.use();
     lightsource.Shader.setMat4("projection", projection);
 
-    Audio audio;
-    BattleSystem BattleSystem;
-    BattleSystem.PreambleLength = audio.PreBattleBgmLength * 0.875f;
-    audio.BattleSystem = &BattleSystem;
+    //Game Systems
+    BattleSystem battleSystem{};
+    MovementSystem movementSystem{ LevelMap, Camera, battleSystem };
+
+    Audio audio { battleSystem };
+    battleSystem.PreambleLength = audio.PreBattleBgmLength * 0.875f;
 
     float preambleLength = (float)audio.PreBattleBgmLength * 0.125f; 
-    UI Ui { preambleLength, BattleSystem, SCREEN_HEIGHT, SCREEN_WIDTH };
+    ScreenSize screenSize{ SCREEN_HEIGHT, SCREEN_WIDTH };
+    UI Ui { preambleLength, battleSystem, screenSize };
 
-    Enemy Enemy{enemyShader};
-    MovementSystem.Enemy = &Enemy;
-    MovementSystem.BattleSystem = &BattleSystem;
-
-    BattleSystem.Enemy = &Enemy;
+    Enemy Enemy{ battleSystem, enemyShader };
+    movementSystem.Enemy = &Enemy;
+    battleSystem.Enemy = &Enemy;
 
     //Input
     InputEvent Ie;
-    Ie.AddListener(MovementSystem);
-    Ie.AddListener(BattleSystem);
-    Ie.AddListener(Ui);
-    Ie.AddListener(audio);
-    Input Input{ window, &Ie, &BattleSystem };
-
-    //subscribe to Battle events
-    BattleEvent Be;
-    Be.AddListener(MovementSystem);
-    Be.AddListener(Enemy);
-    Be.AddListener(audio);
-    Be.AddListener(Ui);
-    BattleSystem.BattleEvent = &Be;
+    Ie.AddListener(movementSystem);
+    Ie.AddListener(battleSystem);
+    //Ie.AddListener(Ui);
+    Input Input{ window, &Ie, &battleSystem };
 
     //subscribe to Movement events
     MovementEvent Me;
     Me.AddListener(Enemy);
-    MovementSystem.Event = &Me;
+    movementSystem.Events = &Me;
 
     //Menu System
     std::vector<MenuItem> battleMenuItems = { 
-        { "Attack", [&BattleSystem]() { BattleSystem.SubmitAttack(); } },
+        //{ "Attack", [&GlobalSystems]() { GameSystems.GetBattleSystem().SubmitAttack(); }},
         //{ "Skill",  [](){ Skill();  } }, //TODO: open the skills menu
         //{ "Item",   [](){ Item();   } }, //TODO: open the item menu
-        { "Run",    [&BattleSystem](){ BattleSystem.SetBattlePhase(BattlePhase::End); } }
+        //{ "Run",    [&BattleSystem](){ BattleSystem.SetBattlePhase(BattlePhase::End); } }
+
     };
     Menu BattleMenu { battleMenuItems };
 
@@ -283,17 +275,20 @@ int main(int argc, char* argv[])
             ImGuiStartLoop();
 
             Input.Read();
-            MovementSystem.Tick(DeltaTime);
+            movementSystem.Tick(DeltaTime);
 
             Camera.UpdateCameraRotation();
             mat4 view = Camera.GetView();
 
 
-			ImGui::Begin("Lighting");
-			ImGui::DragFloat3("Light Position", (float*)&lightPos );
-			ImGui::DragFloat3("Light Colour", (float*)&lightColor);
-			ImGui::DragFloat3("Camera Position", (float*)&Camera.CameraPos );
-			ImGui::End();
+            if (G_Args.GuiOn)
+            {
+				ImGui::Begin("Lighting");
+				ImGui::DragFloat3("Light Position", (float*)&lightPos);
+				ImGui::DragFloat3("Light Colour", (float*)&lightColor);
+				ImGui::DragFloat3("Camera Position", (float*)&Camera.CameraPos);
+				ImGui::End();
+            }
 
 			//Lighting Experiment
             lightsource.Shader.use();
@@ -317,7 +312,7 @@ int main(int argc, char* argv[])
             LevelMap.Draw(view);
             Enemy.Tick(DeltaTime, view);
             Ui.Tick(DeltaTime);
-            BattleSystem.Tick(DeltaTime);
+            battleSystem.Tick(DeltaTime);
 
             ImGuiEndLoop();
             

@@ -17,7 +17,8 @@
 class MovementSystem : public BattleEventListener, public InputEventListener
 {
 public:
-	MovementSystem(Map& map, Camera& c);
+	MovementSystem(Map& map, Camera& c, BattleSystem&);
+	void Init();
     Cardinal GetNextRightDir() const;
     Cardinal GetNextLeftDir() const;
     Cardinal GetOppositeDir() const;
@@ -31,9 +32,8 @@ public:
 	float DistanceMoved = 0.0f;
 
 	Enemy* Enemy;
-	BattleSystem* BattleSystem;
 
-	MovementEvent* Event;
+	MovementEvent* Events;
     
 	void OnBattlePhaseChange(BattlePhase bp) override;
 	void OnMoveActionButtonPress(MoveAction action) override;
@@ -57,7 +57,7 @@ private:
 	void SetCurrentMoveAction(MoveAction);
 	void SetCurrentDirection(Cardinal);
 	void SetMoveDistance(float);
-	bool CanMove();
+	BattleSystem& BattleSystem;
 };
 
 #endif

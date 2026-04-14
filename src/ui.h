@@ -6,6 +6,8 @@
 #include "inputeventlistener.h"
 #include "quad.h"
 #include "text.h"
+#include "battlesystem.h"
+
 
 struct Slider {
     float start;
@@ -22,15 +24,20 @@ struct HealthBar
 	Slider Slider;
 };
 
-class UI : public BattleEventListener, public InputEventListener
+struct ScreenSize
+{
+	int Height;
+	int Width;
+};
+
+class UI : public BattleEventListener
 {
 public:
-	UI(float, BattleSystem&, int screenHeight, int screenWidth);
+	UI(float, BattleSystem&, ScreenSize);
     void Tick(float delta);
 
 private:
-	int ScreenHeight;
-	int ScreenWidth;
+    ScreenSize ScreenSize;
     float ScreenScale;
     float TextScale;
     float OffScreenDistance;
@@ -74,7 +81,6 @@ private:
 
     void OnBattlePhaseChange(BattlePhase) override;
     void OnTurnAction(TurnAction&) override;
-    void OnMenuActionButtonPress(MenuAction button) override;
     void OnCharacterTurnChange(std::string charname) override;
 };
 

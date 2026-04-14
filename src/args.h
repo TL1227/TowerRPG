@@ -8,6 +8,7 @@ class Args
 public:
 	bool IsLiveEdit = false;
 	bool BattleOff = false;
+	bool GuiOn = true;
     std::string MapPath = {};
 	void Parse(int argc, char* argv[]);
 };

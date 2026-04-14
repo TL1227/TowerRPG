@@ -12,6 +12,8 @@ void Args::Parse(int argc, char* argv[])
 			MapPath = argv[i + 1];
 		if (std::string(argv[i]) == "--battle-off") 
             BattleOff = true;
+		if (std::string(argv[i]) == "--gui-off") 
+            GuiOn = false;
 	}
 }
 
