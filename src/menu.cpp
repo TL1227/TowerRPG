@@ -47,3 +47,5 @@ void Menu::RecieveInput(InputAction IA)
 		break;
 	}
 }
+
+bool Menu::InputRepeats() { return false; };

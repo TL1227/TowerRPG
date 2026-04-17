@@ -346,3 +346,39 @@ void MovementSystem::OnMoveActionButtonPress(MoveAction action)
 {
 	ProcessMoveAction(action);
 }
+
+void MovementSystem::RecieveInput(InputAction inputAction)
+{
+	switch (inputAction)
+	{
+	case InputAction::Confirm:
+		break;
+	case InputAction::Cancel:
+		break;
+	case InputAction::Up:
+		ProcessMoveAction(MoveAction::Forwards);
+		break;
+	case InputAction::Down:
+		ProcessMoveAction(MoveAction::Backwards);
+		break;
+	case InputAction::Left:
+		ProcessMoveAction(MoveAction::TurnLeft);
+		break;
+	case InputAction::Right:
+		ProcessMoveAction(MoveAction::TurnRight);
+		break;
+	case InputAction::StepRight:
+		ProcessMoveAction(MoveAction::Right);
+		break;
+	case InputAction::StepLeft:
+		ProcessMoveAction(MoveAction::Left);
+		break;
+	case InputAction::TurnAround:
+		ProcessMoveAction(MoveAction::TurnAround);
+		break;
+	default:
+		break;
+	}
+}
+
+bool MovementSystem::InputRepeats() { return true; }

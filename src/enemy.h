@@ -24,6 +24,7 @@ public:
     float Alpha = 0.0f;
     Shader Shader;
     glm::mat4 ModelMat;
+
     float MaxHealth = 100;
 
     Enemy(BattleSystem& systems, ::Shader&);

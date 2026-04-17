@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
     Ie.AddListener(movementSystem);
     Ie.AddListener(battleSystem);
     //Ie.AddListener(Ui);
-    Input Input{ window, &Ie, &battleSystem };
+    Input Input{ window, movementSystem };
 
     //subscribe to Movement events
     MovementEvent Me;
@@ -274,12 +274,14 @@ int main(int argc, char* argv[])
 
             ImGuiStartLoop();
 
+            //input
             Input.Read();
+
+            //update
             movementSystem.Tick(DeltaTime);
 
             Camera.UpdateCameraRotation();
             mat4 view = Camera.GetView();
-
 
             if (G_Args.GuiOn)
             {
@@ -309,6 +311,7 @@ int main(int argc, char* argv[])
 
 			//--------------------------------
 
+            //TODO: seperate tick and draw functions
             LevelMap.Draw(view);
             Enemy.Tick(DeltaTime, view);
             Ui.Tick(DeltaTime);

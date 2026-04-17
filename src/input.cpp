@@ -1,88 +1,69 @@
 #include "input.h"
 #include "battlephase.h"
+#include "battlesystem.h"
+#include "movementsystem.h"
 
 #include "inputaction.h"
 
-Input::Input(GLFWwindow* window, InputEvent* event, ::BattleSystem* battleSystem)
+Input::Input(GLFWwindow* window, ::MovementSystem& movementSystem)
 	: Window{ window }
-	, Event{ event }
-	, BattleSystem{ battleSystem }
+	, MovementSystem { movementSystem }
+	, CurrentReciever { &MovementSystem } //TODO: this will probably become a stack or something
 {
 
 }
 
 void Input::Read()
 {
-    if (BattleSystem->GetPhase() == BattlePhase::Sighting || BattleSystem->GetPhase() == BattlePhase::End)
-    {
-		if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_D))
-		{
-			Event->DispatchButtonPress(MoveAction::TurnRight);
-		}
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_A))
-		{
-			Event->DispatchButtonPress(MoveAction::TurnLeft);
-		}
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_RIGHT))
-		{
-			Event->DispatchButtonPress(MoveAction::Right);
-		}
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_LEFT))
-		{
-			Event->DispatchButtonPress(MoveAction::Left);
-		}
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_DOWN))
-		{
-			Event->DispatchButtonPress(MoveAction::TurnAround);
-		}
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_W))
-		{
-			Event->DispatchButtonPress(MoveAction::Forwards);
-		}
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_S))
-		{
-			Event->DispatchButtonPress(MoveAction::Backwards);
-		}
-    }
-    else if (BattleSystem->GetPhase() == BattlePhase::Start ||
-        BattleSystem->GetPhase() == BattlePhase::StartTurn ||
-        BattleSystem->GetPhase() == BattlePhase::ChoosingSkill
-    )
-	{
-		if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_D))
-			RegisterActionPress(MenuAction::Right);
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_A))
-			RegisterActionPress(MenuAction::Left);
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_W))
-			RegisterActionPress(MenuAction::Up);
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_S))
-			RegisterActionPress(MenuAction::Down);
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_ENTER))
-			RegisterActionPress(MenuAction::Confirm);
-		else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_BACKSPACE))
-			RegisterActionPress(MenuAction::Cancel);
+	if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_D))
+		RegisterActionPress(InputAction::Right);
+	else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_A))
+		RegisterActionPress(InputAction::Left);
+	else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_RIGHT))
+		RegisterActionPress(InputAction::StepRight);
+	else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_LEFT))
+		RegisterActionPress(InputAction::StepLeft);
+	else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_DOWN))
+		RegisterActionPress(InputAction::TurnAround);
+	else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_W))
+		RegisterActionPress(InputAction::Up);
+	else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_S))
+		RegisterActionPress(InputAction::Down);
+	else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_ENTER))
+		RegisterActionPress(InputAction::Confirm);
+	else if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_BACKSPACE))
+		RegisterActionPress(InputAction::Cancel);
 
-		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_S))
-			RegisterActionKeyUp(MenuAction::Down);
-		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_D))
-			RegisterActionKeyUp(MenuAction::Right);
-		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_A))
-			RegisterActionKeyUp(MenuAction::Left);
-		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_W))
-			RegisterActionKeyUp(MenuAction::Up);
-		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_ENTER))
-			RegisterActionKeyUp(MenuAction::Confirm);
-		if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_BACKSPACE))
-			RegisterActionKeyUp(MenuAction::Cancel);
-	}
+	if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_D))
+		RegisterActionKeyUp(InputAction::Right);
+	if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_A))
+		RegisterActionKeyUp(InputAction::Left);
+	if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_RIGHT))
+		RegisterActionKeyUp(InputAction::StepRight);
+	if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_LEFT))
+		RegisterActionKeyUp(InputAction::StepLeft);
+	if (GLFW_PRESS == glfwGetKey(Window, GLFW_KEY_DOWN))
+		RegisterActionKeyUp(InputAction::TurnAround);
+	if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_W))
+		RegisterActionKeyUp(InputAction::Up);
+	if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_S))
+		RegisterActionKeyUp(InputAction::Down);
+	if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_ENTER))
+		RegisterActionKeyUp(InputAction::Confirm);
+	if (GLFW_RELEASE == glfwGetKey(Window, GLFW_KEY_BACKSPACE))
+		RegisterActionKeyUp(InputAction::Cancel);
 }
 
 void Input::RegisterActionPress(InputAction action)
 {
 	if (!InputActionState[(int)action])
 	{
-		Event->DispatchButtonPress(action);
+		CurrentReciever->RecieveInput(action);
 		InputActionState[(int)action] = true;
+	}
+	else if (CurrentReciever->InputRepeats())
+	{
+		CurrentReciever->RecieveInput(action);
 	}
 }
 
@@ -91,39 +72,5 @@ void Input::RegisterActionKeyUp(InputAction action)
 	if (InputActionState[(int)action])
 	{
 		InputActionState[(int)action] = false;
-	}
-}
-
-void Input::RegisterActionPress(MoveAction action)
-{
-	if (!MoveActionState[(int)action])
-	{
-		Event->DispatchButtonPress(action);
-		MoveActionState[(int)action] = true;
-	}
-}
-
-void Input::RegisterActionKeyUp(MoveAction action)
-{
-	if (MoveActionState[(int)action])
-	{
-		MoveActionState[(int)action] = false;
-	}
-}
-
-void Input::RegisterActionPress(MenuAction action)
-{
-	if (!MenuActionState[(int)action])
-	{
-		Event->DispatchButtonPress(action);
-		MenuActionState[(int)action] = true;
-	}
-}
-
-void Input::RegisterActionKeyUp(MenuAction action)
-{
-	if (MenuActionState[(int)action])
-	{
-		MenuActionState[(int)action] = false;
 	}
 }

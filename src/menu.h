@@ -15,10 +15,12 @@ public:
 	void SelectPreviousItem();
 	MenuItem* GetCurrentSelection();
 
+	virtual void RecieveInput(InputAction) override;
+	virtual bool InputRepeats() override;
+
 private:
 	std::vector<MenuItem> Items;
 	int CurrentItemIndex = 0;
-	virtual void RecieveInput(InputAction) override;
 };
 
 #endif

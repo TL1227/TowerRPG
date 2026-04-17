@@ -5,8 +5,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "battlesystem.h"
 
-Enemy::Enemy(BattleSystem& battleSystem, ::Shader& shader) : Shader{ shader }
+Enemy::Enemy(BattleSystem& battleSystem, ::Shader& shader) 
+    : Shader{ shader }
 {
+    battleSystem.SubscribeToEvents(*this);
+
     float vertices[] = {
         // positions          // colors           // texture coords
          0.2f,  0.4f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
@@ -51,8 +54,6 @@ Enemy::Enemy(BattleSystem& battleSystem, ::Shader& shader) : Shader{ shader }
 
     //TODO: set the starting direction some other wa!
     PlayerDirection = (float)Cardinal::East;
-
-    battleSystem.SubscribeToEvents(*this);
 }
 
 void Enemy::Tick(float delta, glm::mat4 view)
@@ -183,8 +184,8 @@ void Enemy::OnTurnAction(TurnAction& ta)
     }
 }
 
-void Enemy::OnMoveDistanceChange(float distance)
+void Enemy::OnMoveDistanceChange(float distance) 
 {
     if (DrawMe)
-		Alpha = (distance == 0) ? 1.0f : distance;
+        Alpha = (distance == 0) ? 1.0f : distance;
 }

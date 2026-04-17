@@ -11,10 +11,11 @@
 #include "movementevent.h"
 #include "cardinal.h"
 #include "inputeventlistener.h"
+#include "InputReciever.h"
 
 //TODO: move this to it's own file one day
 
-class MovementSystem : public BattleEventListener, public InputEventListener
+class MovementSystem : public BattleEventListener, public InputEventListener, public InputReciever
 {
 public:
 	MovementSystem(Map& map, Camera& c, BattleSystem&);
@@ -38,6 +39,10 @@ public:
 	void OnBattlePhaseChange(BattlePhase bp) override;
 	void OnMoveActionButtonPress(MoveAction action) override;
 
+	//inputReciever
+	virtual void RecieveInput(InputAction) override;
+	virtual bool InputRepeats() override;
+
 private:
 	glm::vec3 DirOffset(Cardinal dir);
 	Map& Map;
@@ -58,6 +63,7 @@ private:
 	void SetCurrentDirection(Cardinal);
 	void SetMoveDistance(float);
 	BattleSystem& BattleSystem;
+
 };
 
 #endif

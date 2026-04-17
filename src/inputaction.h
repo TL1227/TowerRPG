@@ -10,6 +10,9 @@ enum class InputAction
     Down,
     Left,
     Right,
+    StepRight,
+    StepLeft,
+    TurnAround,
 };
 
 #endif

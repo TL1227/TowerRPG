@@ -4,28 +4,27 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "inputevent.h"
-#include "battlesystem.h"
 #include "menuaction.h"
 #include "moveaction.h"
+
+class BattleSystem;
+class MovementSystem;
+class InputReciever;
 
 class Input
 {
 public:
-    Input(GLFWwindow* window, InputEvent* inputEvent, BattleSystem* battleSystem);
+    Input(GLFWwindow* window, MovementSystem& movementSystem);
     void Read();
 private:
     bool InputActionState[20];
-    bool MoveActionState[20];
-    bool MenuActionState[20];
     BattleSystem* BattleSystem;
+    MovementSystem& MovementSystem;
     InputEvent* Event;
     GLFWwindow* Window;
+    InputReciever* CurrentReciever;
     void RegisterActionPress(InputAction);
     void RegisterActionKeyUp(InputAction);
-    void RegisterActionPress(MoveAction);
-    void RegisterActionKeyUp(MoveAction);
-    void RegisterActionPress(MenuAction);
-    void RegisterActionKeyUp(MenuAction);
 };
 
 #endif
