@@ -4,8 +4,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "inputevent.h"
-#include "menuaction.h"
-#include "moveaction.h"
 
 class BattleSystem;
 class MovementSystem;

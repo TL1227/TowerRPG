@@ -1,6 +1,4 @@
 #include "input.h"
-#include "battlephase.h"
-#include "battlesystem.h"
 #include "movementsystem.h"
 
 #include "inputaction.h"
